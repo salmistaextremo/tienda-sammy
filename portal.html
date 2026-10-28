@@ -8,7 +8,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
 <style>
-  /* Mismo CSS del portal */
   * { margin:0; padding:0; box-sizing:border-box; }
   :root{ --bg:#fcfbf8; --surface:#ffffff; --text:#111111; --muted:#767676; --border:#e8e5df; --accent:#ffea61; --danger:#ef4444; --success:#22c55e; --radius-lg:24px; --radius-md:16px; --radius-sm:100px; }
   html,body{ background:var(--bg); color:var(--text); font-family:'Outfit',sans-serif; min-height: 100vh; display: flex; flex-direction: column; }
@@ -29,12 +28,20 @@
   .dashboard { flex: 1; padding: 40px 0 80px; display: none; }
   .dash-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 32px; }
   .dash-header h1 { font-size: 32px; font-weight: 700; } .dash-header p { font-size: 15px; color: var(--muted); }
-  .btn-logout { font-size: 14px; font-weight: 600; color: var(--danger); border: 1px solid var(--border); padding: 10px 20px; border-radius: var(--radius-sm); }
+  .btn-logout { font-size: 14px; font-weight: 600; color: var(--danger); border: 1px solid var(--border); padding: 10px 20px; border-radius: var(--radius-sm); cursor:pointer; }
   .order-card { background: var(--surface); border-radius: var(--radius-lg); border: 1px solid var(--border); padding: 24px; margin-bottom: 20px; }
   .order-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 16px; }
   .order-id { font-size: 18px; font-weight: 700; } .order-date { font-size: 13px; color: var(--muted); margin-top: 4px; }
   .order-status { padding: 6px 14px; border-radius: var(--radius-sm); font-size: 12px; font-weight: 600; text-transform: uppercase; }
-  .status-pendiente { background: #fef3c7; color: #92400e; } .status-confirmado { background: #dcfce7; color: #166534; } .status-cancelado { background: #fee2e2; color: #991b1b; }
+  
+  /* NUEVOS COLORES DE ESTADOS */
+  .status-pendiente { background: #fef3c7; color: #92400e; } 
+  .status-verificado { background: #dcfce7; color: #166534; } 
+  .status-enviado { background: #dbeafe; color: #1e40af; } 
+  .status-cancelado { background: #fee2e2; color: #991b1b; }
+  .status-cuota1_confirmada, .status-cuota2_confirmada, .status-cuota3_confirmada { background: #e0e7ff; color: #3730a3; }
+  .status-registro_pago { background: #fef3c7; color: #92400e; }
+
   .order-items { margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px dashed var(--border); }
   .item-row { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 8px; }
   .item-note { font-size: 12px; color: var(--muted); font-style: italic; display: block; margin-top: 2px; }
@@ -50,7 +57,7 @@
   .plan-details-box { background: var(--bg); padding: 16px; border-radius: var(--radius-md); margin-bottom: 16px; font-size: 14px; }
   .loyalty-banner { background: #ecfdf5; border: 1px solid #10b981; padding: 20px; border-radius: var(--radius-md); margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; }
   .loyalty-banner p { color: #065f46; font-weight: 500; font-size: 14px; margin: 0; }
-  .btn-loyalty { background: #10b981; color: #fff; padding: 10px 20px; border-radius: var(--radius-sm); font-weight: 600; font-size: 14px; }
+  .btn-loyalty { background: #10b981; color: #fff; padding: 10px 20px; border-radius: var(--radius-sm); font-weight: 600; font-size: 14px; cursor:pointer; }
   .btn-loyalty:disabled { background: #d1fae5; color: #065f46; cursor: not-allowed; }
   @media(max-width: 600px) { .dash-header { flex-direction: column; align-items: flex-start; gap: 16px; } .order-details { grid-template-columns: 1fr; } .btn-logout { width: 100%; text-align: center; } .loyalty-banner { flex-direction: column; gap: 16px; text-align: center; } }
 </style>
@@ -99,6 +106,20 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const fmtBs = n => "Bs " + Number(n).toLocaleString('es-VE',{minimumFractionDigits:0,maximumFractionDigits:2});
 
 let isLoginMode = true;
+let currentUserId = null;
+let currentUserEmail = null;
+
+/* TRADUCTOR DE ESTADOS */
+const statusLabels = {
+  'pendiente': 'Pendiente',
+  'verificado': 'Verificado',
+  'enviado': 'Enviado',
+  'cuota1_confirmada': 'Cuota 1 Confirmada',
+  'cuota2_confirmada': 'Cuota 2 Confirmada',
+  'cuota3_confirmada': 'Cuota 3 Confirmada',
+  'registro_pago': 'Registro de Pago',
+  'cancelado': 'Cancelado'
+};
 
 function toggleAuthMode() {
   isLoginMode = !isLoginMode;
@@ -130,16 +151,35 @@ async function handleAuth(e) {
   } catch (error) { errBox.textContent = error.message; } finally { btn.disabled = false; btn.textContent = isLoginMode ? "Entrar" : "Registrarse"; }
 }
 
-async function handleLogout() { await supabaseClient.auth.signOut(); document.getElementById('dashboardScreen').style.display = 'none'; document.getElementById('authScreen').style.display = 'flex'; document.getElementById('authForm').reset(); }
+async function handleLogout() { await supabaseClient.auth.signOut(); location.reload(); }
 
 async function checkSession() {
   const { data: { session } } = await supabaseClient.auth.getSession();
   if (session) {
+    currentUserId = session.user.id;
+    currentUserEmail = session.user.email;
     document.getElementById('authScreen').style.display = 'none'; document.getElementById('dashboardScreen').style.display = 'block';
     const { data: profile } = await supabaseClient.from('profiles').select('full_name').eq('id', session.user.id).single();
     document.getElementById('userNameDisplay').textContent = profile?.full_name || session.user.user_metadata?.full_name || session.user.email;
-    loadMyOrders(session.user.id, session.user.email);
-  } else { document.getElementById('authScreen').style.display = 'flex'; document.getElementById('dashboardScreen').style.display = 'none'; }
+    loadMyOrders(currentUserId, currentUserEmail);
+    suscribirseCambiosCliente();
+  } else { 
+    document.getElementById('authScreen').style.display = 'flex'; 
+    document.getElementById('dashboardScreen').style.display = 'none'; 
+  }
+}
+
+/* TIEMPO REAL: Escuchar cambios en la tabla de pedidos para el cliente */
+function suscribirseCambiosCliente() {
+  supabaseClient
+    .channel('cambios-cliente')
+    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'orders' }, payload => {
+      // Solo recargar si el pedido que cambió es de este cliente
+      if (payload.new.user_id === currentUserId || payload.new.customer_email === currentUserEmail) {
+        loadMyOrders(currentUserId, currentUserEmail);
+      }
+    })
+    .subscribe();
 }
 
 async function loadMyOrders(userId, userEmail) {
@@ -162,6 +202,9 @@ async function loadMyOrders(userId, userEmail) {
       const saldoBs = Math.max(0, totalBs - abonadoBs), saldoUsdt = Math.max(0, totalUsdt - abonadoUsdt);
       const isPaid = saldoBs <= 0.1;
       const statusClass = `status-${o.status}`;
+      
+      // Traducir el estado para mostrarlo bonito
+      const statusText = statusLabels[o.status] || o.status;
 
       const itemsHtml = (o.order_items || []).map(item => `
         <div class="item-row">
@@ -207,7 +250,7 @@ async function loadMyOrders(userId, userEmail) {
         <div class="order-card">
           <div class="order-top">
             <div><div class="order-id">Pedido #${shortId}</div><div class="order-date">${date}</div></div>
-            <div class="order-status ${statusClass}">${o.status.replace(/_/g, ' ')}</div>
+            <div class="order-status ${statusClass}">${statusText}</div>
           </div>
           
           <div class="order-items">${itemsHtml}</div>
