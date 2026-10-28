@@ -7,7 +7,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  /* [Mismo CSS que tenías anteriormente] */
   * { margin:0; padding:0; box-sizing:border-box; }
   :root{
     --bg:#fcfbf8; --surface:#ffffff; --text:#111111; --muted:#767676; --border:#e8e5df;
@@ -100,6 +99,16 @@
   .summary{ background:var(--bg); border-radius:var(--radius-md); padding:20px; margin:24px 0; } .summary .row{ display:flex; justify-content:space-between; font-size:14px; color:var(--muted); } .summary .row.total{ font-size:18px; font-weight:700; color:var(--text); margin-top:12px; padding-top:12px; border-top:1px solid var(--border); }
   .err{ color:#ef4444; font-size:13px; margin-top:12px; text-align:center; } .msg{ text-align:center; padding:48px 24px; }
 
+  /* ESTILOS PARA LOGIN EN TIENDA */
+  .auth-modal { max-width: 420px; padding: 40px; }
+  .auth-modal h2 { font-size: 24px; font-weight: 700; margin-bottom: 8px; text-align: center; }
+  .auth-modal p { font-size: 14px; color: var(--muted); text-align: center; margin-bottom: 32px; }
+  .auth-modal .field label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 8px; }
+  .auth-modal .field input { border: 1px solid var(--border); }
+  .auth-modal .field input:focus { border-color: var(--text); }
+  .auth-switch { text-align: center; margin-top: 24px; font-size: 14px; color: var(--muted); }
+  .auth-switch button { color: var(--text); font-weight: 600; text-decoration: underline; }
+
   .footer{ background:var(--surface); border-top:1px solid var(--border); padding:64px 0 32px; }
   .fgrid{ display:grid; grid-template-columns:2fr 1fr 1fr 1fr; gap:48px; margin-bottom:48px; }
   .footer h4{ font-size:13px; font-weight:600; text-transform: uppercase; margin-bottom:20px; } .footer a{ display:block; color:var(--muted); font-size:14px; margin-bottom:12px; }
@@ -175,6 +184,35 @@
 <div class="modal-wrap" id="productModal" onclick="closeProduct(event)"><div class="modal" id="productModalInner"></div></div>
 <div class="modal-wrap" id="checkoutModal" onclick="closeCheckout(event)"><div class="modal checkout" id="checkoutModalInner"></div></div>
 
+<!-- NUEVO MODAL DE LOGIN/REGISTRO PARA LA TIENDA -->
+<div class="modal-wrap" id="authModal" onclick="if(event.target.id==='authModal') closeAuthModal()">
+  <div class="modal auth-modal">
+    <button class="modal-x" onclick="closeAuthModal()">✕</button>
+    <h2 id="authTitle">Iniciar Sesión</h2>
+    <p id="authSub">Debes ingresar para completar tu compra.</p>
+    <form id="authFormStore" onsubmit="handleStoreAuth(event)">
+      <div class="field" id="nameField" style="display:none;">
+        <label>Nombre Completo</label>
+        <input type="text" id="authName">
+      </div>
+      <div class="field">
+        <label>Correo Electrónico</label>
+        <input type="email" id="authEmail" required>
+      </div>
+      <div class="field">
+        <label>Contraseña</label>
+        <input type="password" id="authPassword" required>
+      </div>
+      <button type="submit" class="btn-primary" id="btnAuthSubmit">Entrar y Continuar</button>
+      <div id="authError" class="err"></div>
+    </form>
+    <div class="auth-switch">
+      <span id="switchText">¿No tienes cuenta?</span> 
+      <button onclick="toggleStoreAuthMode()" id="switchBtn">Regístrate aquí</button>
+    </div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const SUPABASE_URL = "https://zxhufobqfxmbjpneyiam.supabase.co";
@@ -182,6 +220,8 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 let PRODUCTS = [], cart = [], currentFilter = "todo", selectedSize = null, currentProduct = null, currentQty = 1, paymentPlan = "contado", paymentMethod = "bs_transfer";
+let isLoginMode = true;
+
 const CATEGORIES = [{ key:"todo", label:"Todo" }, { key:"oversize", label:"Oversize" }, { key:"camisetas", label:"Camisetas" }];
 const fmtBs = n => "Bs " + Number(n).toLocaleString('es-VE');
 const fmtUsdt = n => Number(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) + " USDT";
@@ -305,30 +345,102 @@ function removeItem(idx){ cart.splice(idx,1); renderCart(); }
 function openCart(){ document.getElementById('drawer').classList.add('open'); document.getElementById('overlay').classList.add('open'); }
 function closeCart(){ document.getElementById('drawer').classList.remove('open'); document.getElementById('overlay').classList.remove('open'); }
 
-async function openCheckout(){
-  if(cart.length === 0) return; closeCart(); paymentPlan = "contado"; paymentMethod = "bs_transfer";
-  const { data: { session } } = await supabaseClient.auth.getSession();
-  let prefName = "", prefEmail = "";
-  if (session) {
-    prefEmail = session.user.email;
-    const { data: profile } = await supabaseClient.from('profiles').select('full_name').eq('id', session.user.id).single();
-    prefName = profile?.full_name || "";
+/* =========================================
+   LÓGICA DE AUTENTICACIÓN EN LA TIENDA
+   ========================================= */
+function toggleStoreAuthMode() {
+  isLoginMode = !isLoginMode;
+  document.getElementById('authTitle').textContent = isLoginMode ? "Iniciar Sesión" : "Crear Cuenta";
+  document.getElementById('authSub').textContent = isLoginMode ? "Debes ingresar para completar tu compra." : "Regístrate para continuar con tu pedido.";
+  document.getElementById('btnAuthSubmit').textContent = isLoginMode ? "Entrar y Continuar" : "Registrarse y Continuar";
+  document.getElementById('nameField').style.display = isLoginMode ? 'none' : 'block';
+  document.getElementById('switchText').textContent = isLoginMode ? "¿No tienes cuenta?" : "¿Ya tienes cuenta?";
+  document.getElementById('switchBtn').textContent = isLoginMode ? "Regístrate aquí" : "Inicia sesión";
+  document.getElementById('authError').textContent = "";
+}
+
+function openAuthModal() {
+  document.getElementById('authModal').classList.add('open');
+  document.getElementById('authFormStore').reset();
+  document.getElementById('authError').textContent = "";
+}
+function closeAuthModal() {
+  document.getElementById('authModal').classList.remove('open');
+}
+
+async function handleStoreAuth(e) {
+  e.preventDefault();
+  const email = document.getElementById('authEmail').value.trim();
+  const password = document.getElementById('authPassword').value;
+  const name = document.getElementById('authName').value.trim();
+  const errBox = document.getElementById('authError');
+  const btn = document.getElementById('btnAuthSubmit');
+
+  errBox.textContent = ""; btn.disabled = true; btn.textContent = "Procesando...";
+
+  try {
+    if (isLoginMode) {
+      const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+      closeAuthModal();
+      openCheckout(); // Ahora que está logueado, abrimos el checkout
+    } else {
+      if (!name) throw new Error("Por favor ingresa tu nombre.");
+      const { data, error } = await supabaseClient.auth.signUp({ email, password, options: { data: { full_name: name } } });
+      if (error) throw error;
+      if (data.session) {
+        closeAuthModal();
+        openCheckout();
+      } else {
+        alert("Cuenta creada. Por favor, inicia sesión.");
+        toggleStoreAuthMode();
+      }
+    }
+  } catch (err) {
+    errBox.textContent = err.message === "Invalid login credentials" ? "Correo o contraseña incorrectos." : err.message;
+  } finally {
+    btn.disabled = false; btn.textContent = isLoginMode ? "Entrar y Continuar" : "Registrarse y Continuar";
   }
-  renderCheckout(prefName, prefEmail);
+}
+
+/* =========================================
+   CHECKOUT Y PEDIDO
+   ========================================= */
+async function openCheckout(){
+  if(cart.length === 0) return;
+  
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  
+  // SI NO ESTÁ LOGUEADO, PEDIR LOGIN
+  if (!session) {
+    closeCart();
+    openAuthModal();
+    return;
+  }
+
+  closeCart(); 
+  paymentPlan = "contado"; 
+  paymentMethod = "bs_transfer";
+  
+  // Traer nombre del perfil para autocompletar
+  let prefName = "";
+  const { data: profile } = await supabaseClient.from('profiles').select('full_name').eq('id', session.user.id).single();
+  prefName = profile?.full_name || "";
+
+  renderCheckout(prefName);
   document.getElementById('checkoutModal').classList.add('open');
 }
 function closeCheckout(e){ if(e && e.target.id !== 'checkoutModal') return; document.getElementById('checkoutModal').classList.remove('open'); }
 
-function renderCheckout(prefName, prefEmail){
+function renderCheckout(prefName){
   const totalBs = cart.reduce((s,i)=>s + i.price_bs*i.qty, 0), totalUsdt = cart.reduce((s,i)=>s + i.price_usdt*i.qty, 0);
   document.getElementById('checkoutModalInner').innerHTML = `
     <button class="modal-x" onclick="closeCheckout()">✕</button>
-    <h3>Finalizar Pedido</h3><p class="sub">Completa tus datos y elige cómo pagar.</p>
+    <h3>Finalizar Pedido</h3><p class="sub">Confirma tus datos y elige cómo pagar.</p>
 
     <div class="dlabel">Datos de contacto</div>
-    <div class="field"><input id="fName" type="text" placeholder="Nombre completo" value="${prefName}"></div>
-    <div class="field"><input id="fPhone" type="text" placeholder="Teléfono / WhatsApp"></div>
-    <div class="field" style="margin-bottom:24px;"><input id="fEmail" type="email" placeholder="Correo (opcional)" value="${prefEmail}" ${prefEmail ? 'readonly style="background:#f0f0f0;"' : ''}></div>
+    <div class="field"><input id="fName" type="text" placeholder="Nombre completo" value="${prefName}" readonly style="background:#f0f0f0;"></div>
+    <div class="field" style="margin-bottom:24px;"><input id="fPhone" type="text" placeholder="Teléfono / WhatsApp (para la entrega)"></div>
 
     <div class="dlabel">Modalidad de pago</div>
     <div class="plans">
@@ -353,29 +465,39 @@ function renderCheckout(prefName, prefEmail){
   `;
 }
 function selPlan(p){ 
-  paymentPlan=p; const n=document.getElementById('fName').value, ph=document.getElementById('fPhone').value, e=document.getElementById('fEmail').value; 
-  renderCheckout(n, e); document.getElementById('fPhone').value=ph; 
+  paymentPlan=p; const n=document.getElementById('fName').value, ph=document.getElementById('fPhone').value; 
+  renderCheckout(n); document.getElementById('fPhone').value=ph; 
 }
 function selMethod(m){ 
-  paymentMethod=m; const n=document.getElementById('fName').value, ph=document.getElementById('fPhone').value, e=document.getElementById('fEmail').value; 
-  renderCheckout(n, e); document.getElementById('fPhone').value=ph; 
+  paymentMethod=m; const n=document.getElementById('fName').value, ph=document.getElementById('fPhone').value; 
+  renderCheckout(n); document.getElementById('fPhone').value=ph; 
 }
 
 async function submitOrder(){
   const errBox = document.getElementById('checkoutError'); errBox.textContent = "";
-  const name = document.getElementById('fName').value.trim(), phone = document.getElementById('fPhone').value.trim(), email = document.getElementById('fEmail').value.trim();
-  if(!name || !phone) { errBox.textContent = "Nombre y teléfono son obligatorios."; return; }
+  const name = document.getElementById('fName').value.trim(), phone = document.getElementById('fPhone').value.trim();
+  if(!phone) { errBox.textContent = "El teléfono es obligatorio para la entrega."; return; }
   
   const btn = document.querySelector('#checkoutModalInner .btn-primary'); btn.disabled = true; btn.textContent = "Registrando...";
 
   try{
     const { data: { session } } = await supabaseClient.auth.getSession();
+    if (!session) throw new Error("Tu sesión ha expirado. Vuelve a iniciar sesión.");
+    
     const totalBs = cart.reduce((s,i)=>s + i.price_bs*i.qty, 0), totalUsdt = cart.reduce((s,i)=>s + i.price_usdt*i.qty, 0);
 
     const { data: orderData, error: orderErr } = await supabaseClient.from('orders').insert({
-      customer_name: name, customer_phone: phone, customer_email: session ? session.user.email : email, user_id: session ? session.user.id : null,
-      payment_plan: paymentPlan, payment_method: paymentMethod, total_bs: totalBs, total_usdt: totalUsdt, status: 'pendiente'
+      customer_name: name, 
+      customer_phone: phone, 
+      customer_email: session.user.email, 
+      user_id: session.user.id, // <-- Ahora siempre está vinculado al ID de la sesión
+      payment_plan: paymentPlan, 
+      payment_method: paymentMethod, 
+      total_bs: totalBs, 
+      total_usdt: totalUsdt, 
+      status: 'pendiente'
     }).select().single();
+    
     if(orderErr) throw orderErr;
 
     const items = cart.map(i => ({
@@ -396,7 +518,13 @@ async function submitOrder(){
     const shortId = String(orderData.id).slice(0,8).toUpperCase();
     document.getElementById('checkoutModalInner').innerHTML = `
       <button class="modal-x" onclick="closeCheckout()">✕</button>
-      <div class="msg"><h3>¡Pedido Registrado!</h3><p class="sub">Número de pedido: <strong>#${shortId}</strong></p><button class="btn-primary" onclick="closeCheckout()">Seguir Comprando</button></div>
+      <div class="msg">
+        <div style="font-size:48px; margin-bottom:16px;">🎉</div>
+        <h3>¡Pedido Registrado!</h3>
+        <p class="sub">Número de pedido: <strong>#${shortId}</strong></p>
+        <a href="/portal.html" class="btn-primary" style="display:inline-block; width:auto; margin-bottom:12px;">Ver en Mis Pedidos</a>
+        <button class="btn-primary" onclick="closeCheckout()" style="background:#e5e7eb; color:#111;">Seguir Comprando</button>
+      </div>
     `;
     cart = []; renderCart();
   }catch(err){
