@@ -6,7 +6,6 @@
 <title>Tiendas Sammy — Panel de Administración</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<!-- LIBRERÍA PARA COMPRIMIR IMÁGENES -->
 <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
@@ -59,8 +58,8 @@
   .admin-title{ font-size:32px; margin-bottom:8px; }
   .admin-sub{ font-size:15px; color:var(--muted); margin-bottom:40px; }
 
-  .tabs{ display:flex; gap:8px; margin-bottom:32px; background:var(--surface); padding:8px; border-radius:var(--radius-md); display:inline-flex; box-shadow:var(--shadow); }
-  .tab{ padding:12px 24px; font-size:15px; font-weight:600; color:var(--muted); border-radius:var(--radius-sm); transition:all .2s; }
+  .tabs{ display:flex; gap:8px; margin-bottom:32px; background:var(--surface); padding:8px; border-radius:var(--radius-md); display:inline-flex; box-shadow:var(--shadow); overflow-x:auto; max-width:100%; }
+  .tab{ padding:12px 24px; font-size:15px; font-weight:600; color:var(--muted); border-radius:var(--radius-sm); transition:all .2s; white-space:nowrap; }
   .tab:hover{ color:var(--text); }
   .tab.active{ background:var(--accent); color:#1a1a1a; }
 
@@ -70,8 +69,8 @@
 
   /* TABLE */
   .panel-header-actions{ display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
-  .data-table-wrap{ background:var(--surface); border-radius:var(--radius-lg); overflow:hidden; box-shadow:var(--shadow); }
-  .data-table{ width:100%; border-collapse:collapse; }
+  .data-table-wrap{ background:var(--surface); border-radius:var(--radius-lg); overflow:hidden; box-shadow:var(--shadow); overflow-x:auto; }
+  .data-table{ width:100%; border-collapse:collapse; min-width: 800px; }
   .data-table th, .data-table td{ padding:20px 24px; text-align:left; font-size:14px; border-bottom:1px solid var(--border); }
   .data-table th{ background:rgba(248,246,240,0.5); font-weight:600; font-size:12px; text-transform:uppercase; letter-spacing:0.5px; color:var(--muted); }
   .data-table tr:last-child td{ border-bottom:none; }
@@ -88,6 +87,7 @@
   .tag-apartado{ background:#dbeafe; color:#1e40af; }
   .tag-activo{ background:#dcfce7; color:#166534; }
   .tag-inactivo{ background:#fee2e2; color:#991b1b; }
+  .tag-rol{ background:#e0e7ff; color:#3730a3; }
 
   .status-select{ padding:10px 16px; border-radius:var(--radius-sm); background:var(--bg); border:1px solid var(--border); color:var(--text); font-family:inherit; font-size:13px; font-weight:600; outline:none; cursor:pointer; }
   .status-select:focus{ border-color:var(--accent); }
@@ -98,6 +98,7 @@
   .btn-delete{ background:#fee2e2; color:#991b1b; }
   .btn-delete:hover{ background:#fca5a5; }
   .btn-new{ background:var(--accent); color:#1a1a1a; padding:10px 20px; border-radius:var(--radius-sm); font-weight:700; font-size:14px; }
+  .btn-new:hover{ background:var(--accent-hover); }
 
   .empty-state{ text-align:center; padding:60px 20px; color:var(--muted); font-size:15px; }
 
@@ -123,7 +124,6 @@
     .admin-header{ padding:0 20px; }
     .admin-main{ padding:24px 20px; }
     .data-table th, .data-table td{ padding:16px; font-size:13px; }
-    .tabs{ display:flex; overflow-x:auto; white-space:nowrap; }
     .form-grid{ grid-template-columns:1fr; }
     .modal{ padding:32px 24px; }
   }
@@ -161,12 +161,13 @@
 
   <main class="admin-main">
     <h1 class="admin-title">Dashboard</h1>
-    <p class="admin-sub">Gestiona los pedidos, abonos y productos de Tiendas Sammy.</p>
+    <p class="admin-sub">Gestiona los pedidos, abonos, productos y usuarios.</p>
 
     <div class="tabs">
       <button class="tab active" onclick="switchTab('pedidos', event)">📦 Pedidos</button>
       <button class="tab" onclick="switchTab('abonos', event)">💳 Abonos</button>
       <button class="tab" onclick="switchTab('productos', event)">🛍️ Productos</button>
+      <button class="tab" onclick="switchTab('usuarios', event)">👥 Usuarios</button>
     </div>
 
     <!-- PANEL PEDIDOS -->
@@ -235,6 +236,29 @@
         </table>
       </div>
     </div>
+
+    <!-- PANEL USUARIOS -->
+    <div class="panel" id="panel-usuarios">
+      <div class="panel-header-actions">
+        <h3 style="font-size:20px;">Gestión de Usuarios y Roles</h3>
+        <button class="btn-new" onclick="openUserForm()">+ Nuevo Usuario</button>
+      </div>
+      <div class="data-table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Email</th>
+              <th>Rol</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="usersTableBody">
+            <tr><td colspan="4" class="empty-state">Cargando usuarios…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
   </main>
 </div>
 
@@ -283,7 +307,7 @@
           <label>Imagen del Producto</label>
           <input type="file" id="pImage" accept="image/*" class="file-input" onchange="previewImage(event)">
           <img id="imgPreview" class="img-preview" alt="Vista previa">
-          <p style="font-size:12px; color:var(--muted); margin-top:8px;">La imagen se comprimirá automáticamente para que tu tienda cargue rápido.</p>
+          <p style="font-size:12px; color:var(--muted); margin-top:8px;">La imagen se comprimirá automáticamente.</p>
         </div>
         <div class="form-group full">
           <label>Descripción</label>
@@ -291,7 +315,7 @@
         </div>
         <div class="form-group full">
           <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
-            <input type="checkbox" id="pActive" checked style="width:auto; accent-color:var(--accent);"> Producto Activo (visible en la tienda)
+            <input type="checkbox" id="pActive" checked style="width:auto; accent-color:var(--accent);"> Producto Activo
           </label>
         </div>
       </div>
@@ -301,15 +325,48 @@
   </div>
 </div>
 
+<!-- MODAL FORMULARIO USUARIO -->
+<div class="modal-wrap" id="userModal" onclick="closeUserForm(event)">
+  <div class="modal" style="max-width:500px;">
+    <button class="modal-x" onclick="closeUserForm()">✕</button>
+    <h3>Añadir Nuevo Usuario</h3>
+    <form id="userForm" onsubmit="saveUser(event)">
+      <div class="form-group">
+        <label>Nombre Completo *</label>
+        <input type="text" id="uName" required placeholder="Ej: Laura Martínez">
+      </div>
+      <div class="form-group">
+        <label>Correo Electrónico *</label>
+        <input type="email" id="uEmail" required placeholder="Ej: laura@tiendasammy.com">
+      </div>
+      <div class="form-group">
+        <label>Contraseña Temporal *</label>
+        <input type="password" id="uPassword" required placeholder="Mínimo 6 caracteres" minlength="6">
+      </div>
+      <div class="form-group">
+        <label>Rol del Usuario *</label>
+        <select id="uRole" required>
+          <option value="vendedor">Vendedor (Gestiona pedidos y abonos)</option>
+          <option value="admin">Administrador (Control total excepto dueño)</option>
+          <option value="cliente">Cliente</option>
+        </select>
+      </div>
+      <button type="submit" class="btn-primary" id="btnSaveUser">Crear Usuario</button>
+      <div id="userFormError" class="err" style="display:none;"></div>
+    </form>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-/* ============================================================
-   CREDENCIALES DE SUPABASE (Reemplaza con tus datos)
-   ============================================================ */
 const SUPABASE_URL      = "https://zxhufobqfxmbjpneyiam.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4aHVmb2JxZnhtYmpwbmV5aWFtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMxNjk2OTEsImV4cCI6MjEwODc0NTY5MX0.EUS-QUdhuhtSk9rgLB11wz-GYF9m01JqhXfT6yT9_Vs";
 
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// Cliente secundario para crear usuarios sin cerrar la sesión del admin
+const tempSupabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
 const loginView = document.getElementById('loginView');
 const adminPanel = document.getElementById('adminPanel');
 const loginError = document.getElementById('loginError');
@@ -334,7 +391,7 @@ async function handleLogin(){
     if(profileError) throw profileError;
     if(!['super_admin', 'admin', 'vendedor'].includes(profile.role)){
       await supabaseClient.auth.signOut();
-      throw new Error("No tienes permisos de administrador.");
+      throw new Error("No tienes permisos para acceder al panel.");
     }
     showAdminPanel(data.user.email);
   } catch(err){
@@ -357,7 +414,7 @@ function showAdminPanel(email){
   loginView.style.display = 'none';
   adminPanel.style.display = 'block';
   document.getElementById('userEmailDisplay').textContent = email || "";
-  loadOrders(); loadInstallments(); loadProducts();
+  loadOrders(); loadInstallments(); loadProducts(); loadUsers();
 }
 
 /* ============================================================
@@ -551,21 +608,13 @@ async function saveProduct(e){
     if (imageFile) {
       btn.textContent = "Optimizando imagen...";
       
-      // --- COMPRESIÓN DE IMAGEN ---
-      const options = {
-        maxSizeMB: 0.5, // Máximo 500KB
-        maxWidthOrHeight: 1000, // Máximo 1000px de ancho o alto
-        useWebWorker: true
-      };
-      
+      const options = { maxSizeMB: 0.5, maxWidthOrHeight: 1000, useWebWorker: true };
       let fileToUpload = imageFile;
       try {
         fileToUpload = await imageCompression(imageFile, options);
-        console.log(`Imagen comprimida de ${(imageFile.size / 1024 / 1024).toFixed(2)} MB a ${(fileToUpload.size / 1024 / 1024).toFixed(2)} MB`);
       } catch (error) {
         console.error("Error en compresión, subiendo original:", error);
       }
-      // -----------------------------
 
       btn.textContent = "Subiendo imagen...";
       const fileExt = fileToUpload.name.split('.').pop() || 'jpg';
@@ -632,6 +681,119 @@ async function deleteProduct(id){
 }
 
 /* ============================================================
+   GESTIÓN DE USUARIOS Y ROLES
+   ============================================================ */
+let allUsers = [];
+
+async function loadUsers(){
+  const tbody = document.getElementById('usersTableBody');
+  try {
+    const { data, error } = await supabaseClient.from('profiles').select('*').order('created_at', { ascending: false });
+    if(error) throw error;
+    allUsers = data || [];
+    
+    if(allUsers.length === 0){ tbody.innerHTML = `<tr><td colspan="4" class="empty-state">No hay usuarios.</td></tr>`; return; }
+    
+    tbody.innerHTML = allUsers.map(u => {
+      const roleLabel = {
+        'super_admin': 'Super Admin',
+        'admin': 'Administrador',
+        'vendedor': 'Vendedor',
+        'cliente': 'Cliente'
+      }[u.role] || u.role;
+
+      return `
+        <tr>
+          <td><strong>${u.full_name || 'Sin nombre'}</strong></td>
+          <td>${u.email || 'N/A'}</td>
+          <td><span class="tag tag-rol">${roleLabel}</span></td>
+          <td>
+            <select class="status-select" onchange="updateUserRole('${u.id}', this.value)" ${u.email === document.getElementById('userEmailDisplay').textContent ? 'disabled title="No puedes cambiar tu propio rol"' : ''}>
+              <option value="vendedor" ${u.role==='vendedor'?'selected':''}>Vendedor</option>
+              <option value="admin" ${u.role==='admin'?'selected':''}>Administrador</option>
+              <option value="super_admin" ${u.role==='super_admin'?'selected':''}>Super Admin</option>
+              <option value="cliente" ${u.role==='cliente'?'selected':''}>Cliente</option>
+            </select>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  } catch(err) {
+    tbody.innerHTML = `<tr><td colspan="4" class="empty-state">Error: ${err.message}</td></tr>`;
+  }
+}
+
+function openUserForm(){
+  document.getElementById('userForm').reset();
+  document.getElementById('userFormError').style.display = 'none';
+  document.getElementById('userModal').classList.add('open');
+}
+
+function closeUserForm(e){
+  if(e && e.target.id !== 'userModal') return;
+  document.getElementById('userModal').classList.remove('open');
+}
+
+async function saveUser(e){
+  e.preventDefault();
+  const btn = document.getElementById('btnSaveUser');
+  const errBox = document.getElementById('userFormError');
+  
+  btn.disabled = true;
+  btn.textContent = "Creando...";
+  errBox.style.display = 'none';
+
+  const name = document.getElementById('uName').value.trim();
+  const email = document.getElementById('uEmail').value.trim();
+  const password = document.getElementById('uPassword').value;
+  const role = document.getElementById('uRole').value;
+
+  try {
+    // 1. Crear el usuario en Auth usando el cliente temporal para no desloguear al admin
+    const { data: authData, error: authError } = await tempSupabase.auth.signUp({
+      email: email,
+      password: password,
+      options: {
+        data: { full_name: name }
+      }
+    });
+
+    if (authError) throw authError;
+    if (!authData.user) throw new Error("No se pudo crear el usuario.");
+
+    // 2. Actualizar el rol en la tabla profiles
+    const { error: profileError } = await supabaseClient
+      .from('profiles')
+      .update({ role: role })
+      .eq('id', authData.user.id);
+
+    if (profileError) throw profileError;
+
+    closeUserForm();
+    loadUsers();
+    alert("Usuario creado exitosamente. Ya puede iniciar sesión.");
+
+  } catch(err) {
+    console.error(err);
+    errBox.textContent = err.message || "Error al crear el usuario.";
+    errBox.style.display = 'block';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Crear Usuario";
+  }
+}
+
+async function updateUserRole(userId, newRole){
+  try {
+    const { error } = await supabaseClient.from('profiles').update({ role: newRole }).eq('id', userId);
+    if(error) throw error;
+  } catch(err) {
+    alert("Error al actualizar el rol: " + err.message);
+    loadUsers();
+  }
+}
+
+/* ============================================================
    CAMBIO DE PESTAÑAS
    ============================================================ */
 function switchTab(tabName, event){
@@ -645,10 +807,6 @@ function switchTab(tabName, event){
    VERIFICAR SESIÓN AL CARGAR
    ============================================================ */
 window.addEventListener('DOMContentLoaded', async () => {
-  if(SUPABASE_URL.includes("PEGA_AQUI") || SUPABASE_ANON_KEY.includes("PEGA_AQUI")){
-    loginError.textContent = "⚠️ Faltan credenciales de Supabase.";
-    loginBtn.disabled = true; return;
-  }
   const { data: { session } } = await supabaseClient.auth.getSession();
   if(session){
     const { data: profile } = await supabaseClient.from('profiles').select('role').eq('id', session.user.id).single();
