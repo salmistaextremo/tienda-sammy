@@ -8,7 +8,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
 <style>
-  /* ... Mismo CSS del admin ... */
   * { margin:0; padding:0; box-sizing:border-box; }
   :root{ --bg:#f8f6f0; --surface:#ffffff; --text:#1a1a1a; --muted:#7a7a7a; --border:#e8e4db; --accent:#ffea61; --danger:#ef4444; --success:#22c55e; --radius-lg:24px; --radius-md:16px; --radius-sm:100px; }
   html,body{ background:var(--bg); color:var(--text); font-family:'Outfit',sans-serif; }
@@ -44,9 +43,16 @@
   .modal h3{ font-size:24px; margin-bottom:24px; font-weight:700; }
   .form-group{ margin-bottom:16px; } .form-group label{ display:block; font-size:13px; font-weight:600; margin-bottom:8px; }
   .form-group input, .form-group select, .form-group textarea{ width:100%; padding:14px; border-radius:var(--radius-md); background:var(--bg); border:1px solid var(--border); font-family:inherit; }
+  
+  /* ESTILOS PARA EL DETALLE DEL PEDIDO CON IMAGEN */
   .item-detail-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px dashed var(--border); font-size: 14px; }
-  .item-detail-note { font-size: 12px; color: var(--muted); font-style: italic; display: block; margin-top: 4px; }
+  .item-detail-info { display: flex; gap: 12px; align-items: flex-start; }
+  .item-detail-img { width: 50px; height: 65px; object-fit: cover; border-radius: 6px; background: var(--bg); flex-shrink: 0; }
+  .item-detail-text { flex: 1; }
+  .item-detail-desc { font-size: 12px; color: var(--muted); margin-top: 2px; display: block; }
+  .item-detail-note { font-size: 12px; color: var(--text); font-style: italic; margin-top: 4px; display: block; background: var(--bg); padding: 2px 6px; border-radius: 4px; }
   .receipt-img-preview { width: 100%; max-height: 300px; object-fit: contain; border-radius: 8px; margin-top: 10px; border: 1px solid var(--border); cursor: pointer; }
+
   @media(max-width:800px){ .admin-header{ padding:0 20px; } .admin-main{ padding:24px 20px; } .data-table th, .data-table td{ padding:16px; } .modal{ padding:32px 24px; } }
 </style>
 </head>
@@ -148,6 +154,7 @@
         <div class="form-group"><label>Etiqueta</label><input type="text" id="pBadge"></div>
       </div>
       <div class="form-group"><label>Imagen</label><input type="file" id="pImage" accept="image/*" onchange="previewImage(event)"><img id="imgPreview" style="display:none; width:100%; height:150px; object-fit:cover; margin-top:10px; border-radius:8px;"></div>
+      <div class="form-group"><label>Descripción</label><textarea id="pDescription" rows="3"></textarea></div>
       <div class="form-group"><label style="display:flex; gap:8px;"><input type="checkbox" id="pActive" checked> Producto Activo</label></div>
       <button type="submit" class="btn-primary" id="btnSaveProduct">Guardar</button>
     </form>
@@ -208,15 +215,14 @@ function suscribirseCambios() {
 
 async function loadOrders(){
   const tbody = document.getElementById('ordersTableBody');
-  // Incluimos el status en el select de installments
-  const { data, error } = await supabaseClient.from('orders').select('*, order_items(*), installments(amount_bs, amount_usdt, status)').order('created_at', { ascending: false });
+  // AQUÍ AÑADIMOS LA RELACIÓN CON PRODUCTOS PARA TRAER IMAGEN Y DESCRIPCIÓN
+  const { data, error } = await supabaseClient.from('orders').select('*, order_items(*, products(image_url, description)), installments(amount_bs, amount_usdt, status)').order('created_at', { ascending: false });
   if(error) return; allOrdersData = data || [];
 
   if(allOrdersData.length === 0) { tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;">Sin pedidos</td></tr>`; return; }
 
   tbody.innerHTML = allOrdersData.map(o => {
     let abonadoBs = 0; 
-    // Solo sumamos los abonos verificados
     if(o.installments) o.installments.forEach(i => { if(i.status !== 'pendiente') abonadoBs += Number(i.amount_bs || 0); });
     const saldoBs = Math.max(0, Number(o.total_bs) - abonadoBs);
     
@@ -279,13 +285,18 @@ function viewOrderDetails(orderId) {
   let abonadoBs = 0; if(o.installments) o.installments.forEach(i => { if(i.status !== 'pendiente') abonadoBs += Number(i.amount_bs || 0); });
   const saldoBs = Math.max(0, Number(o.total_bs) - abonadoBs);
 
+  // ITEMS ACTUALIZADOS CON IMAGEN Y DESCRIPCIÓN EN EL MODAL DE ADMIN
   const itemsHtml = (o.order_items || []).map(item => `
     <div class="item-detail-row">
-      <div>
-        <strong>${item.quantity}x</strong> ${item.product_name} (Talla: ${item.size})
-        ${item.custom_note ? `<span class="item-detail-note">Nota: "${item.custom_note}"</span>` : ''}
+      <div class="item-detail-info">
+        ${item.products?.image_url ? `<img src="${item.products.image_url}" class="item-detail-img">` : `<div class="item-detail-img"></div>`}
+        <div class="item-detail-text">
+          <div><strong>${item.quantity}x</strong> ${item.product_name} (Talla: ${item.size})</div>
+          ${item.products?.description ? `<span class="item-detail-desc">${item.products.description}</span>` : ''}
+          ${item.custom_note ? `<span class="item-detail-note">Nota: "${item.custom_note}"</span>` : ''}
+        </div>
       </div>
-      <div>${fmtBs(item.subtotal_bs)}</div>
+      <div style="font-weight:600; white-space:nowrap;">${fmtBs(item.subtotal_bs)}</div>
     </div>
   `).join('');
 
@@ -404,13 +415,14 @@ function editProduct(id){
   document.getElementById('pId').value=p.id; document.getElementById('pName').value=p.name; document.getElementById('pCategory').value=p.category;
   document.getElementById('pSizes').value=(p.sizes||[]).join(', '); document.getElementById('pPriceBs').value=p.price_bs; document.getElementById('pPriceUsdt').value=p.price_usdt;
   document.getElementById('pStock').value=p.stock; document.getElementById('pBadge').value=p.badge||''; document.getElementById('pActive').checked=p.is_active;
+  document.getElementById('pDescription').value=p.description || '';
   if(p.image_url){ document.getElementById('imgPreview').src=p.image_url; document.getElementById('imgPreview').style.display='block'; } else { document.getElementById('imgPreview').style.display='none'; }
   document.getElementById('productModal').classList.add('open');
 }
 function previewImage(event){ const file = event.target.files[0]; if(!file) return; const reader = new FileReader(); reader.onload = e => { document.getElementById('imgPreview').src=e.target.result; document.getElementById('imgPreview').style.display='block'; }; reader.readAsDataURL(file); }
 async function saveProduct(e){
   e.preventDefault(); const btn = document.getElementById('btnSaveProduct'); btn.disabled=true;
-  const id=document.getElementById('pId').value, name=document.getElementById('pName').value.trim(), category=document.getElementById('pCategory').value, sizes=document.getElementById('pSizes').value.split(',').map(s=>s.trim()), price_bs=parseFloat(document.getElementById('pPriceBs').value), price_usdt=parseFloat(document.getElementById('pPriceUsdt').value), stock=parseInt(document.getElementById('pStock').value), badge=document.getElementById('pBadge').value.trim(), is_active=document.getElementById('pActive').checked, imageFile=document.getElementById('pImage').files[0];
+  const id=document.getElementById('pId').value, name=document.getElementById('pName').value.trim(), category=document.getElementById('pCategory').value, sizes=document.getElementById('pSizes').value.split(',').map(s=>s.trim()), price_bs=parseFloat(document.getElementById('pPriceBs').value), price_usdt=parseFloat(document.getElementById('pPriceUsdt').value), stock=parseInt(document.getElementById('pStock').value), badge=document.getElementById('pBadge').value.trim(), description=document.getElementById('pDescription').value.trim(), is_active=document.getElementById('pActive').checked, imageFile=document.getElementById('pImage').files[0];
   try {
     let image_url = null;
     if (imageFile) {
@@ -419,7 +431,7 @@ async function saveProduct(e){
       await supabaseClient.storage.from('product-images').upload(fileName, fileToUpload);
       image_url = supabaseClient.storage.from('product-images').getPublicUrl(fileName).data.publicUrl;
     }
-    const productData = { name, category, sizes, price_bs, price_usdt, stock, badge, is_active };
+    const productData = { name, category, sizes, price_bs, price_usdt, stock, badge, description, is_active };
     if(image_url) productData.image_url = image_url;
     else if(id) productData.image_url = allProducts.find(x=>x.id===id)?.image_url;
 
