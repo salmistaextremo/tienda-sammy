@@ -6,6 +6,8 @@
 <title>Tiendas Sammy — Panel de Administración</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<!-- LIBRERÍA PARA COMPRIMIR IMÁGENES -->
+<script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
   :root{
@@ -281,7 +283,7 @@
           <label>Imagen del Producto</label>
           <input type="file" id="pImage" accept="image/*" class="file-input" onchange="previewImage(event)">
           <img id="imgPreview" class="img-preview" alt="Vista previa">
-          <p style="font-size:12px; color:var(--muted); margin-top:8px;">Opcional. Si no subes imagen, se usará una por defecto.</p>
+          <p style="font-size:12px; color:var(--muted); margin-top:8px;">La imagen se comprimirá automáticamente para que tu tienda cargue rápido.</p>
         </div>
         <div class="form-group full">
           <label>Descripción</label>
@@ -433,14 +435,18 @@ async function loadInstallments(){
 /* ============================================================
    GESTIÓN DE PRODUCTOS (CRUD)
    ============================================================ */
+let allProducts = []; 
+
 async function loadProducts(){
   const tbody = document.getElementById('productsTableBody');
   try {
     const { data, error } = await supabaseClient.from('products').select('*').order('created_at', { ascending: false });
     if(error) throw error;
-    if(!data || data.length === 0){ tbody.innerHTML = `<tr><td colspan="6" class="empty-state">No hay productos. ¡Crea el primero!</td></tr>`; return; }
+    allProducts = data || [];
     
-    tbody.innerHTML = data.map(p => `
+    if(allProducts.length === 0){ tbody.innerHTML = `<tr><td colspan="6" class="empty-state">No hay productos. ¡Crea el primero!</td></tr>`; return; }
+    
+    tbody.innerHTML = allProducts.map(p => `
       <tr>
         <td>
           <div style="display:flex; align-items:center; gap:12px;">
@@ -462,35 +468,6 @@ async function loadProducts(){
     tbody.innerHTML = `<tr><td colspan="6" class="empty-state">Error: ${err.message}</td></tr>`;
   }
 }
-
-let allProducts = []; // Cache para editar
-
-// Sobrescribimos loadProducts para guardar el cache
-const originalLoadProducts = loadProducts;
-loadProducts = async function() {
-    const { data } = await supabaseClient.from('products').select('*').order('created_at', { ascending: false });
-    allProducts = data || [];
-    const tbody = document.getElementById('productsTableBody');
-    if(!allProducts || allProducts.length === 0){ tbody.innerHTML = `<tr><td colspan="6" class="empty-state">No hay productos. ¡Crea el primero!</td></tr>`; return; }
-    tbody.innerHTML = allProducts.map(p => `
-      <tr>
-        <td>
-          <div style="display:flex; align-items:center; gap:12px;">
-            <img src="${p.image_url || 'https://picsum.photos/seed/'+p.id+'/100/100'}" style="width:40px; height:50px; object-fit:cover; border-radius:6px;">
-            <strong>${p.name}</strong>
-          </div>
-        </td>
-        <td>${p.category}</td>
-        <td>${Number(p.price_bs).toLocaleString('es-VE')} Bs<br><small style="color:var(--muted);">${Number(p.price_usdt).toFixed(2)} USDT</small></td>
-        <td>${p.stock}</td>
-        <td>${p.is_active ? '<span class="tag tag-activo">Activo</span>' : '<span class="tag tag-inactivo">Inactivo</span>'}</td>
-        <td>
-          <button class="btn-sm btn-edit" onclick="editProduct('${p.id}')">Editar</button>
-          <button class="btn-sm btn-delete" onclick="deleteProduct('${p.id}')">Borrar</button>
-        </td>
-      </tr>
-    `).join('');
-};
 
 function openProductForm(){
   document.getElementById('productForm').reset();
@@ -571,18 +548,35 @@ async function saveProduct(e){
   try {
     let image_url = null;
 
-    // Si el usuario seleccionó una imagen nueva, la subimos a Storage
     if (imageFile) {
-      const fileExt = imageFile.name.split('.').pop();
+      btn.textContent = "Optimizando imagen...";
+      
+      // --- COMPRESIÓN DE IMAGEN ---
+      const options = {
+        maxSizeMB: 0.5, // Máximo 500KB
+        maxWidthOrHeight: 1000, // Máximo 1000px de ancho o alto
+        useWebWorker: true
+      };
+      
+      let fileToUpload = imageFile;
+      try {
+        fileToUpload = await imageCompression(imageFile, options);
+        console.log(`Imagen comprimida de ${(imageFile.size / 1024 / 1024).toFixed(2)} MB a ${(fileToUpload.size / 1024 / 1024).toFixed(2)} MB`);
+      } catch (error) {
+        console.error("Error en compresión, subiendo original:", error);
+      }
+      // -----------------------------
+
+      btn.textContent = "Subiendo imagen...";
+      const fileExt = fileToUpload.name.split('.').pop() || 'jpg';
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
       
       const { data: uploadData, error: uploadError } = await supabaseClient.storage
         .from('product-images')
-        .upload(fileName, imageFile, { cacheControl: '3600', upsert: false });
+        .upload(fileName, fileToUpload, { cacheControl: '3600', upsert: false });
 
       if (uploadError) throw new Error("Error al subir imagen: " + uploadError.message);
 
-      // Obtener URL pública
       const { data: publicUrlData } = supabaseClient.storage
         .from('product-images')
         .getPublicUrl(fileName);
@@ -590,27 +584,23 @@ async function saveProduct(e){
       image_url = publicUrlData.publicUrl;
     }
 
-    // Preparar el objeto del producto
+    btn.textContent = "Guardando datos...";
     const productData = {
       name, category, sizes, price_bs, price_usdt, stock, badge, description, is_active
     };
     
-    // Si subimos una imagen nueva o estamos editando y no hay nueva, conservamos o actualizamos
     if (image_url) {
       productData.image_url = image_url;
     } else if (id) {
-      // Si editamos y no subimos nueva imagen, dejamos la que tenía
       const existing = allProducts.find(x => x.id === id);
       if(existing && existing.image_url) productData.image_url = existing.image_url;
     }
 
     let error;
     if (id) {
-      // Actualizar
       const res = await supabaseClient.from('products').update(productData).eq('id', id);
       error = res.error;
     } else {
-      // Crear
       const res = await supabaseClient.from('products').insert([productData]);
       error = res.error;
     }
@@ -618,7 +608,7 @@ async function saveProduct(e){
     if (error) throw error;
 
     closeProductForm();
-    loadProducts(); // Recargar la tabla
+    loadProducts();
 
   } catch(err) {
     console.error(err);
