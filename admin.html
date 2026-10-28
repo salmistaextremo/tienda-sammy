@@ -9,83 +9,43 @@
 <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
-  :root{ 
-    --bg:#f8f6f0; 
-    --surface:#ffffff; 
-    --text:#1a1a1a; 
-    --muted:#7a7a7a; 
-    --border:#e8e4db; 
-    --accent:#ffea61; 
-    --danger:#ef4444; 
-    --success:#22c55e; 
-    --radius-lg:24px; 
-    --radius-md:16px; 
-    --radius-sm:100px; 
-  }
+  :root{ --bg:#f8f6f0; --surface:#ffffff; --text:#1a1a1a; --muted:#7a7a7a; --border:#e8e4db; --accent:#ffea61; --danger:#ef4444; --success:#22c55e; --radius-lg:24px; --radius-md:16px; --radius-sm:100px; }
   html,body{ background:var(--bg); color:var(--text); font-family:'Outfit',sans-serif; }
-  button{ font-family:inherit; cursor:pointer; border:none; background:none; color:inherit; } 
-  .container{ max-width:1200px; margin:0 auto; padding:0 24px; }
-
-  /* LOGIN */
+  button{ font-family:inherit; cursor:pointer; border:none; background:none; color:inherit; } .container{ max-width:1200px; margin:0 auto; padding:0 24px; }
   .login-wrapper{ min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px; }
   .login-card{ background:var(--surface); border-radius:var(--radius-lg); padding:48px; width:100%; max-width:420px; box-shadow:0 10px 30px rgba(0,0,0,0.04); }
-  .logo{ font-weight:700; font-size:24px; margin-bottom:8px; text-align:center; } 
-  .logo span{ background:var(--accent); padding:2px 8px; border-radius:8px; color:#111; }
-  .field{ margin-bottom:20px; } 
-  .field label{ display:block; font-size:13px; font-weight:600; margin-bottom:8px; } 
-  .field input{ width:100%; padding:16px; border-radius:var(--radius-md); background:var(--bg); border:1px solid var(--border); font-family:inherit; }
+  .logo{ font-weight:700; font-size:24px; margin-bottom:8px; text-align:center; } .logo span{ background:var(--accent); padding:2px 8px; border-radius:8px; color:#111; }
+  .field{ margin-bottom:20px; } .field label{ display:block; font-size:13px; font-weight:600; margin-bottom:8px; } .field input{ width:100%; padding:16px; border-radius:var(--radius-md); background:var(--bg); border:1px solid var(--border); font-family:inherit; }
   .btn-primary{ width:100%; padding:16px; border-radius:var(--radius-md); background:var(--text); color:#fff; font-weight:600; display:flex; justify-content:center; cursor:pointer; }
-
-  /* PANEL */
   #adminPanel{ display:none; }
   .admin-header{ background:var(--surface); border-bottom:1px solid var(--border); padding:0 32px; height:80px; display:flex; align-items:center; justify-content:space-between; }
-  .admin-header .logo{ font-size:20px; margin:0; } 
-  .admin-header-right{ display:flex; align-items:center; gap:20px; }
+  .admin-header .logo{ font-size:20px; margin:0; } .admin-header-right{ display:flex; align-items:center; gap:20px; }
   .logout-btn{ padding:10px 20px; border-radius:var(--radius-sm); background:var(--bg); font-size:14px; font-weight:600; border:1px solid var(--border); cursor:pointer; }
-
   .admin-main{ padding:40px 32px; max-width:1240px; margin:0 auto; }
-  .admin-title{ font-size:32px; margin-bottom:8px; } 
-  .admin-sub{ font-size:15px; color:var(--muted); margin-bottom:40px; }
-  
-  .tabs{ display:flex; gap:8px; margin-bottom:32px; background:var(--surface); padding:8px; border-radius:var(--radius-md); display:inline-flex; overflow-x:auto; max-width:100%; }
-  .tab{ padding:12px 24px; font-size:15px; font-weight:600; color:var(--muted); border-radius:var(--radius-sm); cursor:pointer; white-space:nowrap; } 
-  .tab.active{ background:var(--accent); color:#111; }
-  
-  .panel{ display:none; } 
-  .panel.active{ display:block; }
-
-  /* TABLAS */
+  .admin-title{ font-size:32px; margin-bottom:8px; } .admin-sub{ font-size:15px; color:var(--muted); margin-bottom:40px; }
+  .tabs{ display:flex; gap:8px; margin-bottom:32px; background:var(--surface); padding:8px; border-radius:var(--radius-md); display:inline-flex; }
+  .tab{ padding:12px 24px; font-size:15px; font-weight:600; color:var(--muted); border-radius:var(--radius-sm); cursor:pointer; } .tab.active{ background:var(--accent); color:#111; }
+  .panel{ display:none; } .panel.active{ display:block; }
   .data-table-wrap{ background:var(--surface); border-radius:var(--radius-lg); box-shadow:0 10px 30px rgba(0,0,0,0.04); overflow-x:auto; }
   .data-table{ width:100%; border-collapse:collapse; min-width: 900px; }
   .data-table th, .data-table td{ padding:16px 20px; text-align:left; font-size:14px; border-bottom:1px solid var(--border); vertical-align: middle; }
   .data-table th{ background:rgba(248,246,240,0.5); font-weight:600; font-size:12px; text-transform:uppercase; color:var(--muted); }
-  
   .tag{ display:inline-block; padding:6px 12px; border-radius:var(--radius-sm); font-size:12px; font-weight:600; }
-  .tag-activo{ background:#dcfce7; color:#166534; } 
-  .tag-inactivo{ background:#fee2e2; color:#991b1b; }
-  
+  .tag-activo{ background:#dcfce7; color:#166534; } .tag-inactivo{ background:#fee2e2; color:#991b1b; }
   .status-select{ padding:10px 16px; border-radius:var(--radius-sm); background:var(--bg); border:1px solid var(--border); font-size:13px; font-weight:600; outline:none; cursor:pointer; }
-  
   .btn-sm{ padding:8px 14px; border-radius:8px; font-size:13px; font-weight:600; }
-  .btn-view{ background:var(--bg); border:1px solid var(--border); margin-right:8px; cursor:pointer; } 
-  .btn-view:hover{ border-color:var(--text); }
+  .btn-view{ background:var(--bg); border:1px solid var(--border); margin-right:8px; cursor:pointer; } .btn-view:hover{ border-color:var(--text); }
   .btn-new{ background:var(--accent); color:#111; padding:10px 20px; border-radius:var(--radius-sm); font-weight:700; font-size:14px; cursor:pointer; }
-
-  /* MODALES */
   .modal-wrap{ position:fixed; inset:0; z-index:200; display:none; align-items:center; justify-content:center; padding:20px; background:rgba(0,0,0,0.5); backdrop-filter:blur(5px); overflow-y:auto; }
   .modal-wrap.open{ display:flex; }
   .modal{ background:var(--surface); border-radius:var(--radius-lg); max-width:640px; width:100%; max-height:92vh; overflow-y:auto; position:relative; padding:40px; }
   .modal-x{ position:absolute; top:20px; right:20px; width:40px; height:40px; border-radius:50%; background:var(--bg); display:grid; place-items:center; cursor:pointer; }
   .modal h3{ font-size:24px; margin-bottom:24px; font-weight:700; }
-  
-  .form-group{ margin-bottom:16px; } 
-  .form-group label{ display:block; font-size:13px; font-weight:600; margin-bottom:8px; }
+  .form-group{ margin-bottom:16px; } .form-group label{ display:block; font-size:13px; font-weight:600; margin-bottom:8px; }
   .form-group input, .form-group select, .form-group textarea{ width:100%; padding:14px; border-radius:var(--radius-md); background:var(--bg); border:1px solid var(--border); font-family:inherit; }
-  
   .item-detail-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px dashed var(--border); font-size: 14px; }
   .item-detail-note { font-size: 12px; color: var(--muted); font-style: italic; display: block; margin-top: 4px; }
   .receipt-img-preview { width: 100%; max-height: 300px; object-fit: contain; border-radius: 8px; margin-top: 10px; border: 1px solid var(--border); cursor: pointer; }
-
   @media(max-width:800px){ .admin-header{ padding:0 20px; } .admin-main{ padding:24px 20px; } .data-table th, .data-table td{ padding:16px; } .modal{ padding:32px 24px; } }
 </style>
 </head>
@@ -107,7 +67,6 @@
     <div class="logo">SAMMY <span>ADMIN</span></div>
     <div class="admin-header-right"><button class="logout-btn" onclick="handleLogout()">Cerrar sesión</button></div>
   </header>
-
   <main class="admin-main">
     <h1 class="admin-title">Dashboard</h1>
     <div class="tabs">
@@ -117,7 +76,6 @@
       <div class="tab" onclick="switchTab('usuarios', event)">👥 Usuarios</div>
       <div class="tab" onclick="switchTab('solicitudes', event)">⭐ Solicitudes</div>
     </div>
-
     <div class="panel active" id="panel-pedidos">
       <div class="data-table-wrap">
         <table class="data-table">
@@ -126,7 +84,6 @@
         </table>
       </div>
     </div>
-
     <div class="panel" id="panel-abonos">
       <div class="data-table-wrap">
         <table class="data-table">
@@ -135,7 +92,6 @@
         </table>
       </div>
     </div>
-
     <div class="panel" id="panel-productos">
       <div style="display:flex; justify-content:space-between; margin-bottom:16px;"><h3>Inventario</h3><button class="btn-new" onclick="openProductForm()">+ Nuevo</button></div>
       <div class="data-table-wrap">
@@ -145,7 +101,6 @@
         </table>
       </div>
     </div>
-
     <div class="panel" id="panel-usuarios">
       <div style="display:flex; justify-content:space-between; margin-bottom:16px;"><h3>Usuarios</h3><button class="btn-new" onclick="openUserForm()">+ Nuevo</button></div>
       <div class="data-table-wrap">
@@ -155,7 +110,6 @@
         </table>
       </div>
     </div>
-
     <div class="panel" id="panel-solicitudes">
       <div class="data-table-wrap">
         <table class="data-table">
@@ -224,7 +178,6 @@ let currentUserId = null, currentUserRole = null;
 let allOrdersData = [], allProducts = [], allUsers = [];
 const fmtBs = n => "Bs " + Number(n).toLocaleString('es-VE',{minimumFractionDigits:0,maximumFractionDigits:2});
 
-/* AUTENTICACIÓN */
 async function handleLogin(){
   const email = document.getElementById('loginEmail').value, password = document.getElementById('loginPassword').value;
   const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
@@ -237,11 +190,24 @@ async function handleLogin(){
   currentUserId = data.user.id; currentUserRole = profile.role;
   document.getElementById('loginView').style.display = 'none'; document.getElementById('adminPanel').style.display = 'block';
   loadAllData();
+  suscribirseCambios();
 }
 
 async function handleLogout() { await supabaseClient.auth.signOut(); location.reload(); }
 
 function loadAllData() { loadOrders(); loadInstallments(); loadProducts(); loadUsers(); loadRequests(); }
+
+/* TIEMPO REAL: Escuchar cambios en la tabla de pedidos */
+function suscribirseCambios() {
+  supabaseClient
+    .channel('cambios-admin')
+    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'orders' }, payload => {
+      // Cuando haya un cambio, recargamos las tablas silenciosamente
+      loadOrders();
+      loadInstallments();
+    })
+    .subscribe();
+}
 
 /* PEDIDOS */
 async function loadOrders(){
@@ -255,7 +221,6 @@ async function loadOrders(){
     let abonadoBs = 0; if(o.installments) o.installments.forEach(i => abonadoBs += Number(i.amount_bs || 0));
     const saldoBs = Math.max(0, Number(o.total_bs) - abonadoBs);
     
-    // LÓGICA DE ESTADOS DINÁMICOS SEGÚN TIPO DE PEDIDO
     let statusOptions = "";
     if (o.payment_plan === 'contado') {
       statusOptions = `
@@ -301,8 +266,14 @@ async function loadOrders(){
 
 async function updateOrderStatus(orderId, newStatus){
   try {
+    // 1. Actualizar en la base de datos
     const { error } = await supabaseClient.from('orders').update({ status: newStatus }).eq('id', orderId);
     if(error) throw error;
+    
+    // 2. Actualizar en el objeto local para que "Ver Detalles" muestre el estado nuevo
+    const index = allOrdersData.findIndex(o => o.id === orderId);
+    if(index > -1) allOrdersData[index].status = newStatus;
+
   } catch(err) {
     alert("Error al actualizar: " + err.message); loadOrders();
   }
