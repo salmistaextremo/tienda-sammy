@@ -6,6 +6,8 @@
 <title>Tiendas Sammy — Oversize & más</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<!-- LIBRERÍA PARA COMPRIMIR IMÁGENES -->
+<script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
   :root{
@@ -89,15 +91,20 @@
 
   .checkout{ max-width:600px; padding:40px; } .checkout h3{ font-size:24px; font-weight:700; margin-bottom:6px; } .checkout .sub{ font-size:14px; color:var(--muted); margin-bottom:32px; }
   .plans{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:24px; }
-  .plan{ padding:16px; border-radius:var(--radius-md); border:1px solid var(--border); text-align:center; background:var(--surface); } .plan.selected{ border-color:var(--text); background:var(--bg); }
+  .plan{ padding:16px; border-radius:var(--radius-md); border:1px solid var(--border); text-align:center; background:var(--surface); cursor:pointer; } .plan.selected{ border-color:var(--text); background:var(--bg); }
   .plan .nm{ font-weight:600; font-size:14px; } .plan .ds{ font-size:11px; color:var(--muted); margin-top:4px; }
   .methods{ display:flex; flex-direction:column; gap:8px; margin-bottom:24px; }
-  .method{ padding:16px; border-radius:var(--radius-md); border:1px solid var(--border); display:flex; align-items:center; gap:12px; }
+  .method{ padding:16px; border-radius:var(--radius-md); border:1px solid var(--border); display:flex; align-items:center; gap:12px; cursor:pointer; }
   .method.selected{ border-color:var(--text); background:var(--bg); }
   .dot{ width:16px; height:16px; border-radius:50%; border:1.5px solid var(--border); display:grid; place-items:center; } .method.selected .dot{ border-color:var(--text); background:var(--text); } .method.selected .dot::after{ content:''; width:6px; height:6px; border-radius:50%; background:#fff; }
   .field{ margin-bottom:12px; } .field input{ width:100%; padding:16px; border-radius:var(--radius-md); background:var(--bg); border:1px solid transparent; font-family:inherit; }
   .summary{ background:var(--bg); border-radius:var(--radius-md); padding:20px; margin:24px 0; } .summary .row{ display:flex; justify-content:space-between; font-size:14px; color:var(--muted); } .summary .row.total{ font-size:18px; font-weight:700; color:var(--text); margin-top:12px; padding-top:12px; border-top:1px solid var(--border); }
   .err{ color:#ef4444; font-size:13px; margin-top:12px; text-align:center; } .msg{ text-align:center; padding:48px 24px; }
+  
+  .file-upload-wrapper { border: 1px dashed var(--border); padding: 16px; border-radius: var(--radius-md); text-align: center; cursor: pointer; background: var(--bg); transition: border-color 0.2s; margin-bottom: 24px; }
+  .file-upload-wrapper:hover { border-color: var(--text); }
+  .file-upload-wrapper span { font-size: 14px; font-weight: 500; color: var(--muted); }
+  .file-upload-wrapper input[type="file"] { display: none; }
 
   /* ESTILOS PARA LOGIN EN TIENDA */
   .auth-modal { max-width: 420px; padding: 40px; }
@@ -184,32 +191,17 @@
 <div class="modal-wrap" id="productModal" onclick="closeProduct(event)"><div class="modal" id="productModalInner"></div></div>
 <div class="modal-wrap" id="checkoutModal" onclick="closeCheckout(event)"><div class="modal checkout" id="checkoutModalInner"></div></div>
 
-<!-- NUEVO MODAL DE LOGIN/REGISTRO PARA LA TIENDA -->
 <div class="modal-wrap" id="authModal" onclick="if(event.target.id==='authModal') closeAuthModal()">
   <div class="modal auth-modal">
     <button class="modal-x" onclick="closeAuthModal()">✕</button>
-    <h2 id="authTitle">Iniciar Sesión</h2>
-    <p id="authSub">Debes ingresar para completar tu compra.</p>
+    <h2 id="authTitle">Iniciar Sesión</h2><p id="authSub">Debes ingresar para completar tu compra.</p>
     <form id="authFormStore" onsubmit="handleStoreAuth(event)">
-      <div class="field" id="nameField" style="display:none;">
-        <label>Nombre Completo</label>
-        <input type="text" id="authName">
-      </div>
-      <div class="field">
-        <label>Correo Electrónico</label>
-        <input type="email" id="authEmail" required>
-      </div>
-      <div class="field">
-        <label>Contraseña</label>
-        <input type="password" id="authPassword" required>
-      </div>
-      <button type="submit" class="btn-primary" id="btnAuthSubmit">Entrar y Continuar</button>
-      <div id="authError" class="err"></div>
+      <div class="field" id="nameField" style="display:none;"><label>Nombre Completo</label><input type="text" id="authName"></div>
+      <div class="field"><label>Correo Electrónico</label><input type="email" id="authEmail" required></div>
+      <div class="field"><label>Contraseña</label><input type="password" id="authPassword" required></div>
+      <button type="submit" class="btn-primary" id="btnAuthSubmit">Entrar y Continuar</button><div id="authError" class="err"></div>
     </form>
-    <div class="auth-switch">
-      <span id="switchText">¿No tienes cuenta?</span> 
-      <button onclick="toggleStoreAuthMode()" id="switchBtn">Regístrate aquí</button>
-    </div>
+    <div class="auth-switch"><span id="switchText">¿No tienes cuenta?</span> <button onclick="toggleStoreAuthMode()" id="switchBtn">Regístrate aquí</button></div>
   </div>
 </div>
 
@@ -345,9 +337,6 @@ function removeItem(idx){ cart.splice(idx,1); renderCart(); }
 function openCart(){ document.getElementById('drawer').classList.add('open'); document.getElementById('overlay').classList.add('open'); }
 function closeCart(){ document.getElementById('drawer').classList.remove('open'); document.getElementById('overlay').classList.remove('open'); }
 
-/* =========================================
-   LÓGICA DE AUTENTICACIÓN EN LA TIENDA
-   ========================================= */
 function toggleStoreAuthMode() {
   isLoginMode = !isLoginMode;
   document.getElementById('authTitle').textContent = isLoginMode ? "Iniciar Sesión" : "Crear Cuenta";
@@ -358,43 +347,26 @@ function toggleStoreAuthMode() {
   document.getElementById('switchBtn').textContent = isLoginMode ? "Regístrate aquí" : "Inicia sesión";
   document.getElementById('authError').textContent = "";
 }
-
-function openAuthModal() {
-  document.getElementById('authModal').classList.add('open');
-  document.getElementById('authFormStore').reset();
-  document.getElementById('authError').textContent = "";
-}
-function closeAuthModal() {
-  document.getElementById('authModal').classList.remove('open');
-}
+function openAuthModal() { document.getElementById('authModal').classList.add('open'); document.getElementById('authFormStore').reset(); document.getElementById('authError').textContent = ""; }
+function closeAuthModal() { document.getElementById('authModal').classList.remove('open'); }
 
 async function handleStoreAuth(e) {
   e.preventDefault();
-  const email = document.getElementById('authEmail').value.trim();
-  const password = document.getElementById('authPassword').value;
-  const name = document.getElementById('authName').value.trim();
-  const errBox = document.getElementById('authError');
-  const btn = document.getElementById('btnAuthSubmit');
-
+  const email = document.getElementById('authEmail').value.trim(), password = document.getElementById('authPassword').value, name = document.getElementById('authName').value.trim();
+  const errBox = document.getElementById('authError'), btn = document.getElementById('btnAuthSubmit');
   errBox.textContent = ""; btn.disabled = true; btn.textContent = "Procesando...";
 
   try {
     if (isLoginMode) {
       const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
       if (error) throw error;
-      closeAuthModal();
-      openCheckout(); // Ahora que está logueado, abrimos el checkout
+      closeAuthModal(); openCheckout();
     } else {
       if (!name) throw new Error("Por favor ingresa tu nombre.");
       const { data, error } = await supabaseClient.auth.signUp({ email, password, options: { data: { full_name: name } } });
       if (error) throw error;
-      if (data.session) {
-        closeAuthModal();
-        openCheckout();
-      } else {
-        alert("Cuenta creada. Por favor, inicia sesión.");
-        toggleStoreAuthMode();
-      }
+      if (data.session) { closeAuthModal(); openCheckout(); } 
+      else { alert("Cuenta creada. Por favor, inicia sesión."); toggleStoreAuthMode(); }
     }
   } catch (err) {
     errBox.textContent = err.message === "Invalid login credentials" ? "Correo o contraseña incorrectos." : err.message;
@@ -403,26 +375,15 @@ async function handleStoreAuth(e) {
   }
 }
 
-/* =========================================
-   CHECKOUT Y PEDIDO
-   ========================================= */
 async function openCheckout(){
   if(cart.length === 0) return;
-  
   const { data: { session } } = await supabaseClient.auth.getSession();
-  
-  // SI NO ESTÁ LOGUEADO, PEDIR LOGIN
-  if (!session) {
-    closeCart();
-    openAuthModal();
-    return;
-  }
+  if (!session) { closeCart(); openAuthModal(); return; }
 
   closeCart(); 
   paymentPlan = "contado"; 
   paymentMethod = "bs_transfer";
   
-  // Traer nombre del perfil para autocompletar
   let prefName = "";
   const { data: profile } = await supabaseClient.from('profiles').select('full_name').eq('id', session.user.id).single();
   prefName = profile?.full_name || "";
@@ -440,21 +401,27 @@ function renderCheckout(prefName){
 
     <div class="dlabel">Datos de contacto</div>
     <div class="field"><input id="fName" type="text" placeholder="Nombre completo" value="${prefName}" readonly style="background:#f0f0f0;"></div>
-    <div class="field" style="margin-bottom:24px;"><input id="fPhone" type="text" placeholder="Teléfono / WhatsApp (para la entrega)"></div>
+    <div class="field"><input id="fPhone" type="text" placeholder="Teléfono / WhatsApp (para la entrega)"></div>
 
-    <div class="dlabel">Modalidad de pago</div>
+    <div class="dlabel" style="margin-top:24px;">Modalidad de pago</div>
     <div class="plans">
-      <button class="plan ${paymentPlan==='contado'?'selected':''}" onclick="selPlan('contado')"><div class="ic">💵</div><div class="nm">Contado</div></button>
-      <button class="plan ${paymentPlan==='credito'?'selected':''}" onclick="selPlan('credito')"><div class="ic">📋</div><div class="nm">Crédito</div></button>
-      <button class="plan ${paymentPlan==='apartado'?'selected':''}" onclick="selPlan('apartado')"><div class="ic">🔖</div><div class="nm">Apartado</div></button>
+      <div class="plan ${paymentPlan==='contado'?'selected':''}" onclick="selPlan('contado', this)"><div class="ic">💵</div><div class="nm">Contado</div></div>
+      <div class="plan ${paymentPlan==='credito'?'selected':''}" onclick="selPlan('credito', this)"><div class="ic">📋</div><div class="nm">Crédito</div></div>
+      <div class="plan ${paymentPlan==='apartado'?'selected':''}" onclick="selPlan('apartado', this)"><div class="ic">🔖</div><div class="nm">Apartado</div></div>
     </div>
 
     <div class="dlabel">Método de pago</div>
     <div class="methods">
-      <button class="method ${paymentMethod==='bs_transfer'?'selected':''}" onclick="selMethod('bs_transfer')"><span class="dot"></span><span class="mn">Transferencia en Bs</span></button>
-      <button class="method ${paymentMethod==='bs_pago_movil'?'selected':''}" onclick="selMethod('bs_pago_movil')"><span class="dot"></span><span class="mn">Pago Móvil</span></button>
-      <button class="method ${paymentMethod==='usdt_trc20'?'selected':''}" onclick="selMethod('usdt_trc20')"><span class="dot"></span><span class="mn">USDT (TRC-20)</span></button>
+      <div class="method ${paymentMethod==='bs_transfer'?'selected':''}" onclick="selMethod('bs_transfer', this)"><span class="dot"></span><span class="mn">Transferencia en Bs</span></div>
+      <div class="method ${paymentMethod==='bs_pago_movil'?'selected':''}" onclick="selMethod('bs_pago_movil', this)"><span class="dot"></span><span class="mn">Pago Móvil</span></div>
+      <div class="method ${paymentMethod==='usdt_trc20'?'selected':''}" onclick="selMethod('usdt_trc20', this)"><span class="dot"></span><span class="mn">USDT (TRC-20)</span></div>
     </div>
+
+    <div class="dlabel">Comprobante de Pago (Opcional)</div>
+    <label class="file-upload-wrapper">
+      <span id="fileNameDisplay">📸 Sube una captura si ya realizaste el pago</span>
+      <input type="file" id="fReceipt" accept="image/*" onchange="document.getElementById('fileNameDisplay').textContent = this.files[0].name">
+    </label>
 
     <div class="summary">
       <div class="row"><span>Total</span><span>${fmtBs(totalBs)} <small style="color:var(--muted);">≈ ${fmtUsdt(totalUsdt)}</small></span></div>
@@ -464,13 +431,16 @@ function renderCheckout(prefName){
     <div id="checkoutError" class="err"></div>
   `;
 }
-function selPlan(p){ 
-  paymentPlan=p; const n=document.getElementById('fName').value, ph=document.getElementById('fPhone').value; 
-  renderCheckout(n); document.getElementById('fPhone').value=ph; 
+
+function selPlan(p, el){ 
+  paymentPlan = p; 
+  document.querySelectorAll('.plan').forEach(e => e.classList.remove('selected'));
+  el.classList.add('selected');
 }
-function selMethod(m){ 
-  paymentMethod=m; const n=document.getElementById('fName').value, ph=document.getElementById('fPhone').value; 
-  renderCheckout(n); document.getElementById('fPhone').value=ph; 
+function selMethod(m, el){ 
+  paymentMethod = m; 
+  document.querySelectorAll('.method').forEach(e => e.classList.remove('selected'));
+  el.classList.add('selected');
 }
 
 async function submitOrder(){
@@ -484,18 +454,38 @@ async function submitOrder(){
     const { data: { session } } = await supabaseClient.auth.getSession();
     if (!session) throw new Error("Tu sesión ha expirado. Vuelve a iniciar sesión.");
     
+    // --- SUBIR COMPROBANTE AL STORAGE (Si se seleccionó uno) ---
+    let receipt_url = null;
+    const fileInput = document.getElementById('fReceipt');
+    if (fileInput && fileInput.files.length > 0) {
+      btn.textContent = "Subiendo comprobante...";
+      const file = fileInput.files[0];
+      const options = { maxSizeMB: 0.5, maxWidthOrHeight: 1000, useWebWorker: true };
+      const compressedFile = await imageCompression(file, options);
+      const ext = compressedFile.name.split('.').pop();
+      const fileName = `receipt_${session.user.id}_${Date.now()}.${ext}`;
+
+      const { error: uploadError } = await supabaseClient.storage.from('receipts').upload(fileName, compressedFile);
+      if (uploadError) throw new Error("Error al subir comprobante: " + uploadError.message);
+
+      const { data: urlData } = supabaseClient.storage.from('receipts').getPublicUrl(fileName);
+      receipt_url = urlData.publicUrl;
+    }
+
+    btn.textContent = "Guardando pedido...";
     const totalBs = cart.reduce((s,i)=>s + i.price_bs*i.qty, 0), totalUsdt = cart.reduce((s,i)=>s + i.price_usdt*i.qty, 0);
 
     const { data: orderData, error: orderErr } = await supabaseClient.from('orders').insert({
       customer_name: name, 
       customer_phone: phone, 
       customer_email: session.user.email, 
-      user_id: session.user.id, // <-- Ahora siempre está vinculado al ID de la sesión
+      user_id: session.user.id,
       payment_plan: paymentPlan, 
       payment_method: paymentMethod, 
       total_bs: totalBs, 
       total_usdt: totalUsdt, 
-      status: 'pendiente'
+      status: 'pendiente',
+      receipt_url: receipt_url
     }).select().single();
     
     if(orderErr) throw orderErr;
