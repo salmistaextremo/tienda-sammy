@@ -82,7 +82,8 @@
   .file-upload-wrapper { border: 1px dashed var(--border); padding: 16px; border-radius: var(--radius-md); text-align: center; cursor: pointer; background: var(--bg); margin-bottom: 24px; display: block; }
   .auth-modal { max-width: 420px; padding: 40px; }
   
-  .footer{ background:var(--surface); border-top:1px solid var(--border); padding:64px 0 32px; } .fgrid{ display:grid; grid-template-columns:2fr 1fr 1fr 1fr; gap:48px; margin-bottom:48px; }
+  .footer{ background:var(--surface); border-top:1px solid var(--border); padding:64px 0 32px; } 
+  .fgrid{ display:grid; grid-template-columns:2fr 1fr 1fr 1fr 1fr; gap:32px; margin-bottom:48px; }
   .footer h4{ font-size:13px; margin-bottom:20px; } .footer a{ display:block; color:var(--muted); font-size:14px; margin-bottom:12px; }
   .fbot{ border-top:1px solid var(--border); padding-top:32px; display: flex; justify-content: space-between; font-size:13px; color:var(--muted); }
   
@@ -137,16 +138,40 @@
 <footer class="footer">
   <div class="container">
     <div class="fgrid">
+      <!-- Columna 1: Logo -->
       <div>
         <a href="/" class="logo" style="display:block; margin-bottom:16px;">
           <img src="https://zxhufobqfxmbjpneyiam.supabase.co/storage/v1/object/public/brand-assets/logo.png" alt="Tiendas Sam's" style="height:40px; width:auto;">
         </a>
         <p style="color:var(--muted); font-size:14px;">Ropa oversize y otros productos de calidad.</p>
       </div>
-      <div><h4>Tienda</h4><a href="#">Oversize</a><a href="#">Camisetas</a></div>
-      <div><h4>Pagos</h4><a href="#">Contado</a><a href="#">Crédito</a><a href="#">Apartado</a></div>
-      <div><h4>Contacto</h4><a href="#">WhatsApp</a><a href="#">Instagram</a></div>
-           <div>
+
+      <!-- Columna 2: Tienda -->
+      <div>
+        <h4>Tienda</h4>
+        <a href="#catalog" onclick="setFilter('oversize')">Oversize</a>
+        <a href="#catalog" onclick="setFilter('camisetas')">Camisetas</a>
+        <a href="#catalog" onclick="setFilter('pantalones')">Pantalones</a>
+      </div>
+
+      <!-- Columna 3: Pagos -->
+      <div>
+        <h4>Pagos</h4>
+        <a href="#">Contado</a>
+        <a href="#">Crédito</a>
+        <a href="#">Apartado</a>
+      </div>
+
+      <!-- Columna 4: Contacto -->
+      <div>
+        <h4>Contacto</h4>
+        <a href="#">WhatsApp</a>
+        <a href="#">Instagram</a>
+        <a href="#">Correo</a>
+      </div>
+
+      <!-- Columna 5: Información -->
+      <div>
         <h4>Información</h4>
         <a href="/info.html">Envíos y Entregas</a>
         <a href="/info.html">Pagos y Apartados</a>
@@ -154,7 +179,11 @@
         <a href="/info.html">Preguntas Frecuentes</a>
       </div>
     </div>
-    <div class="fbot"><div>© 2025 Tiendas Sam's.</div><div>Hecho con ♥ en Venezuela.</div></div>
+    
+    <div class="fbot">
+      <div>© 2025 Tiendas Sam's. Todos los derechos reservados.</div>
+      <div>Hecho con ♥ en Venezuela.</div>
+    </div>
   </div>
 </footer>
 
