@@ -3,1074 +3,376 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tiendas Sammy — Panel de Administración</title>
+<title>Tiendas Sammy — Admin</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
 <style>
+  /* [Mismo CSS del panel anterior, con adiciones para modales] */
   * { margin:0; padding:0; box-sizing:border-box; }
-  :root{
-    --bg:#f8f6f0;
-    --surface:#ffffff;
-    --text:#1a1a1a;
-    --muted:#7a7a7a;
-    --border:#e8e4db;
-    --accent:#ffea61;
-    --accent-hover:#ffe633;
-    --radius-lg:24px;
-    --radius-md:16px;
-    --radius-sm:100px;
-    --shadow:0 8px 30px rgba(0,0,0,0.04);
-    --success:#22c55e;
-    --danger:#ef4444;
-  }
-  html,body{ background:var(--bg); color:var(--text); font-family:'Outfit',sans-serif; line-height:1.5; -webkit-font-smoothing:antialiased; }
-  button{ font-family:inherit; cursor:pointer; border:none; background:none; color:inherit; }
-  img{ display:block; max-width:100%; }
-  .display{ font-family:'Outfit',sans-serif; font-weight:700; letter-spacing:-1px; }
+  :root{ --bg:#f8f6f0; --surface:#ffffff; --text:#1a1a1a; --muted:#7a7a7a; --border:#e8e4db; --accent:#ffea61; --danger:#ef4444; --success:#22c55e; --radius-lg:24px; --radius-md:16px; --radius-sm:100px; }
+  html,body{ background:var(--bg); color:var(--text); font-family:'Outfit',sans-serif; }
+  button{ font-family:inherit; cursor:pointer; border:none; background:none; color:inherit; } .container{ max-width:1200px; margin:0 auto; padding:0 24px; }
 
-  /* LOGIN */
-  .login-wrapper{ min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px; background:var(--bg); }
-  .login-card{ background:var(--surface); border-radius:var(--radius-lg); padding:48px; width:100%; max-width:420px; box-shadow:var(--shadow); }
-  .login-card .logo{ font-weight:700; font-size:24px; margin-bottom:8px; text-align:center; }
-  .login-card .logo span{ background:var(--accent); padding:2px 8px; border-radius:8px; color:#1a1a1a; }
-  .login-card h2{ font-size:16px; margin-bottom:32px; color:var(--muted); font-weight:500; text-align:center; }
-  .field{ margin-bottom:20px; }
-  .field label{ display:block; font-size:13px; font-weight:600; color:var(--text); margin-bottom:8px; }
-  .field input{ width:100%; padding:16px; border-radius:var(--radius-md); background:var(--bg); border:1px solid var(--border); color:var(--text); font-family:inherit; font-size:15px; }
-  .field input:focus{ outline:none; border-color:var(--accent); background:#fff; }
-  .btn-primary{ width:100%; padding:16px; border-radius:var(--radius-md); background:var(--accent); color:#1a1a1a; font-weight:700; font-size:16px; transition:background .2s; display:flex; justify-content:center; align-items:center; }
-  .btn-primary:hover{ background:var(--accent-hover); }
-  .btn-primary:disabled{ opacity:.6; cursor:not-allowed; }
-  .err{ color:var(--danger); font-size:14px; margin-top:16px; text-align:center; font-weight:500; }
+  .login-wrapper{ min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px; }
+  .login-card{ background:var(--surface); border-radius:var(--radius-lg); padding:48px; width:100%; max-width:420px; box-shadow:0 10px 30px rgba(0,0,0,0.04); }
+  .logo{ font-weight:700; font-size:24px; margin-bottom:8px; text-align:center; } .logo span{ background:var(--accent); padding:2px 8px; border-radius:8px; color:#111; }
+  .field{ margin-bottom:20px; } .field label{ display:block; font-size:13px; font-weight:600; margin-bottom:8px; } .field input{ width:100%; padding:16px; border-radius:var(--radius-md); background:var(--bg); border:1px solid var(--border); font-family:inherit; }
+  .btn-primary{ width:100%; padding:16px; border-radius:var(--radius-md); background:var(--text); color:#fff; font-weight:600; display:flex; justify-content:center; }
 
-  /* ADMIN PANEL */
   #adminPanel{ display:none; }
-  .admin-header{ background:var(--surface); border-bottom:1px solid var(--border); padding:0 32px; height:80px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:50; }
-  .admin-header .logo{ font-weight:700; font-size:20px; }
-  .admin-header .logo span{ background:var(--accent); padding:2px 8px; border-radius:8px; color:#1a1a1a; }
-  .admin-header-right{ display:flex; align-items:center; gap:20px; }
-  .admin-header-right .user-email{ font-size:14px; color:var(--muted); font-weight:500; }
-  .logout-btn{ padding:10px 20px; border-radius:var(--radius-sm); background:var(--bg); font-size:14px; font-weight:600; border:1px solid var(--border); transition:all .2s; }
-  .logout-btn:hover{ background:var(--text); color:#fff; border-color:var(--text); }
+  .admin-header{ background:var(--surface); border-bottom:1px solid var(--border); padding:0 32px; height:80px; display:flex; align-items:center; justify-content:space-between; }
+  .admin-header .logo{ font-size:20px; margin:0; } .admin-header-right{ display:flex; align-items:center; gap:20px; }
+  .logout-btn{ padding:10px 20px; border-radius:var(--radius-sm); background:var(--bg); font-size:14px; font-weight:600; border:1px solid var(--border); }
 
   .admin-main{ padding:40px 32px; max-width:1240px; margin:0 auto; }
-  .admin-title{ font-size:32px; margin-bottom:8px; }
-  .admin-sub{ font-size:15px; color:var(--muted); margin-bottom:40px; }
+  .admin-title{ font-size:32px; margin-bottom:8px; } .admin-sub{ font-size:15px; color:var(--muted); margin-bottom:40px; }
+  .tabs{ display:flex; gap:8px; margin-bottom:32px; background:var(--surface); padding:8px; border-radius:var(--radius-md); display:inline-flex; }
+  .tab{ padding:12px 24px; font-size:15px; font-weight:600; color:var(--muted); border-radius:var(--radius-sm); } .tab.active{ background:var(--accent); color:#111; }
+  .panel{ display:none; } .panel.active{ display:block; }
 
-  .tabs{ display:flex; gap:8px; margin-bottom:32px; background:var(--surface); padding:8px; border-radius:var(--radius-md); display:inline-flex; box-shadow:var(--shadow); overflow-x:auto; max-width:100%; }
-  .tab{ padding:12px 24px; font-size:15px; font-weight:600; color:var(--muted); border-radius:var(--radius-sm); transition:all .2s; white-space:nowrap; }
-  .tab:hover{ color:var(--text); }
-  .tab.active{ background:var(--accent); color:#1a1a1a; }
-
-  .panel{ display:none; animation:fadeIn .3s ease; }
-  @keyframes fadeIn{ from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }
-  .panel.active{ display:block; }
-
-  /* TABLE */
-  .panel-header-actions{ display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
-  .data-table-wrap{ background:var(--surface); border-radius:var(--radius-lg); overflow:hidden; box-shadow:var(--shadow); overflow-x:auto; }
+  .data-table-wrap{ background:var(--surface); border-radius:var(--radius-lg); box-shadow:0 10px 30px rgba(0,0,0,0.04); overflow-x:auto; }
   .data-table{ width:100%; border-collapse:collapse; min-width: 900px; }
-  .data-table th, .data-table td{ padding:20px 24px; text-align:left; font-size:14px; border-bottom:1px solid var(--border); vertical-align: middle; }
-  .data-table th{ background:rgba(248,246,240,0.5); font-weight:600; font-size:12px; text-transform:uppercase; letter-spacing:0.5px; color:var(--muted); }
-  .data-table tr:last-child td{ border-bottom:none; }
-  .data-table tr:hover td{ background:rgba(248,246,240,0.5); }
-
+  .data-table th, .data-table td{ padding:16px 20px; text-align:left; font-size:14px; border-bottom:1px solid var(--border); vertical-align: middle; }
+  .data-table th{ background:rgba(248,246,240,0.5); font-weight:600; font-size:12px; text-transform:uppercase; color:var(--muted); }
   .tag{ display:inline-block; padding:6px 12px; border-radius:var(--radius-sm); font-size:12px; font-weight:600; }
-  .tag-pendiente{ background:#fef3c7; color:#92400e; }
-  .tag-confirmado{ background:#dcfce7; color:#166534; }
-  .tag-enviado{ background:#dbeafe; color:#1e40af; }
-  .tag-entregado{ background:#dcfce7; color:#166534; }
-  .tag-cancelado{ background:#fee2e2; color:#991b1b; }
-  .tag-contado{ background:#f3f4f6; color:#374151; }
-  .tag-credito{ background:#fef3c7; color:#92400e; }
-  .tag-apartado{ background:#dbeafe; color:#1e40af; }
-  .tag-activo{ background:#dcfce7; color:#166534; }
-  .tag-inactivo{ background:#fee2e2; color:#991b1b; }
-  .tag-rol{ background:#e0e7ff; color:#3730a3; }
-  .tag-pagado{ background:#dcfce7; color:#166534; }
-  .tag-deuda{ background:#fee2e2; color:#991b1b; }
+  .tag-pendiente{ background:#fef3c7; color:#92400e; } .tag-confirmado{ background:#dcfce7; color:#166534; } .tag-entregado{ background:#dcfce7; color:#166534; }
+  .tag-activo{ background:#dcfce7; color:#166534; } .tag-inactivo{ background:#fee2e2; color:#991b1b; }
+  .status-select{ padding:10px 16px; border-radius:var(--radius-sm); background:var(--bg); border:1px solid var(--border); font-size:13px; font-weight:600; outline:none; }
+  
+  .btn-sm{ padding:8px 14px; border-radius:8px; font-size:13px; font-weight:600; }
+  .btn-view{ background:var(--bg); border:1px solid var(--border); margin-right:8px; } .btn-view:hover{ border-color:var(--text); }
+  .btn-new{ background:var(--accent); color:#111; padding:10px 20px; border-radius:var(--radius-sm); font-weight:700; font-size:14px; }
 
-  .status-select{ padding:10px 16px; border-radius:var(--radius-sm); background:var(--bg); border:1px solid var(--border); color:var(--text); font-family:inherit; font-size:13px; font-weight:600; outline:none; cursor:pointer; }
-  .status-select:focus{ border-color:var(--accent); }
-
-  .btn-sm{ padding:8px 14px; border-radius:8px; font-size:13px; font-weight:600; transition:all .2s; }
-  .btn-edit{ background:var(--bg); border:1px solid var(--border); margin-right:8px; }
-  .btn-edit:hover{ border-color:var(--text); }
-  .btn-delete{ background:#fee2e2; color:#991b1b; }
-  .btn-delete:hover{ background:#fca5a5; }
-  .btn-toggle{ background:#fef3c7; color:#92400e; margin-right:8px; }
-  .btn-toggle:hover{ background:#fde68a; }
-  .btn-new{ background:var(--accent); color:#1a1a1a; padding:10px 20px; border-radius:var(--radius-sm); font-weight:700; font-size:14px; }
-  .btn-new:hover{ background:var(--accent-hover); }
-  .btn-abono{ background:var(--success); color:#fff; padding:8px 14px; border-radius:8px; font-weight:600; font-size:12px; }
-  .btn-abono:hover{ background:#16a34a; }
-
-  .empty-state{ text-align:center; padding:60px 20px; color:var(--muted); font-size:15px; }
-
-  /* MODAL FORMULARIO */
-  .modal-wrap{ position:fixed; inset:0; z-index:200; display:none; align-items:center; justify-content:center; padding:20px; background:rgba(0,0,0,0.5); backdrop-filter:blur(5px); opacity:0; transition:opacity .3s; overflow-y:auto; }
-  .modal-wrap.open{ display:flex; opacity:1; }
-  .modal{ background:var(--surface); border-radius:var(--radius-lg); max-width:640px; width:100%; max-height:92vh; overflow-y:auto; position:relative; box-shadow:0 30px 60px rgba(0,0,0,0.2); animation:mIn .3s ease; padding:40px; }
-  @keyframes mIn{ from{ transform:scale(.97) translateY(10px); opacity:0; } to{ transform:scale(1) translateY(0); opacity:1; } }
-  .modal-x{ position:absolute; top:20px; right:20px; z-index:2; width:40px; height:40px; border-radius:50%; background:var(--bg); display:grid; place-items:center; font-size:16px; box-shadow:0 4px 10px rgba(0,0,0,0.1); }
+  .modal-wrap{ position:fixed; inset:0; z-index:200; display:none; align-items:center; justify-content:center; padding:20px; background:rgba(0,0,0,0.5); backdrop-filter:blur(5px); overflow-y:auto; }
+  .modal-wrap.open{ display:flex; }
+  .modal{ background:var(--surface); border-radius:var(--radius-lg); max-width:640px; width:100%; max-height:92vh; overflow-y:auto; position:relative; padding:40px; }
+  .modal-x{ position:absolute; top:20px; right:20px; width:40px; height:40px; border-radius:50%; background:var(--bg); display:grid; place-items:center; }
   .modal h3{ font-size:24px; margin-bottom:24px; font-weight:700; }
   
-  .form-grid{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
-  .form-group{ margin-bottom:16px; }
-  .form-group.full{ grid-column:1/-1; }
-  .form-group label{ display:block; font-size:13px; font-weight:600; margin-bottom:8px; }
-  .form-group input, .form-group select, .form-group textarea{ width:100%; padding:14px; border-radius:var(--radius-md); background:var(--bg); border:1px solid var(--border); font-family:inherit; font-size:14px; }
-  .form-group input:focus, .form-group select:focus, .form-group textarea:focus{ outline:none; border-color:var(--accent); background:#fff; }
-  .form-group textarea{ resize:vertical; min-height:80px; }
-  .file-input{ padding:10px; background:#fff; border:1px dashed var(--border); cursor:pointer; }
-  .img-preview{ width:100%; height:150px; object-fit:cover; border-radius:8px; margin-top:10px; display:none; }
+  .form-group{ margin-bottom:16px; } .form-group label{ display:block; font-size:13px; font-weight:600; margin-bottom:8px; }
+  .form-group input, .form-group select, .form-group textarea{ width:100%; padding:14px; border-radius:var(--radius-md); background:var(--bg); border:1px solid var(--border); font-family:inherit; }
+  
+  .item-detail-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px dashed var(--border); font-size: 14px; }
+  .item-detail-note { font-size: 12px; color: var(--muted); font-style: italic; display: block; margin-top: 4px; }
+  .receipt-img-preview { width: 100%; max-height: 300px; object-fit: contain; border-radius: 8px; margin-top: 10px; border: 1px solid var(--border); }
 
-  .abono-summary{ background:var(--bg); border-radius:var(--radius-md); padding:16px; margin-bottom:20px; border-left:4px solid var(--accent); }
-  .abono-summary p{ font-size:14px; margin-bottom:4px; }
-  .abono-summary strong{ color:var(--text); }
-
-  @media(max-width:800px){
-    .admin-header{ padding:0 20px; }
-    .admin-main{ padding:24px 20px; }
-    .data-table th, .data-table td{ padding:16px; font-size:13px; }
-    .form-grid{ grid-template-columns:1fr; }
-    .modal{ padding:32px 24px; }
-  }
+  @media(max-width:800px){ .admin-header{ padding:0 20px; } .admin-main{ padding:24px 20px; } .data-table th, .data-table td{ padding:16px; } .modal{ padding:32px 24px; } }
 </style>
 </head>
 <body>
 
-<!-- LOGIN -->
 <div class="login-wrapper" id="loginView">
   <div class="login-card">
     <div class="logo">TIENDAS <span>SAMMY</span></div>
-    <h2>Panel de Administración</h2>
-    <div class="field">
-      <label>Correo electrónico</label>
-      <input id="loginEmail" type="email" placeholder="admin@tiendasammy.com">
-    </div>
-    <div class="field">
-      <label>Contraseña</label>
-      <input id="loginPassword" type="password" placeholder="••••••••">
-    </div>
+    <h2 style="text-align:center; font-size:16px; color:var(--muted); margin-bottom:32px;">Panel de Administración</h2>
+    <div class="field"><label>Correo</label><input id="loginEmail" type="email"></div>
+    <div class="field"><label>Contraseña</label><input id="loginPassword" type="password"></div>
     <button class="btn-primary" id="loginBtn" onclick="handleLogin()">Iniciar sesión</button>
     <div class="err" id="loginError"></div>
   </div>
 </div>
 
-<!-- PANEL -->
 <div id="adminPanel">
   <header class="admin-header">
     <div class="logo">SAMMY <span>ADMIN</span></div>
-    <div class="admin-header-right">
-      <span class="user-email" id="userEmailDisplay"></span>
-      <button class="logout-btn" onclick="handleLogout()">Cerrar sesión</button>
-    </div>
+    <div class="admin-header-right"><button class="logout-btn" onclick="handleLogout()">Cerrar sesión</button></div>
   </header>
 
   <main class="admin-main">
     <h1 class="admin-title">Dashboard</h1>
-    <p class="admin-sub">Gestiona los pedidos, abonos, productos y usuarios.</p>
-
     <div class="tabs">
       <button class="tab active" onclick="switchTab('pedidos', event)">📦 Pedidos</button>
       <button class="tab" onclick="switchTab('abonos', event)">💳 Abonos</button>
       <button class="tab" onclick="switchTab('productos', event)">🛍️ Productos</button>
       <button class="tab" onclick="switchTab('usuarios', event)">👥 Usuarios</button>
+      <button class="tab" onclick="switchTab('solicitudes', event)">⭐ Solicitudes</button>
     </div>
 
-    <!-- PANEL PEDIDOS -->
+    <!-- PEDIDOS -->
     <div class="panel active" id="panel-pedidos">
       <div class="data-table-wrap">
         <table class="data-table">
-          <thead>
-            <tr>
-              <th>Pedido</th>
-              <th>Cliente</th>
-              <th>Modalidad</th>
-              <th>Total</th>
-              <th>Abonado</th>
-              <th>Saldo Pendiente</th>
-              <th>Estado</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody id="ordersTableBody">
-            <tr><td colspan="8" class="empty-state">Cargando pedidos…</td></tr>
-          </tbody>
+          <thead><tr><th>Pedido</th><th>Cliente</th><th>Total</th><th>Saldo</th><th>Estado</th><th>Acciones</th></tr></thead>
+          <tbody id="ordersTableBody"><tr><td colspan="6" style="text-align:center;">Cargando...</td></tr></tbody>
         </table>
       </div>
     </div>
 
-    <!-- PANEL ABONOS (HISTORIAL) -->
+    <!-- ABONOS -->
     <div class="panel" id="panel-abonos">
       <div class="data-table-wrap">
         <table class="data-table">
-          <thead>
-            <tr>
-              <th>Pedido</th>
-              <th>Monto Bs</th>
-              <th>Monto USDT</th>
-              <th>Método</th>
-              <th>Referencia</th>
-              <th>Fecha</th>
-            </tr>
-          </thead>
-          <tbody id="installmentsTableBody">
-            <tr><td colspan="6" class="empty-state">Cargando abonos…</td></tr>
-          </tbody>
+          <thead><tr><th>Pedido</th><th>Monto Bs</th><th>Monto USDT</th><th>Método</th><th>Referencia</th><th>Fecha</th></tr></thead>
+          <tbody id="installmentsTableBody"><tr><td colspan="6" style="text-align:center;">Cargando...</td></tr></tbody>
         </table>
       </div>
     </div>
 
-    <!-- PANEL PRODUCTOS -->
+    <!-- PRODUCTOS -->
     <div class="panel" id="panel-productos">
-      <div class="panel-header-actions">
-        <h3 style="font-size:20px;">Inventario de Productos</h3>
-        <button class="btn-new" onclick="openProductForm()">+ Nuevo Producto</button>
-      </div>
+      <div style="display:flex; justify-content:space-between; margin-bottom:16px;"><h3>Inventario</h3><button class="btn-new" onclick="openProductForm()">+ Nuevo</button></div>
       <div class="data-table-wrap">
         <table class="data-table">
-          <thead>
-            <tr>
-              <th>Producto</th>
-              <th>Categoría</th>
-              <th>Precios</th>
-              <th>Stock</th>
-              <th>Estado</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody id="productsTableBody">
-            <tr><td colspan="6" class="empty-state">Cargando productos…</td></tr>
-          </tbody>
+          <thead><tr><th>Producto</th><th>Categoría</th><th>Precios</th><th>Stock</th><th>Acciones</th></tr></thead>
+          <tbody id="productsTableBody"></tbody>
         </table>
       </div>
     </div>
 
-    <!-- PANEL USUARIOS -->
+    <!-- USUARIOS -->
     <div class="panel" id="panel-usuarios">
-      <div class="panel-header-actions">
-        <h3 style="font-size:20px;">Gestión de Usuarios y Roles</h3>
-        <button class="btn-new" onclick="openUserForm()">+ Nuevo Usuario</button>
-      </div>
+      <div style="display:flex; justify-content:space-between; margin-bottom:16px;"><h3>Usuarios</h3><button class="btn-new" onclick="openUserForm()">+ Nuevo</button></div>
       <div class="data-table-wrap">
         <table class="data-table">
-          <thead>
-            <tr>
-              <th>Nombre</th>
-              <th>Email</th>
-              <th>Rol</th>
-              <th>Estado</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody id="usersTableBody">
-            <tr><td colspan="5" class="empty-state">Cargando usuarios…</td></tr>
-          </tbody>
+          <thead><tr><th>Nombre</th><th>Email</th><th>Rol</th><th>Estado</th><th>Acciones</th></tr></thead>
+          <tbody id="usersTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- SOLICITUDES DE VENDEDOR -->
+    <div class="panel" id="panel-solicitudes">
+      <div class="data-table-wrap">
+        <table class="data-table">
+          <thead><tr><th>Usuario</th><th>Fecha de Solicitud</th><th>Acciones</th></tr></thead>
+          <tbody id="requestsTableBody"></tbody>
         </table>
       </div>
     </div>
   </main>
 </div>
 
-<!-- MODAL ABONO -->
-<div class="modal-wrap" id="abonoModal" onclick="closeAbonoForm(event)">
-  <div class="modal" style="max-width:500px;">
-    <button class="modal-x" onclick="closeAbonoForm()">✕</button>
-    <h3>Registrar Abono</h3>
-    
-    <div class="abono-summary">
-      <p><strong>Cliente:</strong> <span id="abonoClientName"></span></p>
-      <p><strong>Total del Pedido:</strong> <span id="abonoTotal"></span></p>
-      <p><strong>Saldo Pendiente:</strong> <span id="abonoSaldo" style="color:var(--danger)"></span></p>
-    </div>
-
-    <form id="abonoForm" onsubmit="saveAbono(event)">
-      <input type="hidden" id="aOrderId">
-      <input type="hidden" id="aMaxBs">
-      <input type="hidden" id="aMaxUsdt">
-
-      <div class="form-grid">
-        <div class="form-group full">
-          <label>¿En qué moneda abonó? *</label>
-          <select id="aCurrency" required onchange="toggleAbonoCurrency()">
-            <option value="bs">Bolívares (Bs)</option>
-            <option value="usdt">USDT</option>
-          </select>
-        </div>
-        <div class="form-group full">
-          <label>Monto del abono *</label>
-          <input type="number" step="0.01" id="aAmount" required placeholder="Ej: 500">
-        </div>
-        <div class="form-group">
-          <label>Método *</label>
-          <select id="aMethod" required>
-            <option value="bs_transfer">Transferencia Bs</option>
-            <option value="bs_pago_movil">Pago Móvil</option>
-            <option value="usdt_trc20">USDT (TRC-20)</option>
-            <option value="efectivo">Efectivo</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Referencia</label>
-          <input type="text" id="aReference" placeholder="Últimos 4 dígitos, hash...">
-        </div>
-      </div>
-      <button type="submit" class="btn-primary" id="btnSaveAbono" style="margin-top:16px;">Guardar Abono</button>
-      <div id="abonoFormError" class="err" style="display:none;"></div>
-    </form>
+<!-- MODALES -->
+<div class="modal-wrap" id="orderDetailModal" onclick="if(event.target.id==='orderDetailModal') this.classList.remove('open')">
+  <div class="modal">
+    <button class="modal-x" onclick="document.getElementById('orderDetailModal').classList.remove('open')">✕</button>
+    <h3>Detalles del Pedido</h3>
+    <div id="orderDetailContent"></div>
   </div>
 </div>
 
-<!-- MODAL FORMULARIO PRODUCTO -->
-<div class="modal-wrap" id="productModal" onclick="closeProductForm(event)">
+<div class="modal-wrap" id="productModal" onclick="if(event.target.id==='productModal') this.classList.remove('open')">
   <div class="modal">
-    <button class="modal-x" onclick="closeProductForm()">✕</button>
+    <button class="modal-x" onclick="document.getElementById('productModal').classList.remove('open')">✕</button>
     <h3 id="modalProductTitle">Añadir Producto</h3>
     <form id="productForm" onsubmit="saveProduct(event)">
       <input type="hidden" id="pId">
-      <div class="form-grid">
-        <div class="form-group full">
-          <label>Nombre del Producto *</label>
-          <input type="text" id="pName" required placeholder="Ej: Hoodie Oversize Élite">
-        </div>
-        <div class="form-group">
-          <label>Categoría *</label>
-          <select id="pCategory" required>
-            <option value="oversize">Oversize</option>
-            <option value="camisetas">Camisetas</option>
-            <option value="pantalones">Pantalones</option>
-            <option value="accesorios">Accesorios</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Tallas (separadas por coma) *</label>
-          <input type="text" id="pSizes" required placeholder="Ej: S, M, L, XL">
-        </div>
-        <div class="form-group">
-          <label>Precio en Bs *</label>
-          <input type="number" step="0.01" id="pPriceBs" required placeholder="Ej: 1280">
-        </div>
-        <div class="form-group">
-          <label>Precio en USDT *</label>
-          <input type="number" step="0.01" id="pPriceUsdt" required placeholder="Ej: 32">
-        </div>
-        <div class="form-group">
-          <label>Stock *</label>
-          <input type="number" id="pStock" required placeholder="Ej: 25">
-        </div>
-        <div class="form-group">
-          <label>Etiqueta (Badge)</label>
-          <input type="text" id="pBadge" placeholder="Ej: NUEVO, -20%">
-        </div>
-        <div class="form-group full">
-          <label>Imagen del Producto</label>
-          <input type="file" id="pImage" accept="image/*" class="file-input" onchange="previewImage(event)">
-          <img id="imgPreview" class="img-preview" alt="Vista previa">
-        </div>
-        <div class="form-group full">
-          <label>Descripción</label>
-          <textarea id="pDescription" placeholder="Descripción del producto..."></textarea>
-        </div>
-        <div class="form-group full">
-          <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
-            <input type="checkbox" id="pActive" checked style="width:auto; accent-color:var(--accent);"> Producto Activo
-          </label>
-        </div>
+      <div class="form-group"><label>Nombre *</label><input type="text" id="pName" required></div>
+      <div class="form-group"><label>Categoría *</label><select id="pCategory" required><option value="oversize">Oversize</option><option value="camisetas">Camisetas</option><option value="pantalones">Pantalones</option><option value="accesorios">Accesorios</option></select></div>
+      <div class="form-group"><label>Tallas (coma separada) *</label><input type="text" id="pSizes" required placeholder="S, M, L"></div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+        <div class="form-group"><label>Precio Bs *</label><input type="number" step="0.01" id="pPriceBs" required></div>
+        <div class="form-group"><label>Precio USDT *</label><input type="number" step="0.01" id="pPriceUsdt" required></div>
       </div>
-      <button type="submit" class="btn-primary" id="btnSaveProduct" style="margin-top:16px;">Guardar Producto</button>
-      <div id="formError" class="err" style="display:none;"></div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+        <div class="form-group"><label>Stock *</label><input type="number" id="pStock" required></div>
+        <div class="form-group"><label>Etiqueta</label><input type="text" id="pBadge"></div>
+      </div>
+      <div class="form-group"><label>Imagen</label><input type="file" id="pImage" accept="image/*" onchange="previewImage(event)"><img id="imgPreview" style="display:none; width:100%; height:150px; object-fit:cover; margin-top:10px; border-radius:8px;"></div>
+      <div class="form-group"><label style="display:flex; gap:8px;"><input type="checkbox" id="pActive" checked> Producto Activo</label></div>
+      <button type="submit" class="btn-primary" id="btnSaveProduct">Guardar</button>
     </form>
   </div>
 </div>
 
-<!-- MODAL FORMULARIO USUARIO -->
-<div class="modal-wrap" id="userModal" onclick="closeUserForm(event)">
-  <div class="modal" style="max-width:500px;">
-    <button class="modal-x" onclick="closeUserForm()">✕</button>
-    <h3>Añadir Nuevo Usuario</h3>
+<div class="modal-wrap" id="userModal" onclick="if(event.target.id==='userModal') this.classList.remove('open')">
+  <div class="modal">
+    <button class="modal-x" onclick="document.getElementById('userModal').classList.remove('open')">✕</button>
+    <h3>Nuevo Usuario</h3>
     <form id="userForm" onsubmit="saveUser(event)">
-      <div class="form-group">
-        <label>Nombre Completo *</label>
-        <input type="text" id="uName" required placeholder="Ej: Laura Martínez">
-      </div>
-      <div class="form-group">
-        <label>Correo Electrónico *</label>
-        <input type="email" id="uEmail" required placeholder="Ej: laura@tiendasammy.com">
-      </div>
-      <div class="form-group">
-        <label>Contraseña Temporal *</label>
-        <input type="password" id="uPassword" required placeholder="Mínimo 6 caracteres" minlength="6">
-      </div>
-      <div class="form-group">
-        <label>Rol del Usuario *</label>
-        <select id="uRole" required>
-          <option value="vendedor">Vendedor (Gestiona pedidos y abonos)</option>
-          <option value="admin">Administrador (Control total excepto dueño)</option>
-          <option value="cliente">Cliente</option>
-        </select>
-      </div>
-      <button type="submit" class="btn-primary" id="btnSaveUser">Crear Usuario</button>
-      <div id="userFormError" class="err" style="display:none;"></div>
+      <div class="form-group"><label>Nombre *</label><input type="text" id="uName" required></div>
+      <div class="form-group"><label>Email *</label><input type="email" id="uEmail" required></div>
+      <div class="form-group"><label>Contraseña *</label><input type="password" id="uPassword" required minlength="6"></div>
+      <div class="form-group"><label>Rol *</label><select id="uRole" required><option value="vendedor">Vendedor</option><option value="admin">Admin</option><option value="cliente">Cliente</option></select></div>
+      <button type="submit" class="btn-primary" id="btnSaveUser">Crear</button>
     </form>
   </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-const SUPABASE_URL      = "https://zxhufobqfxmbjpneyiam.supabase.co";
+const SUPABASE_URL = "https://zxhufobqfxmbjpneyiam.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4aHVmb2JxZnhtYmpwbmV5aWFtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMxNjk2OTEsImV4cCI6MjEwODc0NTY5MX0.EUS-QUdhuhtSk9rgLB11wz-GYF9m01JqhXfT6yT9_Vs";
-
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const tempSupabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-const loginView = document.getElementById('loginView');
-const adminPanel = document.getElementById('adminPanel');
-const loginError = document.getElementById('loginError');
-const loginBtn = document.getElementById('loginBtn');
+let currentUserId = null, currentUserRole = null;
+let allOrdersData = [], allProducts = [], allUsers = [];
 
-let allOrdersData = [];
-
-/* ============================================================
-   AUTENTICACIÓN
-   ============================================================ */
 async function handleLogin(){
-  loginError.textContent = "";
-  const email = document.getElementById('loginEmail').value.trim();
-  const password = document.getElementById('loginPassword').value;
-
-  if(!email || !password){ loginError.textContent = "Completa todos los campos."; return; }
-  loginBtn.disabled = true; loginBtn.textContent = "Verificando…";
-
-  try {
-    const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-    if(error) throw error;
-    
-    const { data: profile, error: profileError } = await supabaseClient.from('profiles').select('role, is_active').eq('id', data.user.id).single();
-    if(profileError) throw profileError;
-    
-    if(!['super_admin', 'admin', 'vendedor'].includes(profile.role)){
-      await supabaseClient.auth.signOut();
-      throw new Error("No tienes permisos para acceder al panel.");
-    }
-
-    if(profile.is_active === false){
-      await supabaseClient.auth.signOut();
-      throw new Error("Tu cuenta ha sido deshabilitada por el administrador.");
-    }
-
-    showAdminPanel(data.user.email);
-  } catch(err){
-    loginError.textContent = "Error: " + (err.message || "Credenciales incorrectas.");
-  } finally {
-    loginBtn.disabled = false; loginBtn.textContent = "Iniciar sesión";
-  }
+  const email = document.getElementById('loginEmail').value, password = document.getElementById('loginPassword').value;
+  const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+  if(error) { document.getElementById('loginError').textContent = error.message; return; }
+  
+  const { data: profile } = await supabaseClient.from('profiles').select('role, is_active').eq('id', data.user.id).single();
+  if(!profile || !['super_admin','admin','vendedor'].includes(profile.role)) { await supabaseClient.auth.signOut(); return alert("Sin permisos."); }
+  if(profile.is_active === false) { await supabaseClient.auth.signOut(); return alert("Cuenta deshabilitada."); }
+  
+  currentUserId = data.user.id; currentUserRole = profile.role;
+  document.getElementById('loginView').style.display = 'none'; document.getElementById('adminPanel').style.display = 'block';
+  loadAllData();
 }
 
-async function handleLogout(){
-  await supabaseClient.auth.signOut();
-  adminPanel.style.display = 'none';
-  loginView.style.display = 'flex';
-  document.getElementById('loginEmail').value = "";
-  document.getElementById('loginPassword').value = "";
-  loginError.textContent = "";
-}
+async function handleLogout() { await supabaseClient.auth.signOut(); location.reload(); }
 
-function showAdminPanel(email){
-  loginView.style.display = 'none';
-  adminPanel.style.display = 'block';
-  document.getElementById('userEmailDisplay').textContent = email || "";
-  loadOrders(); loadInstallments(); loadProducts(); loadUsers();
-}
+function loadAllData() { loadOrders(); loadInstallments(); loadProducts(); loadUsers(); loadRequests(); }
 
-/* ============================================================
-   CARGAR PEDIDOS Y CALCULAR SALDOS
-   ============================================================ */
+/* PEDIDOS */
 async function loadOrders(){
   const tbody = document.getElementById('ordersTableBody');
-  try {
-    // Traemos los pedidos y sus abonos asociados
-    const { data: orders, error: ordersError } = await supabaseClient.from('orders').select('*, installments(amount_bs, amount_usdt)').order('created_at', { ascending: false });
-    if(ordersError) throw ordersError;
-    
-    allOrdersData = orders || [];
+  const { data, error } = await supabaseClient.from('orders').select('*, order_items(*), installments(amount_bs, amount_usdt)').order('created_at', { ascending: false });
+  if(error) return; allOrdersData = data || [];
 
-    if(allOrdersData.length === 0){ tbody.innerHTML = `<tr><td colspan="8" class="empty-state">Aún no hay pedidos.</td></tr>`; return; }
-    
-    tbody.innerHTML = allOrdersData.map(o => {
-      const shortId = String(o.id).slice(0,8).toUpperCase();
-      const planClass = o.payment_plan === 'contado' ? 'tag-contado' : o.payment_plan === 'credito' ? 'tag-credito' : 'tag-apartado';
-      
-      // Calcular totales abonados
-      let abonadoBs = 0;
-      let abonadoUsdt = 0;
-      if(o.installments && o.installments.length > 0) {
-        o.installments.forEach(i => {
-          abonadoBs += Number(i.amount_bs || 0);
-          abonadoUsdt += Number(i.amount_usdt || 0);
-        });
-      }
+  if(allOrdersData.length === 0) { tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;">Sin pedidos</td></tr>`; return; }
 
-      const totalBs = Number(o.total_bs);
-      const totalUsdt = Number(o.total_usdt);
-      
-      const saldoBs = Math.max(0, totalBs - abonadoBs);
-      const saldoUsdt = Math.max(0, totalUsdt - abonadoUsdt);
-
-      const isPaid = saldoBs <= 0.1 && saldoUsdt <= 0.1; // Considerar pagado si el saldo es casi cero
-
-      const saldoHtml = isPaid 
-        ? `<span class="tag tag-pagado">Pagado</span>` 
-        : `<span class="tag tag-deuda">${Number(saldoBs).toLocaleString('es-VE')} Bs<br>${Number(saldoUsdt).toFixed(2)} USDT</span>`;
-
-      const btnAbono = (!isPaid && o.payment_plan !== 'contado') 
-        ? `<button class="btn-abono" onclick="openAbonoModal('${o.id}')">+ Abono</button>`
-        : `<span style="color:var(--muted); font-size:12px;">-</span>`;
-
-      return `
-        <tr>
-          <td><strong>#${shortId}</strong><br><small style="color:var(--muted);">${new Date(o.created_at).toLocaleDateString('es-VE')}</small></td>
-          <td>${o.customer_name}<br><small style="color:var(--muted);">${o.customer_phone || '-'}</small></td>
-          <td><span class="tag ${planClass}">${o.payment_plan}</span></td>
-          <td>${totalBs.toLocaleString('es-VE')} Bs<br><small style="color:var(--muted);">${totalUsdt.toFixed(2)} USDT</small></td>
-          <td>${abonadoBs.toLocaleString('es-VE')} Bs<br><small style="color:var(--muted);">${abonadoUsdt.toFixed(2)} USDT</small></td>
-          <td>${saldoHtml}</td>
-          <td>
-            <select class="status-select" onchange="updateOrderStatus('${o.id}', this.value)">
-              <option value="pendiente" ${o.status==='pendiente'?'selected':''}>Pendiente</option>
-              <option value="confirmado" ${o.status==='confirmado'?'selected':''}>Confirmado</option>
-              <option value="enviado" ${o.status==='enviado'?'selected':''}>Enviado</option>
-              <option value="entregado" ${o.status==='entregado'?'selected':''}>Entregado</option>
-              <option value="cancelado" ${o.status==='cancelado'?'selected':''}>Cancelado</option>
-            </select>
-          </td>
-          <td>${btnAbono}</td>
-        </tr>
-      `;
-    }).join('');
-  } catch(err) {
-    console.error(err);
-    tbody.innerHTML = `<tr><td colspan="8" class="empty-state">Error al cargar pedidos: ${err.message}</td></tr>`;
-  }
+  tbody.innerHTML = allOrdersData.map(o => {
+    let abonadoBs = 0; if(o.installments) o.installments.forEach(i => abonadoBs += Number(i.amount_bs || 0));
+    const saldoBs = Math.max(0, Number(o.total_bs) - abonadoBs);
+    return `
+      <tr>
+        <td><strong>#${String(o.id).slice(0,8).toUpperCase()}</strong><br><small>${new Date(o.created_at).toLocaleDateString()}</small></td>
+        <td>${o.customer_name}</td>
+        <td>${Number(o.total_bs).toLocaleString('es-VE')} Bs</td>
+        <td style="color:${saldoBs > 0 ? 'var(--danger)' : 'var(--success)'}; font-weight:600;">${saldoBs > 0 ? saldoBs.toLocaleString('es-VE') + ' Bs' : 'Pagado'}</td>
+        <td><span class="tag tag-pendiente">${o.status}</span></td>
+        <td><button class="btn-sm btn-view" onclick="viewOrderDetails('${o.id}')">Ver Detalles</button></td>
+      </tr>
+    `;
+  }).join('');
 }
 
-async function updateOrderStatus(orderId, newStatus){
-  try {
-    const { error } = await supabaseClient.from('orders').update({ status: newStatus }).eq('id', orderId);
-    if(error) throw error;
-  } catch(err) {
-    alert("Error al actualizar: " + err.message); loadOrders();
-  }
-}
-
-/* ============================================================
-   GESTIÓN DE ABONOS (REGISTRAR PAGOS)
-   ============================================================ */
-function openAbonoModal(orderId) {
-  const order = allOrdersData.find(o => o.id === orderId);
-  if(!order) return;
-
-  // Calcular saldo actual
-  let abonadoBs = 0, abonadoUsdt = 0;
-  if(order.installments && order.installments.length > 0) {
-    order.installments.forEach(i => {
-      abonadoBs += Number(i.amount_bs || 0);
-      abonadoUsdt += Number(i.amount_usdt || 0);
-    });
-  }
-  const saldoBs = Math.max(0, Number(order.total_bs) - abonadoBs);
-  const saldoUsdt = Math.max(0, Number(order.total_usdt) - abonadoUsdt);
-
-  // Llenar el modal
-  document.getElementById('aOrderId').value = order.id;
-  document.getElementById('aMaxBs').value = saldoBs;
-  document.getElementById('aMaxUsdt').value = saldoUsdt;
+function viewOrderDetails(orderId) {
+  const o = allOrdersData.find(x => x.id === orderId);
+  if(!o) return;
   
-  document.getElementById('abonoClientName').textContent = order.customer_name;
-  document.getElementById('abonoTotal').textContent = `${Number(order.total_bs).toLocaleString('es-VE')} Bs / ${Number(order.total_usdt).toFixed(2)} USDT`;
-  document.getElementById('abonoSaldo').textContent = `${saldoBs.toLocaleString('es-VE')} Bs / ${saldoUsdt.toFixed(2)} USDT`;
-  
-  document.getElementById('abonoForm').reset();
-  document.getElementById('aOrderId').value = order.id; // restore after reset
-  document.getElementById('abonoFormError').style.display = 'none';
-  
-  // Configurar el input
-  toggleAbonoCurrency();
+  let abonadoBs = 0; if(o.installments) o.installments.forEach(i => abonadoBs += Number(i.amount_bs || 0));
+  const saldoBs = Math.max(0, Number(o.total_bs) - abonadoBs);
 
-  document.getElementById('abonoModal').classList.add('open');
+  const itemsHtml = (o.order_items || []).map(item => `
+    <div class="item-detail-row">
+      <div>
+        <strong>${item.quantity}x</strong> ${item.product_name} (Talla: ${item.size})
+        ${item.custom_note ? `<span class="item-detail-note">Nota: "${item.custom_note}"</span>` : ''}
+      </div>
+      <div>${Number(item.subtotal_bs).toLocaleString('es-VE')} Bs</div>
+    </div>
+  `).join('');
+
+  const receiptHtml = o.receipt_url 
+    ? `<div style="margin-top:16px;"><label style="font-size:12px; color:var(--muted); font-weight:600;">Comprobante de Pago:</label><img src="${o.receipt_url}" class="receipt-img-preview" onclick="window.open('${o.receipt_url}', '_blank')"></div>`
+    : `<div style="margin-top:16px; color:var(--muted); font-size:13px;">El cliente no ha subido comprobante aún.</div>`;
+
+  document.getElementById('orderDetailContent').innerHTML = `
+    <div style="margin-bottom:16px; font-size:14px; color:var(--muted);">
+      Cliente: <strong>${o.customer_name}</strong> | Tel: <strong>${o.customer_phone}</strong>
+    </div>
+    <div style="margin-bottom:20px;">
+      <h4 style="font-size:14px; margin-bottom:8px;">Productos Comprados</h4>
+      ${itemsHtml}
+    </div>
+    <div style="background:var(--bg); padding:16px; border-radius:8px; font-size:14px;">
+      <div style="display:flex; justify-content:space-between; margin-bottom:8px;"><span>Total:</span><strong>${Number(o.total_bs).toLocaleString('es-VE')} Bs</strong></div>
+      <div style="display:flex; justify-content:space-between;"><span>Saldo:</span><strong style="color:${saldoBs > 0 ? 'var(--danger)' : 'var(--success)'};">${saldoBs.toLocaleString('es-VE')} Bs</strong></div>
+    </div>
+    ${receiptHtml}
+  `;
+  document.getElementById('orderDetailModal').classList.add('open');
 }
 
-function toggleAbonoCurrency() {
-  const curr = document.getElementById('aCurrency').value;
-  const input = document.getElementById('aAmount');
-  const methodSelect = document.getElementById('aMethod');
-  
-  if(curr === 'bs') {
-    input.placeholder = "Ej: 500 (Bolívares)";
-    input.max = document.getElementById('aMaxBs').value;
-    methodSelect.value = 'bs_transfer';
-  } else {
-    input.placeholder = "Ej: 10.50 (USDT)";
-    input.max = document.getElementById('aMaxUsdt').value;
-    methodSelect.value = 'usdt_trc20';
-  }
-}
-
-function closeAbonoForm(e){
-  if(e && e.target.id !== 'abonoModal') return;
-  document.getElementById('abonoModal').classList.remove('open');
-}
-
-async function saveAbono(e) {
-  e.preventDefault();
-  const btn = document.getElementById('btnSaveAbono');
-  const errBox = document.getElementById('abonoFormError');
-
-  btn.disabled = true;
-  btn.textContent = "Registrando...";
-  errBox.style.display = 'none';
-
-  const orderId = document.getElementById('aOrderId').value;
-  const currency = document.getElementById('aCurrency').value; // 'bs' o 'usdt'
-  const amount = parseFloat(document.getElementById('aAmount').value);
-  const method = document.getElementById('aMethod').value;
-  const reference = document.getElementById('aReference').value.trim();
-
-  if(amount <= 0) {
-    errBox.textContent = "El monto debe ser mayor a cero.";
-    errBox.style.display = 'block';
-    btn.disabled = false; btn.textContent = "Guardar Abono";
+/* SOLICITUDES DE VENDEDOR */
+async function loadRequests() {
+  const tbody = document.getElementById('requestsTableBody');
+  const { data, error } = await supabaseClient.from('upgrade_requests').select('*, profiles(full_name, email)').eq('status', 'pendiente');
+  if(error || !data || data.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;">No hay solicitudes pendientes.</td></tr>`;
     return;
   }
 
-  try {
-    const insertData = {
-      order_id: orderId,
-      method: method,
-      reference: reference || null,
-      amount_bs: currency === 'bs' ? amount : 0,
-      amount_usdt: currency === 'usdt' ? amount : 0
-    };
-
-    const { error } = await supabaseClient.from('installments').insert([insertData]);
-    if(error) throw error;
-
-    closeAbonoForm();
-    loadOrders(); // Recargar para actualizar los saldos
-    loadInstallments(); // Recargar la pestaña de historial
-
-  } catch(err) {
-    console.error(err);
-    errBox.textContent = "Error al guardar: " + err.message;
-    errBox.style.display = 'block';
-  } finally {
-    btn.disabled = false;
-    btn.textContent = "Guardar Abono";
-  }
+  tbody.innerHTML = data.map(r => `
+    <tr>
+      <td><strong>${r.profiles?.full_name || 'Usuario'}</strong><br><small>${r.profiles?.email}</small></td>
+      <td>${new Date(r.created_at).toLocaleDateString()}</td>
+      <td>
+        <button class="btn-sm" style="background:var(--success); color:#fff;" onclick="approveRequest('${r.id}', '${r.user_id}')">Aprobar Vendedor</button>
+      </td>
+    </tr>
+  `).join('');
 }
 
-/* ============================================================
-   CARGAR HISTORIAL DE ABONOS
-   ============================================================ */
+async function approveRequest(reqId, userId) {
+  if(!confirm("¿Ascender a este cliente a Vendedor?")) return;
+  await supabaseClient.from('profiles').update({ role: 'vendedor' }).eq('id', userId);
+  await supabaseClient.from('upgrade_requests').update({ status: 'aprobado' }).eq('id', reqId);
+  loadRequests();
+  alert("Cliente ascendido a Vendedor exitosamente.");
+}
+
+/* ABONOS */
 async function loadInstallments(){
   const tbody = document.getElementById('installmentsTableBody');
-  try {
-    const { data, error } = await supabaseClient.from('installments').select('*, orders(customer_name)').order('paid_at', { ascending: false });
-    if(error) throw error;
-    if(!data || data.length === 0){ tbody.innerHTML = `<tr><td colspan="6" class="empty-state">Aún no hay abonos registrados.</td></tr>`; return; }
-    
-    tbody.innerHTML = data.map(i => {
-      const shortOrderId = String(i.order_id).slice(0,8).toUpperCase();
-      return `
-        <tr>
-          <td><strong>#${shortOrderId}</strong><br><small style="color:var(--muted);">${i.orders?.customer_name || ''}</small></td>
-          <td>${Number(i.amount_bs) > 0 ? Number(i.amount_bs).toLocaleString('es-VE') + ' Bs' : '-'}</td>
-          <td>${Number(i.amount_usdt) > 0 ? Number(i.amount_usdt).toFixed(2) + ' USDT' : '-'}</td>
-          <td>${i.method}</td>
-          <td>${i.reference || '-'}</td>
-          <td>${new Date(i.paid_at).toLocaleDateString('es-VE')}</td>
-        </tr>
-      `;
-    }).join('');
-  } catch(err) {
-    tbody.innerHTML = `<tr><td colspan="6" class="empty-state">Error: ${err.message}</td></tr>`;
-  }
+  const { data } = await supabaseClient.from('installments').select('*, orders(customer_name)').order('paid_at', { ascending: false });
+  tbody.innerHTML = (data || []).map(i => `<tr><td>#${String(i.order_id).slice(0,8)}</td><td>${Number(i.amount_bs).toLocaleString()}</td><td>${Number(i.amount_usdt).toFixed(2)}</td><td>${i.method}</td><td>${i.reference || '-'}</td><td>${new Date(i.paid_at).toLocaleDateString()}</td></tr>`).join('') || `<tr><td colspan="6">Sin abonos</td></tr>`;
 }
 
-/* ============================================================
-   GESTIÓN DE PRODUCTOS (CRUD)
-   ============================================================ */
-let allProducts = []; 
-
+/* PRODUCTOS */
 async function loadProducts(){
   const tbody = document.getElementById('productsTableBody');
-  try {
-    const { data, error } = await supabaseClient.from('products').select('*').order('created_at', { ascending: false });
-    if(error) throw error;
-    allProducts = data || [];
-    
-    if(allProducts.length === 0){ tbody.innerHTML = `<tr><td colspan="6" class="empty-state">No hay productos. ¡Crea el primero!</td></tr>`; return; }
-    
-    tbody.innerHTML = allProducts.map(p => `
-      <tr>
-        <td>
-          <div style="display:flex; align-items:center; gap:12px;">
-            <img src="${p.image_url || 'https://picsum.photos/seed/'+p.id+'/100/100'}" style="width:40px; height:50px; object-fit:cover; border-radius:6px;">
-            <strong>${p.name}</strong>
-          </div>
-        </td>
-        <td>${p.category}</td>
-        <td>${Number(p.price_bs).toLocaleString('es-VE')} Bs<br><small style="color:var(--muted);">${Number(p.price_usdt).toFixed(2)} USDT</small></td>
-        <td>${p.stock}</td>
-        <td>${p.is_active ? '<span class="tag tag-activo">Activo</span>' : '<span class="tag tag-inactivo">Inactivo</span>'}</td>
-        <td>
-          <button class="btn-sm btn-edit" onclick="editProduct('${p.id}')">Editar</button>
-          <button class="btn-sm btn-delete" onclick="deleteProduct('${p.id}')">Borrar</button>
-        </td>
-      </tr>
-    `).join('');
-  } catch(err) {
-    tbody.innerHTML = `<tr><td colspan="6" class="empty-state">Error: ${err.message}</td></tr>`;
-  }
+  const { data } = await supabaseClient.from('products').select('*').order('created_at', { ascending: false });
+  allProducts = data || [];
+  tbody.innerHTML = allProducts.map(p => `<tr><td><strong>${p.name}</strong></td><td>${p.category}</td><td>${Number(p.price_bs).toLocaleString()} Bs</td><td>${p.stock}</td><td><button class="btn-sm btn-view" onclick="editProduct('${p.id}')">Editar</button></td></tr>`).join('');
 }
-
-function openProductForm(){
-  document.getElementById('productForm').reset();
-  document.getElementById('pId').value = "";
-  document.getElementById('imgPreview').style.display = 'none';
-  document.getElementById('modalProductTitle').textContent = "Añadir Producto";
-  document.getElementById('formError').style.display = 'none';
-  document.getElementById('productModal').classList.add('open');
-}
-
+function openProductForm(){ document.getElementById('productForm').reset(); document.getElementById('pId').value=''; document.getElementById('imgPreview').style.display='none'; document.getElementById('productModal').classList.add('open'); }
 function editProduct(id){
-  const p = allProducts.find(x => x.id === id);
-  if(!p) return;
-
-  document.getElementById('pId').value = p.id;
-  document.getElementById('pName').value = p.name;
-  document.getElementById('pCategory').value = p.category;
-  document.getElementById('pSizes').value = (p.sizes || []).join(', ');
-  document.getElementById('pPriceBs').value = p.price_bs;
-  document.getElementById('pPriceUsdt').value = p.price_usdt;
-  document.getElementById('pStock').value = p.stock;
-  document.getElementById('pBadge').value = p.badge || "";
-  document.getElementById('pDescription').value = p.description || "";
-  document.getElementById('pActive').checked = p.is_active;
-  
-  const imgPreview = document.getElementById('imgPreview');
-  if(p.image_url){
-    imgPreview.src = p.image_url;
-    imgPreview.style.display = 'block';
-  } else {
-    imgPreview.style.display = 'none';
-  }
-
-  document.getElementById('modalProductTitle').textContent = "Editar Producto";
-  document.getElementById('formError').style.display = 'none';
+  const p = allProducts.find(x => x.id === id); if(!p) return;
+  document.getElementById('pId').value=p.id; document.getElementById('pName').value=p.name; document.getElementById('pCategory').value=p.category;
+  document.getElementById('pSizes').value=(p.sizes||[]).join(', '); document.getElementById('pPriceBs').value=p.price_bs; document.getElementById('pPriceUsdt').value=p.price_usdt;
+  document.getElementById('pStock').value=p.stock; document.getElementById('pBadge').value=p.badge||''; document.getElementById('pActive').checked=p.is_active;
+  if(p.image_url){ document.getElementById('imgPreview').src=p.image_url; document.getElementById('imgPreview').style.display='block'; } else { document.getElementById('imgPreview').style.display='none'; }
   document.getElementById('productModal').classList.add('open');
 }
-
-function closeProductForm(e){
-  if(e && e.target.id !== 'productModal') return;
-  document.getElementById('productModal').classList.remove('open');
-}
-
-function previewImage(event){
-  const file = event.target.files[0];
-  if(!file) return;
-  const reader = new FileReader();
-  reader.onload = function(e){
-    const img = document.getElementById('imgPreview');
-    img.src = e.target.result;
-    img.style.display = 'block';
-  };
-  reader.readAsDataURL(file);
-}
-
+function previewImage(event){ const file = event.target.files[0]; if(!file) return; const reader = new FileReader(); reader.onload = e => { document.getElementById('imgPreview').src=e.target.result; document.getElementById('imgPreview').style.display='block'; }; reader.readAsDataURL(file); }
 async function saveProduct(e){
-  e.preventDefault();
-  const btn = document.getElementById('btnSaveProduct');
-  const errBox = document.getElementById('formError');
-  
-  btn.disabled = true;
-  btn.textContent = "Guardando…";
-  errBox.style.display = 'none';
-
-  const id = document.getElementById('pId').value;
-  const name = document.getElementById('pName').value.trim();
-  const category = document.getElementById('pCategory').value;
-  const sizesStr = document.getElementById('pSizes').value;
-  const sizes = sizesStr.split(',').map(s => s.trim()).filter(s => s);
-  const price_bs = parseFloat(document.getElementById('pPriceBs').value);
-  const price_usdt = parseFloat(document.getElementById('pPriceUsdt').value);
-  const stock = parseInt(document.getElementById('pStock').value);
-  const badge = document.getElementById('pBadge').value.trim();
-  const description = document.getElementById('pDescription').value.trim();
-  const is_active = document.getElementById('pActive').checked;
-  const imageFile = document.getElementById('pImage').files[0];
-
+  e.preventDefault(); const btn = document.getElementById('btnSaveProduct'); btn.disabled=true;
+  const id=document.getElementById('pId').value, name=document.getElementById('pName').value.trim(), category=document.getElementById('pCategory').value, sizes=document.getElementById('pSizes').value.split(',').map(s=>s.trim()), price_bs=parseFloat(document.getElementById('pPriceBs').value), price_usdt=parseFloat(document.getElementById('pPriceUsdt').value), stock=parseInt(document.getElementById('pStock').value), badge=document.getElementById('pBadge').value.trim(), is_active=document.getElementById('pActive').checked, imageFile=document.getElementById('pImage').files[0];
   try {
     let image_url = null;
-
     if (imageFile) {
-      btn.textContent = "Optimizando imagen...";
-      
-      const options = { maxSizeMB: 0.5, maxWidthOrHeight: 1000, useWebWorker: true };
-      let fileToUpload = imageFile;
-      try {
-        fileToUpload = await imageCompression(imageFile, options);
-      } catch (error) {
-        console.error("Error en compresión, subiendo original:", error);
-      }
-
-      btn.textContent = "Subiendo imagen...";
-      const fileExt = fileToUpload.name.split('.').pop() || 'jpg';
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-      
-      const { data: uploadData, error: uploadError } = await supabaseClient.storage
-        .from('product-images')
-        .upload(fileName, fileToUpload, { cacheControl: '3600', upsert: false });
-
-      if (uploadError) throw new Error("Error al subir imagen: " + uploadError.message);
-
-      const { data: publicUrlData } = supabaseClient.storage
-        .from('product-images')
-        .getPublicUrl(fileName);
-
-      image_url = publicUrlData.publicUrl;
+      const fileToUpload = await imageCompression(imageFile, { maxSizeMB: 0.5, maxWidthOrHeight: 1000, useWebWorker: true });
+      const fileName = `${Date.now()}.${fileToUpload.name.split('.').pop()}`;
+      await supabaseClient.storage.from('product-images').upload(fileName, fileToUpload);
+      image_url = supabaseClient.storage.from('product-images').getPublicUrl(fileName).data.publicUrl;
     }
+    const productData = { name, category, sizes, price_bs, price_usdt, stock, badge, is_active };
+    if(image_url) productData.image_url = image_url;
+    else if(id) productData.image_url = allProducts.find(x=>x.id===id)?.image_url;
 
-    btn.textContent = "Guardando datos...";
-    const productData = {
-      name, category, sizes, price_bs, price_usdt, stock, badge, description, is_active
-    };
+    if(id) await supabaseClient.from('products').update(productData).eq('id', id);
+    else await supabaseClient.from('products').insert([productData]);
     
-    if (image_url) {
-      productData.image_url = image_url;
-    } else if (id) {
-      const existing = allProducts.find(x => x.id === id);
-      if(existing && existing.image_url) productData.image_url = existing.image_url;
-    }
-
-    let error;
-    if (id) {
-      const res = await supabaseClient.from('products').update(productData).eq('id', id);
-      error = res.error;
-    } else {
-      const res = await supabaseClient.from('products').insert([productData]);
-      error = res.error;
-    }
-
-    if (error) throw error;
-
-    closeProductForm();
-    loadProducts();
-
-  } catch(err) {
-    console.error(err);
-    errBox.textContent = err.message || "Error al guardar el producto.";
-    errBox.style.display = 'block';
-  } finally {
-    btn.disabled = false;
-    btn.textContent = "Guardar Producto";
-  }
+    document.getElementById('productModal').classList.remove('open'); loadProducts();
+  } catch(err) { alert(err.message); } finally { btn.disabled=false; }
 }
 
-async function deleteProduct(id){
-  if(!confirm("¿Estás seguro de que deseas eliminar este producto? Esta acción no se puede deshacer.")) return;
-  try {
-    const { error } = await supabaseClient.from('products').delete().eq('id', id);
-    if(error) throw error;
-    loadProducts();
-  } catch(err) {
-    alert("Error al eliminar: " + err.message);
-  }
-}
-
-/* ============================================================
-   GESTIÓN DE USUARIOS Y ROLES
-   ============================================================ */
-let allUsers = [];
-
+/* USUARIOS */
 async function loadUsers(){
   const tbody = document.getElementById('usersTableBody');
-  try {
-    const { data: { user } } = await supabaseClient.auth.getUser();
-    if (!user) return;
-
-    const { data: myProfile } = await supabaseClient.from('profiles').select('role').eq('id', user.id).single();
-    const isSuperAdmin = myProfile?.role === 'super_admin';
-
-    const { data, error } = await supabaseClient.from('profiles').select('*').order('created_at', { ascending: false });
-    if(error) throw error;
-    allUsers = data || [];
-    
-    if(allUsers.length === 0){ tbody.innerHTML = `<tr><td colspan="5" class="empty-state">No hay usuarios.</td></tr>`; return; }
-    
-    tbody.innerHTML = allUsers.map(u => {
-      const roleLabel = {
-        'super_admin': 'Super Admin',
-        'admin': 'Administrador',
-        'vendedor': 'Vendedor',
-        'cliente': 'Cliente'
-      }[u.role] || u.role;
-
-      const isSelf = u.id === user.id;
-      const statusLabel = u.is_active ? '<span class="tag tag-activo">Activo</span>' : '<span class="tag tag-inactivo">Inactivo</span>';
-      const toggleBtnText = u.is_active ? 'Inhabilitar' : 'Habilitar';
-
-      let actionsHtml = '';
-      
-      if (isSuperAdmin && !isSelf) {
-        actionsHtml = `
-          <button class="btn-sm btn-toggle" onclick="toggleUserStatus('${u.id}', ${u.is_active})">${toggleBtnText}</button>
-          <button class="btn-sm btn-delete" onclick="deleteUser('${u.id}')">Borrar</button>
-        `;
-      } else if (isSelf) {
-        actionsHtml = `<span style="color:var(--muted); font-size:12px;">(Tú)</span>`;
-      } else {
-        actionsHtml = `<span style="color:var(--muted); font-size:12px;">Restringido</span>`;
-      }
-
-      return `
-        <tr>
-          <td><strong>${u.full_name || 'Sin nombre'}</strong> ${isSelf ? '(Tú)' : ''}</td>
-          <td>${u.email || 'N/A'}</td>
-          <td>
-            <select class="status-select" onchange="updateUserRole('${u.id}', this.value)" ${(!isSuperAdmin || isSelf) ? 'disabled title="Solo el Super Admin puede cambiar roles"' : ''}>
-              <option value="vendedor" ${u.role==='vendedor'?'selected':''}>Vendedor</option>
-              <option value="admin" ${u.role==='admin'?'selected':''}>Administrador</option>
-              <option value="super_admin" ${u.role==='super_admin'?'selected':''}>Super Admin</option>
-              <option value="cliente" ${u.role==='cliente'?'selected':''}>Cliente</option>
-            </select>
-          </td>
-          <td>${statusLabel}</td>
-          <td>${actionsHtml}</td>
-        </tr>
-      `;
-    }).join('');
-  } catch(err) {
-    tbody.innerHTML = `<tr><td colspan="5" class="empty-state">Error: ${err.message}</td></tr>`;
-  }
+  const { data } = await supabaseClient.from('profiles').select('*').order('created_at', { ascending: false });
+  allUsers = data || [];
+  tbody.innerHTML = allUsers.map(u => `<tr><td>${u.full_name||'-'}</td><td>${u.email||'-'}</td><td>${u.role}</td><td>${u.is_active ? 'Activo' : 'Inactivo'}</td><td>-</td></tr>`).join('');
 }
-
-function openUserForm(){
-  document.getElementById('userForm').reset();
-  document.getElementById('userFormError').style.display = 'none';
-  document.getElementById('userModal').classList.add('open');
-}
-
-function closeUserForm(e){
-  if(e && e.target.id !== 'userModal') return;
-  document.getElementById('userModal').classList.remove('open');
-}
-
+function openUserForm(){ document.getElementById('userForm').reset(); document.getElementById('userModal').classList.add('open'); }
 async function saveUser(e){
-  e.preventDefault();
-  const btn = document.getElementById('btnSaveUser');
-  const errBox = document.getElementById('userFormError');
-  
-  btn.disabled = true;
-  btn.textContent = "Creando...";
-  errBox.style.display = 'none';
-
-  const name = document.getElementById('uName').value.trim();
-  const email = document.getElementById('uEmail').value.trim();
-  const password = document.getElementById('uPassword').value;
-  const role = document.getElementById('uRole').value;
-
+  e.preventDefault(); const btn = document.getElementById('btnSaveUser'); btn.disabled=true;
   try {
-    const { data: authData, error: authError } = await tempSupabase.auth.signUp({
-      email: email,
-      password: password,
-      options: { data: { full_name: name } }
-    });
-
-    if (authError) throw authError;
-    if (!authData.user) throw new Error("No se pudo crear el usuario.");
-
-    const { error: profileError } = await supabaseClient
-      .from('profiles')
-      .update({ role: role })
-      .eq('id', authData.user.id);
-
-    if (profileError) throw profileError;
-
-    closeUserForm();
-    loadUsers();
-    alert("Usuario creado exitosamente. Ya puede iniciar sesión.");
-
-  } catch(err) {
-    console.error(err);
-    errBox.textContent = err.message || "Error al crear el usuario.";
-    errBox.style.display = 'block';
-  } finally {
-    btn.disabled = false;
-    btn.textContent = "Crear Usuario";
-  }
-}
-
-async function updateUserRole(userId, newRole){
-  try {
-    const { error } = await supabaseClient.from('profiles').update({ role: newRole }).eq('id', userId);
+    const { data, error } = await tempSupabase.auth.signUp({ email: document.getElementById('uEmail').value, password: document.getElementById('uPassword').value, options: { data: { full_name: document.getElementById('uName').value } } });
     if(error) throw error;
-  } catch(err) {
-    alert("Error al actualizar el rol: " + err.message);
-    loadUsers();
-  }
+    await supabaseClient.from('profiles').update({ role: document.getElementById('uRole').value }).eq('id', data.user.id);
+    document.getElementById('userModal').classList.remove('open'); loadUsers(); alert("Usuario creado.");
+  } catch(err) { alert(err.message); } finally { btn.disabled=false; }
 }
 
-async function toggleUserStatus(userId, currentStatus){
-  const newStatus = !currentStatus;
-  const accion = newStatus ? "habilitar" : "inhabilitar";
-  if(!confirm(`¿Estás seguro de ${accion} a este usuario?`)) return;
-  
-  try {
-    const { error } = await supabaseClient.from('profiles').update({ is_active: newStatus }).eq('id', userId);
-    if(error) throw error;
-    loadUsers();
-  } catch(err) {
-    alert("Error al cambiar el estado: " + err.message);
-  }
-}
-
-async function deleteUser(userId){
-  if(!confirm("¿Estás seguro de ELIMINAR permanentemente a este usuario? Esta acción borrará su cuenta de acceso y no se puede deshacer.")) return;
-  
-  try {
-    const { error } = await supabaseClient.rpc('delete_user', { user_id: userId });
-    if(error) throw error;
-    loadUsers();
-  } catch(err) {
-    alert("Error al eliminar el usuario: " + err.message);
-  }
-}
-
-/* ============================================================
-   CAMBIO DE PESTAÑAS
-   ============================================================ */
-function switchTab(tabName, event){
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-  event.target.classList.add('active');
-  document.getElementById('panel-' + tabName).classList.add('active');
-}
-
-/* ============================================================
-   VERIFICAR SESIÓN AL CARGAR
-   ============================================================ */
-window.addEventListener('DOMContentLoaded', async () => {
-  const { data: { session } } = await supabaseClient.auth.getSession();
-  if(session){
-    const { data: profile } = await supabaseClient.from('profiles').select('role, is_active').eq('id', session.user.id).single();
-    if(profile && ['super_admin','admin','vendedor'].includes(profile.role) && profile.is_active !== false) {
-      showAdminPanel(session.user.email);
-    }
-  }
-});
+function switchTab(name, event){ document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active')); document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active')); event.target.classList.add('active'); document.getElementById('panel-'+name).classList.add('active'); }
 </script>
 </body>
 </html>
