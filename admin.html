@@ -8,6 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
 <style>
+  /* ... Mismo CSS del admin ... */
   * { margin:0; padding:0; box-sizing:border-box; }
   :root{ --bg:#f8f6f0; --surface:#ffffff; --text:#1a1a1a; --muted:#7a7a7a; --border:#e8e4db; --accent:#ffea61; --danger:#ef4444; --success:#22c55e; --radius-lg:24px; --radius-md:16px; --radius-sm:100px; }
   html,body{ background:var(--bg); color:var(--text); font-family:'Outfit',sans-serif; }
@@ -87,8 +88,8 @@
     <div class="panel" id="panel-abonos">
       <div class="data-table-wrap">
         <table class="data-table">
-          <thead><tr><th>Pedido</th><th>Monto Bs</th><th>Monto USDT</th><th>Método</th><th>Referencia</th><th>Fecha</th></tr></thead>
-          <tbody id="installmentsTableBody"><tr><td colspan="6" style="text-align:center;">Cargando...</td></tr></tbody>
+          <thead><tr><th>Pedido</th><th>Monto Bs</th><th>Monto USDT</th><th>Método</th><th>Referencia</th><th>Fecha</th><th>Estado</th><th>Acciones</th></tr></thead>
+          <tbody id="installmentsTableBody"><tr><td colspan="8" style="text-align:center;">Cargando...</td></tr></tbody>
         </table>
       </div>
     </div>
@@ -197,28 +198,26 @@ async function handleLogout() { await supabaseClient.auth.signOut(); location.re
 
 function loadAllData() { loadOrders(); loadInstallments(); loadProducts(); loadUsers(); loadRequests(); }
 
-/* TIEMPO REAL: Escuchar cambios en la tabla de pedidos */
 function suscribirseCambios() {
   supabaseClient
     .channel('cambios-admin')
-    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'orders' }, payload => {
-      // Cuando haya un cambio, recargamos las tablas silenciosamente
-      loadOrders();
-      loadInstallments();
-    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, payload => { loadOrders(); loadInstallments(); })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'installments' }, payload => { loadOrders(); loadInstallments(); })
     .subscribe();
 }
 
-/* PEDIDOS */
 async function loadOrders(){
   const tbody = document.getElementById('ordersTableBody');
-  const { data, error } = await supabaseClient.from('orders').select('*, order_items(*), installments(amount_bs, amount_usdt)').order('created_at', { ascending: false });
+  // Incluimos el status en el select de installments
+  const { data, error } = await supabaseClient.from('orders').select('*, order_items(*), installments(amount_bs, amount_usdt, status)').order('created_at', { ascending: false });
   if(error) return; allOrdersData = data || [];
 
   if(allOrdersData.length === 0) { tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;">Sin pedidos</td></tr>`; return; }
 
   tbody.innerHTML = allOrdersData.map(o => {
-    let abonadoBs = 0; if(o.installments) o.installments.forEach(i => abonadoBs += Number(i.amount_bs || 0));
+    let abonadoBs = 0; 
+    // Solo sumamos los abonos verificados
+    if(o.installments) o.installments.forEach(i => { if(i.status !== 'pendiente') abonadoBs += Number(i.amount_bs || 0); });
     const saldoBs = Math.max(0, Number(o.total_bs) - abonadoBs);
     
     let statusOptions = "";
@@ -266,24 +265,18 @@ async function loadOrders(){
 
 async function updateOrderStatus(orderId, newStatus){
   try {
-    // 1. Actualizar en la base de datos
     const { error } = await supabaseClient.from('orders').update({ status: newStatus }).eq('id', orderId);
     if(error) throw error;
-    
-    // 2. Actualizar en el objeto local para que "Ver Detalles" muestre el estado nuevo
     const index = allOrdersData.findIndex(o => o.id === orderId);
     if(index > -1) allOrdersData[index].status = newStatus;
-
-  } catch(err) {
-    alert("Error al actualizar: " + err.message); loadOrders();
-  }
+  } catch(err) { alert("Error al actualizar: " + err.message); loadOrders(); }
 }
 
 function viewOrderDetails(orderId) {
   const o = allOrdersData.find(x => x.id === orderId);
   if(!o) return;
   
-  let abonadoBs = 0; if(o.installments) o.installments.forEach(i => abonadoBs += Number(i.amount_bs || 0));
+  let abonadoBs = 0; if(o.installments) o.installments.forEach(i => { if(i.status !== 'pendiente') abonadoBs += Number(i.amount_bs || 0); });
   const saldoBs = Math.max(0, Number(o.total_bs) - abonadoBs);
 
   const itemsHtml = (o.order_items || []).map(item => `
@@ -321,36 +314,57 @@ function viewOrderDetails(orderId) {
 
   const receiptHtml = o.receipt_url 
     ? `<div style="margin-top:16px;"><label style="font-size:12px; color:var(--muted); font-weight:600;">Comprobante de Pago (Clic para ampliar):</label><img src="${o.receipt_url}" class="receipt-img-preview" onclick="window.open('${o.receipt_url}', '_blank')"></div>`
-    : `<div style="margin-top:16px; color:var(--muted); font-size:13px;">El cliente no ha subido comprobante aún.</div>`;
+    : `<div style="margin-top:16px; color:var(--muted); font-size:13px;">El cliente no ha subido comprobante inicial.</div>`;
 
   document.getElementById('orderDetailContent').innerHTML = `
     <div style="margin-bottom:16px; font-size:14px; color:var(--muted);">
       Cliente: <strong>${o.customer_name}</strong> | Tel: <strong>${o.customer_phone}</strong>
     </div>
-    
     <div style="margin-bottom:20px;">
       <h4 style="font-size:14px; margin-bottom:8px;">Productos Comprados</h4>
       ${itemsHtml}
     </div>
-
     ${planDetailsHtml}
-
     <div style="background:var(--bg); padding:16px; border-radius:8px; font-size:14px; margin-bottom:16px;">
       <div style="display:flex; justify-content:space-between; margin-bottom:8px;"><span>Total del Pedido:</span><strong>${fmtBs(o.total_bs)}</strong></div>
       <div style="display:flex; justify-content:space-between;"><span>Saldo Restante:</span><strong style="color:${saldoBs > 0 ? 'var(--danger)' : 'var(--success)'};">${saldoBs > 0 ? fmtBs(saldoBs) : 'Pagado'}</strong></div>
     </div>
-
     <div style="background:var(--bg); padding:16px; border-radius:8px; margin-bottom:16px;">
-      <h4 style="font-size:14px; margin-bottom:8px;">Método de Pago</h4>
+      <h4 style="font-size:14px; margin-bottom:8px;">Método de Pago Inicial</h4>
       <p style="font-size:14px; font-weight:600; text-transform:capitalize;">${o.payment_method.replace('_', ' ')}</p>
     </div>
-
     ${receiptHtml}
   `;
   document.getElementById('orderDetailModal').classList.add('open');
 }
 
-/* SOLICITUDES DE VENDEDOR */
+async function loadInstallments(){
+  const tbody = document.getElementById('installmentsTableBody');
+  const { data } = await supabaseClient.from('installments').select('*, orders(customer_name)').order('paid_at', { ascending: false });
+  tbody.innerHTML = (data || []).map(i => `
+    <tr>
+      <td>#${String(i.order_id).slice(0,8)}</td>
+      <td>${fmtBs(i.amount_bs)}</td>
+      <td>${Number(i.amount_usdt).toFixed(2)}</td>
+      <td>${i.method}</td>
+      <td>${i.reference || '-'}</td>
+      <td>${new Date(i.paid_at).toLocaleDateString()}</td>
+      <td>${i.status === 'pendiente' ? '<span style="color:orange;font-weight:bold;">Pendiente</span>' : '<span style="color:green;">Verificado</span>'}</td>
+      <td>
+        ${i.receipt_url ? `<a href="${i.receipt_url}" target="_blank" class="btn-sm" style="background:var(--bg); border:1px solid var(--border); text-decoration:none; display:inline-block; margin-bottom:4px;">Ver Comp.</a>` : ''}
+        ${i.status === 'pendiente' ? `<button class="btn-sm" style="background:var(--success);color:#fff; display:block; width:100%;" onclick="verifyInstallment('${i.id}')">Verificar</button>` : ''}
+      </td>
+    </tr>
+  `).join('') || `<tr><td colspan="8" style="text-align:center;">Sin abonos</td></tr>`;
+}
+
+async function verifyInstallment(id) {
+  if(!confirm("¿Verificar este pago? El monto se restará del saldo del cliente.")) return;
+  await supabaseClient.from('installments').update({ status: 'verificado' }).eq('id', id);
+  loadInstallments();
+  loadOrders();
+}
+
 async function loadRequests() {
   const tbody = document.getElementById('requestsTableBody');
   const { data, error } = await supabaseClient.from('upgrade_requests').select('*, profiles(full_name, email)').eq('status', 'pendiente');
@@ -378,14 +392,6 @@ async function approveRequest(reqId, userId) {
   alert("Cliente ascendido a Vendedor exitosamente.");
 }
 
-/* ABONOS */
-async function loadInstallments(){
-  const tbody = document.getElementById('installmentsTableBody');
-  const { data } = await supabaseClient.from('installments').select('*, orders(customer_name)').order('paid_at', { ascending: false });
-  tbody.innerHTML = (data || []).map(i => `<tr><td>#${String(i.order_id).slice(0,8)}</td><td>${fmtBs(i.amount_bs)}</td><td>${Number(i.amount_usdt).toFixed(2)}</td><td>${i.method}</td><td>${i.reference || '-'}</td><td>${new Date(i.paid_at).toLocaleDateString()}</td></tr>`).join('') || `<tr><td colspan="6" style="text-align:center;">Sin abonos</td></tr>`;
-}
-
-/* PRODUCTOS */
 async function loadProducts(){
   const tbody = document.getElementById('productsTableBody');
   const { data } = await supabaseClient.from('products').select('*').order('created_at', { ascending: false });
@@ -424,7 +430,6 @@ async function saveProduct(e){
   } catch(err) { alert(err.message); } finally { btn.disabled=false; }
 }
 
-/* USUARIOS */
 async function loadUsers(){
   const tbody = document.getElementById('usersTableBody');
   const { data } = await supabaseClient.from('profiles').select('*').order('created_at', { ascending: false });
