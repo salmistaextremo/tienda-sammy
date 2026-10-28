@@ -294,9 +294,16 @@ function loadAllData() {
 function suscribirseCambios() {
   supabaseClient
     .channel('cambios-admin')
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, payload => { loadOrders(); })
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'installments' }, payload => { loadInstallments(); loadOrders(); })
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, payload => { loadProducts(); })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, payload => { 
+      loadOrders(); 
+    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'installments' }, payload => { 
+      loadInstallments(); 
+      loadOrders(); 
+    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, payload => { 
+      loadProducts(); // <--- NUEVO: Recarga la tabla de productos y los KPIs
+    })
     .subscribe();
 }
 
