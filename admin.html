@@ -684,5 +684,15 @@ async function saveUser(e){
 
 function switchTab(name, event){ document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active')); document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active')); event.target.classList.add('active'); document.getElementById('panel-'+name).classList.add('active'); }
 </script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then(registration => console.log('ServiceWorker registrado:', registration.scope))
+          .catch(error => console.log('Error al registrar ServiceWorker:', error));
+      });
+    }
+  </script>
+   
 </body>
 </html>
