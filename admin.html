@@ -8,28 +8,25 @@
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
 <style>
+  /* Mismo CSS del admin */
   * { margin:0; padding:0; box-sizing:border-box; }
   :root{ --bg:#f8f6f0; --surface:#ffffff; --text:#1a1a1a; --muted:#7a7a7a; --border:#e8e4db; --accent:#ffea61; --danger:#ef4444; --success:#22c55e; --radius-lg:24px; --radius-md:16px; --radius-sm:100px; }
   html,body{ background:var(--bg); color:var(--text); font-family:'Outfit',sans-serif; }
   button{ font-family:inherit; cursor:pointer; border:none; background:none; color:inherit; } .container{ max-width:1200px; margin:0 auto; padding:0 24px; }
-
   .login-wrapper{ min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px; }
   .login-card{ background:var(--surface); border-radius:var(--radius-lg); padding:48px; width:100%; max-width:420px; box-shadow:0 10px 30px rgba(0,0,0,0.04); }
   .logo{ font-weight:700; font-size:24px; margin-bottom:8px; text-align:center; } .logo span{ background:var(--accent); padding:2px 8px; border-radius:8px; color:#111; }
   .field{ margin-bottom:20px; } .field label{ display:block; font-size:13px; font-weight:600; margin-bottom:8px; } .field input{ width:100%; padding:16px; border-radius:var(--radius-md); background:var(--bg); border:1px solid var(--border); font-family:inherit; }
   .btn-primary{ width:100%; padding:16px; border-radius:var(--radius-md); background:var(--text); color:#fff; font-weight:600; display:flex; justify-content:center; }
-
   #adminPanel{ display:none; }
   .admin-header{ background:var(--surface); border-bottom:1px solid var(--border); padding:0 32px; height:80px; display:flex; align-items:center; justify-content:space-between; }
   .admin-header .logo{ font-size:20px; margin:0; } .admin-header-right{ display:flex; align-items:center; gap:20px; }
   .logout-btn{ padding:10px 20px; border-radius:var(--radius-sm); background:var(--bg); font-size:14px; font-weight:600; border:1px solid var(--border); }
-
   .admin-main{ padding:40px 32px; max-width:1240px; margin:0 auto; }
   .admin-title{ font-size:32px; margin-bottom:8px; } .admin-sub{ font-size:15px; color:var(--muted); margin-bottom:40px; }
   .tabs{ display:flex; gap:8px; margin-bottom:32px; background:var(--surface); padding:8px; border-radius:var(--radius-md); display:inline-flex; }
   .tab{ padding:12px 24px; font-size:15px; font-weight:600; color:var(--muted); border-radius:var(--radius-sm); cursor:pointer; } .tab.active{ background:var(--accent); color:#111; }
   .panel{ display:none; } .panel.active{ display:block; }
-
   .data-table-wrap{ background:var(--surface); border-radius:var(--radius-lg); box-shadow:0 10px 30px rgba(0,0,0,0.04); overflow-x:auto; }
   .data-table{ width:100%; border-collapse:collapse; min-width: 900px; }
   .data-table th, .data-table td{ padding:16px 20px; text-align:left; font-size:14px; border-bottom:1px solid var(--border); vertical-align: middle; }
@@ -38,24 +35,19 @@
   .tag-pendiente{ background:#fef3c7; color:#92400e; } .tag-confirmado{ background:#dcfce7; color:#166534; } .tag-entregado{ background:#dcfce7; color:#166534; }
   .tag-activo{ background:#dcfce7; color:#166534; } .tag-inactivo{ background:#fee2e2; color:#991b1b; }
   .status-select{ padding:10px 16px; border-radius:var(--radius-sm); background:var(--bg); border:1px solid var(--border); font-size:13px; font-weight:600; outline:none; }
-  
   .btn-sm{ padding:8px 14px; border-radius:8px; font-size:13px; font-weight:600; }
   .btn-view{ background:var(--bg); border:1px solid var(--border); margin-right:8px; cursor:pointer; } .btn-view:hover{ border-color:var(--text); }
   .btn-new{ background:var(--accent); color:#111; padding:10px 20px; border-radius:var(--radius-sm); font-weight:700; font-size:14px; cursor:pointer; }
-
   .modal-wrap{ position:fixed; inset:0; z-index:200; display:none; align-items:center; justify-content:center; padding:20px; background:rgba(0,0,0,0.5); backdrop-filter:blur(5px); overflow-y:auto; }
   .modal-wrap.open{ display:flex; }
   .modal{ background:var(--surface); border-radius:var(--radius-lg); max-width:640px; width:100%; max-height:92vh; overflow-y:auto; position:relative; padding:40px; }
   .modal-x{ position:absolute; top:20px; right:20px; width:40px; height:40px; border-radius:50%; background:var(--bg); display:grid; place-items:center; cursor:pointer; }
   .modal h3{ font-size:24px; margin-bottom:24px; font-weight:700; }
-  
   .form-group{ margin-bottom:16px; } .form-group label{ display:block; font-size:13px; font-weight:600; margin-bottom:8px; }
   .form-group input, .form-group select, .form-group textarea{ width:100%; padding:14px; border-radius:var(--radius-md); background:var(--bg); border:1px solid var(--border); font-family:inherit; }
-  
   .item-detail-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px dashed var(--border); font-size: 14px; }
   .item-detail-note { font-size: 12px; color: var(--muted); font-style: italic; display: block; margin-top: 4px; }
   .receipt-img-preview { width: 100%; max-height: 300px; object-fit: contain; border-radius: 8px; margin-top: 10px; border: 1px solid var(--border); cursor: pointer; }
-
   @media(max-width:800px){ .admin-header{ padding:0 20px; } .admin-main{ padding:24px 20px; } .data-table th, .data-table td{ padding:16px; } .modal{ padding:32px 24px; } }
 </style>
 </head>
@@ -88,7 +80,6 @@
       <div class="tab" onclick="switchTab('solicitudes', event)">⭐ Solicitudes</div>
     </div>
 
-    <!-- PEDIDOS -->
     <div class="panel active" id="panel-pedidos">
       <div class="data-table-wrap">
         <table class="data-table">
@@ -98,7 +89,6 @@
       </div>
     </div>
 
-    <!-- ABONOS -->
     <div class="panel" id="panel-abonos">
       <div class="data-table-wrap">
         <table class="data-table">
@@ -108,7 +98,6 @@
       </div>
     </div>
 
-    <!-- PRODUCTOS -->
     <div class="panel" id="panel-productos">
       <div style="display:flex; justify-content:space-between; margin-bottom:16px;"><h3>Inventario</h3><button class="btn-new" onclick="openProductForm()">+ Nuevo</button></div>
       <div class="data-table-wrap">
@@ -119,7 +108,6 @@
       </div>
     </div>
 
-    <!-- USUARIOS -->
     <div class="panel" id="panel-usuarios">
       <div style="display:flex; justify-content:space-between; margin-bottom:16px;"><h3>Usuarios</h3><button class="btn-new" onclick="openUserForm()">+ Nuevo</button></div>
       <div class="data-table-wrap">
@@ -130,7 +118,6 @@
       </div>
     </div>
 
-    <!-- SOLICITUDES DE VENDEDOR -->
     <div class="panel" id="panel-solicitudes">
       <div class="data-table-wrap">
         <table class="data-table">
@@ -142,7 +129,6 @@
   </main>
 </div>
 
-<!-- MODALES -->
 <div class="modal-wrap" id="orderDetailModal" onclick="if(event.target.id==='orderDetailModal') this.classList.remove('open')">
   <div class="modal">
     <button class="modal-x" onclick="document.getElementById('orderDetailModal').classList.remove('open')">✕</button>
@@ -228,17 +214,57 @@ async function loadOrders(){
   tbody.innerHTML = allOrdersData.map(o => {
     let abonadoBs = 0; if(o.installments) o.installments.forEach(i => abonadoBs += Number(i.amount_bs || 0));
     const saldoBs = Math.max(0, Number(o.total_bs) - abonadoBs);
+    
+    let statusOptions = "";
+    if (o.payment_plan === 'contado') {
+      statusOptions = `
+        <option value="pendiente" ${o.status==='pendiente'?'selected':''}>Pendiente</option>
+        <option value="verificado" ${o.status==='verificado'?'selected':''}>Verificado</option>
+        <option value="enviado" ${o.status==='enviado'?'selected':''}>Enviado</option>
+        <option value="cancelado" ${o.status==='cancelado'?'selected':''}>Cancelado</option>
+      `;
+    } else if (o.payment_plan === 'credito') {
+      statusOptions = `
+        <option value="pendiente" ${o.status==='pendiente'?'selected':''}>Pendiente</option>
+        <option value="cuota1_confirmada" ${o.status==='cuota1_confirmada'?'selected':''}>Cuota 01 Confirmada</option>
+        <option value="cuota2_confirmada" ${o.status==='cuota2_confirmada'?'selected':''}>Cuota 02 Confirmada</option>
+        <option value="cuota3_confirmada" ${o.status==='cuota3_confirmada'?'selected':''}>Cuota 03 Confirmada</option>
+        <option value="enviado" ${o.status==='enviado'?'selected':''}>Enviado</option>
+        <option value="cancelado" ${o.status==='cancelado'?'selected':''}>Cancelado</option>
+      `;
+    } else if (o.payment_plan === 'apartado') {
+      statusOptions = `
+        <option value="registro_pago" ${o.status==='registro_pago'?'selected':''}>Registro de Pago</option>
+        <option value="pendiente" ${o.status==='pendiente'?'selected':''}>Pendiente</option>
+        <option value="enviado" ${o.status==='enviado'?'selected':''}>Enviado</option>
+        <option value="cancelado" ${o.status==='cancelado'?'selected':''}>Cancelado</option>
+      `;
+    }
+
     return `
       <tr>
         <td><strong>#${String(o.id).slice(0,8).toUpperCase()}</strong><br><small>${new Date(o.created_at).toLocaleDateString()}</small></td>
         <td>${o.customer_name}</td>
         <td>${Number(o.total_bs).toLocaleString('es-VE')} Bs</td>
         <td style="color:${saldoBs > 0 ? 'var(--danger)' : 'var(--success)'}; font-weight:600;">${saldoBs > 0 ? saldoBs.toLocaleString('es-VE') + ' Bs' : 'Pagado'}</td>
-        <td><span class="tag tag-pendiente">${o.status}</span></td>
+        <td>
+          <select class="status-select" onchange="updateOrderStatus('${o.id}', this.value)">
+            ${statusOptions}
+          </select>
+        </td>
         <td><button class="btn-sm btn-view" onclick="viewOrderDetails('${o.id}')">Ver Detalles</button></td>
       </tr>
     `;
   }).join('');
+}
+
+async function updateOrderStatus(orderId, newStatus){
+  try {
+    const { error } = await supabaseClient.from('orders').update({ status: newStatus }).eq('id', orderId);
+    if(error) throw error;
+  } catch(err) {
+    alert("Error al actualizar: " + err.message); loadOrders();
+  }
 }
 
 function viewOrderDetails(orderId) {
@@ -258,30 +284,27 @@ function viewOrderDetails(orderId) {
     </div>
   `).join('');
 
-  // FORMATEAR DETALLES DEL PAGO
-  let detailsHtml = "";
-  if (o.payment_details) {
-    const d = o.payment_details;
-    if (o.payment_method === 'bs_pago_movil') {
-      detailsHtml = `<ul style="font-size:13px; margin-left:16px; color:var(--text); line-height: 1.8;">
-        <li><strong>Banco:</strong> Banesco (0134)</li>
-        <li><strong>Cédula:</strong> ${d.cedula || '-'}</li>
-        <li><strong>Teléfono:</strong> ${d.telefono || '-'}</li>
-      </ul>`;
-    } else if (o.payment_method === 'bs_transfer') {
-      detailsHtml = `<ul style="font-size:13px; margin-left:16px; color:var(--text); line-height: 1.8;">
-        <li><strong>Banco:</strong> Banesco (0134)</li>
-        <li><strong>Cédula:</strong> ${d.cedula || '-'}</li>
-        <li><strong>Nombre:</strong> ${d.nombre || '-'}</li>
-        <li><strong>Tipo de Cuenta:</strong> ${d.tipo_cuenta || '-'}</li>
-      </ul>`;
-    } else if (o.payment_method === 'usdt_binance') {
-      detailsHtml = `<ul style="font-size:13px; margin-left:16px; color:var(--text); line-height: 1.8;">
-        <li><strong>UID / Correo Binance:</strong> ${d.uid_correo || '-'}</li>
-      </ul>`;
+  let planDetailsHtml = "";
+  if(o.payment_plan_details) {
+    const d = o.payment_plan_details;
+    if(o.payment_plan === 'credito') {
+      planDetailsHtml = `
+        <div style="background:var(--bg); padding:16px; border-radius:8px; margin-bottom:16px;">
+          <h4 style="font-size:14px; margin-bottom:8px;">Detalles del Crédito</h4>
+          <p style="font-size:13px; margin-bottom:4px;">Cuota 1: ${fmtBs(d.cuota_monto)} - ${d.cuota1_pagada ? '✅ Pagada' : '⏳ Pendiente'}</p>
+          <p style="font-size:13px; margin-bottom:4px;">Cuota 2: ${fmtBs(d.cuota_monto)} - ${d.cuota2_pagada ? '✅ Pagada' : '⏳ Pendiente'}</p>
+          <p style="font-size:13px; margin-bottom:4px;">Cuota 3: ${fmtBs(d.cuota_monto)} - ${d.cuota3_pagada ? '✅ Pagada' : '⏳ Pendiente'}</p>
+        </div>
+      `;
+    } else if (o.payment_plan === 'apartado') {
+      planDetailsHtml = `
+        <div style="background:var(--bg); padding:16px; border-radius:8px; margin-bottom:16px;">
+          <h4 style="font-size:14px; margin-bottom:8px;">Detalles del Apartado</h4>
+          <p style="font-size:13px; margin-bottom:4px;">Abono Inicial: ${fmtBs(d.abono_inicial)}</p>
+          <p style="font-size:13px;">Saldo Inicial Pendiente: <strong style="color:var(--danger);">${fmtBs(d.saldo_pendiente)}</strong></p>
+        </div>
+      `;
     }
-  } else {
-    detailsHtml = `<p style="font-size:13px; color:var(--muted); margin-left:16px;">Sin datos adicionales registrados.</p>`;
   }
 
   const receiptHtml = o.receipt_url 
@@ -298,14 +321,16 @@ function viewOrderDetails(orderId) {
       ${itemsHtml}
     </div>
 
+    ${planDetailsHtml}
+
     <div style="background:var(--bg); padding:16px; border-radius:8px; font-size:14px; margin-bottom:16px;">
-      <div style="display:flex; justify-content:space-between; margin-bottom:8px;"><span>Total:</span><strong>${Number(o.total_bs).toLocaleString('es-VE')} Bs</strong></div>
-      <div style="display:flex; justify-content:space-between;"><span>Saldo:</span><strong style="color:${saldoBs > 0 ? 'var(--danger)' : 'var(--success)'};">${saldoBs.toLocaleString('es-VE')} Bs</strong></div>
+      <div style="display:flex; justify-content:space-between; margin-bottom:8px;"><span>Total del Pedido:</span><strong>${Number(o.total_bs).toLocaleString('es-VE')} Bs</strong></div>
+      <div style="display:flex; justify-content:space-between;"><span>Saldo Restante:</span><strong style="color:${saldoBs > 0 ? 'var(--danger)' : 'var(--success)'};">${saldoBs.toLocaleString('es-VE')} Bs</strong></div>
     </div>
 
     <div style="background:var(--bg); padding:16px; border-radius:8px; margin-bottom:16px;">
-      <h4 style="font-size:14px; margin-bottom:8px;">Datos del Pago (${o.payment_method})</h4>
-      ${detailsHtml}
+      <h4 style="font-size:14px; margin-bottom:8px;">Método de Pago</h4>
+      <p style="font-size:14px; font-weight:600; text-transform:capitalize;">${o.payment_method.replace('_', ' ')}</p>
     </div>
 
     ${receiptHtml}
