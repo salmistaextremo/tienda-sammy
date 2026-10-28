@@ -8,7 +8,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
 <style>
-  /* ... (Todo el CSS se mantiene igual que en el paso anterior) ... */
   * { margin:0; padding:0; box-sizing:border-box; }
   :root{
     --bg:#f8f6f0;
@@ -71,8 +70,8 @@
   /* TABLE */
   .panel-header-actions{ display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
   .data-table-wrap{ background:var(--surface); border-radius:var(--radius-lg); overflow:hidden; box-shadow:var(--shadow); overflow-x:auto; }
-  .data-table{ width:100%; border-collapse:collapse; min-width: 800px; }
-  .data-table th, .data-table td{ padding:20px 24px; text-align:left; font-size:14px; border-bottom:1px solid var(--border); }
+  .data-table{ width:100%; border-collapse:collapse; min-width: 900px; }
+  .data-table th, .data-table td{ padding:20px 24px; text-align:left; font-size:14px; border-bottom:1px solid var(--border); vertical-align: middle; }
   .data-table th{ background:rgba(248,246,240,0.5); font-weight:600; font-size:12px; text-transform:uppercase; letter-spacing:0.5px; color:var(--muted); }
   .data-table tr:last-child td{ border-bottom:none; }
   .data-table tr:hover td{ background:rgba(248,246,240,0.5); }
@@ -89,6 +88,8 @@
   .tag-activo{ background:#dcfce7; color:#166534; }
   .tag-inactivo{ background:#fee2e2; color:#991b1b; }
   .tag-rol{ background:#e0e7ff; color:#3730a3; }
+  .tag-pagado{ background:#dcfce7; color:#166534; }
+  .tag-deuda{ background:#fee2e2; color:#991b1b; }
 
   .status-select{ padding:10px 16px; border-radius:var(--radius-sm); background:var(--bg); border:1px solid var(--border); color:var(--text); font-family:inherit; font-size:13px; font-weight:600; outline:none; cursor:pointer; }
   .status-select:focus{ border-color:var(--accent); }
@@ -102,6 +103,8 @@
   .btn-toggle:hover{ background:#fde68a; }
   .btn-new{ background:var(--accent); color:#1a1a1a; padding:10px 20px; border-radius:var(--radius-sm); font-weight:700; font-size:14px; }
   .btn-new:hover{ background:var(--accent-hover); }
+  .btn-abono{ background:var(--success); color:#fff; padding:8px 14px; border-radius:8px; font-weight:600; font-size:12px; }
+  .btn-abono:hover{ background:#16a34a; }
 
   .empty-state{ text-align:center; padding:60px 20px; color:var(--muted); font-size:15px; }
 
@@ -122,6 +125,10 @@
   .form-group textarea{ resize:vertical; min-height:80px; }
   .file-input{ padding:10px; background:#fff; border:1px dashed var(--border); cursor:pointer; }
   .img-preview{ width:100%; height:150px; object-fit:cover; border-radius:8px; margin-top:10px; display:none; }
+
+  .abono-summary{ background:var(--bg); border-radius:var(--radius-md); padding:16px; margin-bottom:20px; border-left:4px solid var(--accent); }
+  .abono-summary p{ font-size:14px; margin-bottom:4px; }
+  .abono-summary strong{ color:var(--text); }
 
   @media(max-width:800px){
     .admin-header{ padding:0 20px; }
@@ -181,20 +188,22 @@
             <tr>
               <th>Pedido</th>
               <th>Cliente</th>
-              <th>Teléfono</th>
               <th>Modalidad</th>
               <th>Total</th>
+              <th>Abonado</th>
+              <th>Saldo Pendiente</th>
               <th>Estado</th>
+              <th>Acciones</th>
             </tr>
           </thead>
           <tbody id="ordersTableBody">
-            <tr><td colspan="6" class="empty-state">Cargando pedidos…</td></tr>
+            <tr><td colspan="8" class="empty-state">Cargando pedidos…</td></tr>
           </tbody>
         </table>
       </div>
     </div>
 
-    <!-- PANEL ABONOS -->
+    <!-- PANEL ABONOS (HISTORIAL) -->
     <div class="panel" id="panel-abonos">
       <div class="data-table-wrap">
         <table class="data-table">
@@ -266,6 +275,55 @@
   </main>
 </div>
 
+<!-- MODAL ABONO -->
+<div class="modal-wrap" id="abonoModal" onclick="closeAbonoForm(event)">
+  <div class="modal" style="max-width:500px;">
+    <button class="modal-x" onclick="closeAbonoForm()">✕</button>
+    <h3>Registrar Abono</h3>
+    
+    <div class="abono-summary">
+      <p><strong>Cliente:</strong> <span id="abonoClientName"></span></p>
+      <p><strong>Total del Pedido:</strong> <span id="abonoTotal"></span></p>
+      <p><strong>Saldo Pendiente:</strong> <span id="abonoSaldo" style="color:var(--danger)"></span></p>
+    </div>
+
+    <form id="abonoForm" onsubmit="saveAbono(event)">
+      <input type="hidden" id="aOrderId">
+      <input type="hidden" id="aMaxBs">
+      <input type="hidden" id="aMaxUsdt">
+
+      <div class="form-grid">
+        <div class="form-group full">
+          <label>¿En qué moneda abonó? *</label>
+          <select id="aCurrency" required onchange="toggleAbonoCurrency()">
+            <option value="bs">Bolívares (Bs)</option>
+            <option value="usdt">USDT</option>
+          </select>
+        </div>
+        <div class="form-group full">
+          <label>Monto del abono *</label>
+          <input type="number" step="0.01" id="aAmount" required placeholder="Ej: 500">
+        </div>
+        <div class="form-group">
+          <label>Método *</label>
+          <select id="aMethod" required>
+            <option value="bs_transfer">Transferencia Bs</option>
+            <option value="bs_pago_movil">Pago Móvil</option>
+            <option value="usdt_trc20">USDT (TRC-20)</option>
+            <option value="efectivo">Efectivo</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Referencia</label>
+          <input type="text" id="aReference" placeholder="Últimos 4 dígitos, hash...">
+        </div>
+      </div>
+      <button type="submit" class="btn-primary" id="btnSaveAbono" style="margin-top:16px;">Guardar Abono</button>
+      <div id="abonoFormError" class="err" style="display:none;"></div>
+    </form>
+  </div>
+</div>
+
 <!-- MODAL FORMULARIO PRODUCTO -->
 <div class="modal-wrap" id="productModal" onclick="closeProductForm(event)">
   <div class="modal">
@@ -311,7 +369,6 @@
           <label>Imagen del Producto</label>
           <input type="file" id="pImage" accept="image/*" class="file-input" onchange="previewImage(event)">
           <img id="imgPreview" class="img-preview" alt="Vista previa">
-          <p style="font-size:12px; color:var(--muted); margin-top:8px;">La imagen se comprimirá automáticamente.</p>
         </div>
         <div class="form-group full">
           <label>Descripción</label>
@@ -374,6 +431,8 @@ const adminPanel = document.getElementById('adminPanel');
 const loginError = document.getElementById('loginError');
 const loginBtn = document.getElementById('loginBtn');
 
+let allOrdersData = [];
+
 /* ============================================================
    AUTENTICACIÓN
    ============================================================ */
@@ -427,24 +486,57 @@ function showAdminPanel(email){
 }
 
 /* ============================================================
-   CARGAR PEDIDOS
+   CARGAR PEDIDOS Y CALCULAR SALDOS
    ============================================================ */
 async function loadOrders(){
   const tbody = document.getElementById('ordersTableBody');
   try {
-    const { data, error } = await supabaseClient.from('orders').select('*').order('created_at', { ascending: false });
-    if(error) throw error;
-    if(!data || data.length === 0){ tbody.innerHTML = `<tr><td colspan="6" class="empty-state">Aún no hay pedidos.</td></tr>`; return; }
-    tbody.innerHTML = data.map(o => {
+    // Traemos los pedidos y sus abonos asociados
+    const { data: orders, error: ordersError } = await supabaseClient.from('orders').select('*, installments(amount_bs, amount_usdt)').order('created_at', { ascending: false });
+    if(ordersError) throw ordersError;
+    
+    allOrdersData = orders || [];
+
+    if(allOrdersData.length === 0){ tbody.innerHTML = `<tr><td colspan="8" class="empty-state">Aún no hay pedidos.</td></tr>`; return; }
+    
+    tbody.innerHTML = allOrdersData.map(o => {
       const shortId = String(o.id).slice(0,8).toUpperCase();
       const planClass = o.payment_plan === 'contado' ? 'tag-contado' : o.payment_plan === 'credito' ? 'tag-credito' : 'tag-apartado';
+      
+      // Calcular totales abonados
+      let abonadoBs = 0;
+      let abonadoUsdt = 0;
+      if(o.installments && o.installments.length > 0) {
+        o.installments.forEach(i => {
+          abonadoBs += Number(i.amount_bs || 0);
+          abonadoUsdt += Number(i.amount_usdt || 0);
+        });
+      }
+
+      const totalBs = Number(o.total_bs);
+      const totalUsdt = Number(o.total_usdt);
+      
+      const saldoBs = Math.max(0, totalBs - abonadoBs);
+      const saldoUsdt = Math.max(0, totalUsdt - abonadoUsdt);
+
+      const isPaid = saldoBs <= 0.1 && saldoUsdt <= 0.1; // Considerar pagado si el saldo es casi cero
+
+      const saldoHtml = isPaid 
+        ? `<span class="tag tag-pagado">Pagado</span>` 
+        : `<span class="tag tag-deuda">${Number(saldoBs).toLocaleString('es-VE')} Bs<br>${Number(saldoUsdt).toFixed(2)} USDT</span>`;
+
+      const btnAbono = (!isPaid && o.payment_plan !== 'contado') 
+        ? `<button class="btn-abono" onclick="openAbonoModal('${o.id}')">+ Abono</button>`
+        : `<span style="color:var(--muted); font-size:12px;">-</span>`;
+
       return `
         <tr>
-          <td><strong>#${shortId}</strong></td>
-          <td>${o.customer_name}</td>
-          <td>${o.customer_phone || '-'}</td>
+          <td><strong>#${shortId}</strong><br><small style="color:var(--muted);">${new Date(o.created_at).toLocaleDateString('es-VE')}</small></td>
+          <td>${o.customer_name}<br><small style="color:var(--muted);">${o.customer_phone || '-'}</small></td>
           <td><span class="tag ${planClass}">${o.payment_plan}</span></td>
-          <td>${Number(o.total_bs).toLocaleString('es-VE')} Bs<br><small style="color:var(--muted);">${Number(o.total_usdt).toFixed(2)} USDT</small></td>
+          <td>${totalBs.toLocaleString('es-VE')} Bs<br><small style="color:var(--muted);">${totalUsdt.toFixed(2)} USDT</small></td>
+          <td>${abonadoBs.toLocaleString('es-VE')} Bs<br><small style="color:var(--muted);">${abonadoUsdt.toFixed(2)} USDT</small></td>
+          <td>${saldoHtml}</td>
           <td>
             <select class="status-select" onchange="updateOrderStatus('${o.id}', this.value)">
               <option value="pendiente" ${o.status==='pendiente'?'selected':''}>Pendiente</option>
@@ -454,11 +546,13 @@ async function loadOrders(){
               <option value="cancelado" ${o.status==='cancelado'?'selected':''}>Cancelado</option>
             </select>
           </td>
+          <td>${btnAbono}</td>
         </tr>
       `;
     }).join('');
   } catch(err) {
-    tbody.innerHTML = `<tr><td colspan="6" class="empty-state">Error: ${err.message}</td></tr>`;
+    console.error(err);
+    tbody.innerHTML = `<tr><td colspan="8" class="empty-state">Error al cargar pedidos: ${err.message}</td></tr>`;
   }
 }
 
@@ -472,7 +566,113 @@ async function updateOrderStatus(orderId, newStatus){
 }
 
 /* ============================================================
-   CARGAR ABONOS
+   GESTIÓN DE ABONOS (REGISTRAR PAGOS)
+   ============================================================ */
+function openAbonoModal(orderId) {
+  const order = allOrdersData.find(o => o.id === orderId);
+  if(!order) return;
+
+  // Calcular saldo actual
+  let abonadoBs = 0, abonadoUsdt = 0;
+  if(order.installments && order.installments.length > 0) {
+    order.installments.forEach(i => {
+      abonadoBs += Number(i.amount_bs || 0);
+      abonadoUsdt += Number(i.amount_usdt || 0);
+    });
+  }
+  const saldoBs = Math.max(0, Number(order.total_bs) - abonadoBs);
+  const saldoUsdt = Math.max(0, Number(order.total_usdt) - abonadoUsdt);
+
+  // Llenar el modal
+  document.getElementById('aOrderId').value = order.id;
+  document.getElementById('aMaxBs').value = saldoBs;
+  document.getElementById('aMaxUsdt').value = saldoUsdt;
+  
+  document.getElementById('abonoClientName').textContent = order.customer_name;
+  document.getElementById('abonoTotal').textContent = `${Number(order.total_bs).toLocaleString('es-VE')} Bs / ${Number(order.total_usdt).toFixed(2)} USDT`;
+  document.getElementById('abonoSaldo').textContent = `${saldoBs.toLocaleString('es-VE')} Bs / ${saldoUsdt.toFixed(2)} USDT`;
+  
+  document.getElementById('abonoForm').reset();
+  document.getElementById('aOrderId').value = order.id; // restore after reset
+  document.getElementById('abonoFormError').style.display = 'none';
+  
+  // Configurar el input
+  toggleAbonoCurrency();
+
+  document.getElementById('abonoModal').classList.add('open');
+}
+
+function toggleAbonoCurrency() {
+  const curr = document.getElementById('aCurrency').value;
+  const input = document.getElementById('aAmount');
+  const methodSelect = document.getElementById('aMethod');
+  
+  if(curr === 'bs') {
+    input.placeholder = "Ej: 500 (Bolívares)";
+    input.max = document.getElementById('aMaxBs').value;
+    methodSelect.value = 'bs_transfer';
+  } else {
+    input.placeholder = "Ej: 10.50 (USDT)";
+    input.max = document.getElementById('aMaxUsdt').value;
+    methodSelect.value = 'usdt_trc20';
+  }
+}
+
+function closeAbonoForm(e){
+  if(e && e.target.id !== 'abonoModal') return;
+  document.getElementById('abonoModal').classList.remove('open');
+}
+
+async function saveAbono(e) {
+  e.preventDefault();
+  const btn = document.getElementById('btnSaveAbono');
+  const errBox = document.getElementById('abonoFormError');
+
+  btn.disabled = true;
+  btn.textContent = "Registrando...";
+  errBox.style.display = 'none';
+
+  const orderId = document.getElementById('aOrderId').value;
+  const currency = document.getElementById('aCurrency').value; // 'bs' o 'usdt'
+  const amount = parseFloat(document.getElementById('aAmount').value);
+  const method = document.getElementById('aMethod').value;
+  const reference = document.getElementById('aReference').value.trim();
+
+  if(amount <= 0) {
+    errBox.textContent = "El monto debe ser mayor a cero.";
+    errBox.style.display = 'block';
+    btn.disabled = false; btn.textContent = "Guardar Abono";
+    return;
+  }
+
+  try {
+    const insertData = {
+      order_id: orderId,
+      method: method,
+      reference: reference || null,
+      amount_bs: currency === 'bs' ? amount : 0,
+      amount_usdt: currency === 'usdt' ? amount : 0
+    };
+
+    const { error } = await supabaseClient.from('installments').insert([insertData]);
+    if(error) throw error;
+
+    closeAbonoForm();
+    loadOrders(); // Recargar para actualizar los saldos
+    loadInstallments(); // Recargar la pestaña de historial
+
+  } catch(err) {
+    console.error(err);
+    errBox.textContent = "Error al guardar: " + err.message;
+    errBox.style.display = 'block';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Guardar Abono";
+  }
+}
+
+/* ============================================================
+   CARGAR HISTORIAL DE ABONOS
    ============================================================ */
 async function loadInstallments(){
   const tbody = document.getElementById('installmentsTableBody');
@@ -480,13 +680,14 @@ async function loadInstallments(){
     const { data, error } = await supabaseClient.from('installments').select('*, orders(customer_name)').order('paid_at', { ascending: false });
     if(error) throw error;
     if(!data || data.length === 0){ tbody.innerHTML = `<tr><td colspan="6" class="empty-state">Aún no hay abonos registrados.</td></tr>`; return; }
+    
     tbody.innerHTML = data.map(i => {
       const shortOrderId = String(i.order_id).slice(0,8).toUpperCase();
       return `
         <tr>
           <td><strong>#${shortOrderId}</strong><br><small style="color:var(--muted);">${i.orders?.customer_name || ''}</small></td>
-          <td>${Number(i.amount_bs).toLocaleString('es-VE')} Bs</td>
-          <td>${Number(i.amount_usdt).toFixed(2)} USDT</td>
+          <td>${Number(i.amount_bs) > 0 ? Number(i.amount_bs).toLocaleString('es-VE') + ' Bs' : '-'}</td>
+          <td>${Number(i.amount_usdt) > 0 ? Number(i.amount_usdt).toFixed(2) + ' USDT' : '-'}</td>
           <td>${i.method}</td>
           <td>${i.reference || '-'}</td>
           <td>${new Date(i.paid_at).toLocaleDateString('es-VE')}</td>
@@ -690,21 +891,19 @@ async function deleteProduct(id){
 }
 
 /* ============================================================
-   GESTIÓN DE USUARIOS Y ROLES (Lógica Blindada)
+   GESTIÓN DE USUARIOS Y ROLES
    ============================================================ */
 let allUsers = [];
 
 async function loadUsers(){
   const tbody = document.getElementById('usersTableBody');
   try {
-    // 1. OBTENER EL ROL ACTUAL DIRECTO DE LA BASE DE DATOS (Sin caché)
     const { data: { user } } = await supabaseClient.auth.getUser();
     if (!user) return;
 
     const { data: myProfile } = await supabaseClient.from('profiles').select('role').eq('id', user.id).single();
     const isSuperAdmin = myProfile?.role === 'super_admin';
 
-    // 2. CARGAR LA LISTA DE TODOS LOS USUARIOS
     const { data, error } = await supabaseClient.from('profiles').select('*').order('created_at', { ascending: false });
     if(error) throw error;
     allUsers = data || [];
@@ -725,19 +924,14 @@ async function loadUsers(){
 
       let actionsHtml = '';
       
-      // SI ES SUPER ADMIN Y NO ES ÉL MISMO -> Muestra botones
       if (isSuperAdmin && !isSelf) {
         actionsHtml = `
           <button class="btn-sm btn-toggle" onclick="toggleUserStatus('${u.id}', ${u.is_active})">${toggleBtnText}</button>
           <button class="btn-sm btn-delete" onclick="deleteUser('${u.id}')">Borrar</button>
         `;
-      } 
-      // SI ES ÉL MISMO -> Muestra "(Tú)"
-      else if (isSelf) {
+      } else if (isSelf) {
         actionsHtml = `<span style="color:var(--muted); font-size:12px;">(Tú)</span>`;
-      } 
-      // SI ES VENDEDOR O ADMIN -> Muestra "Restringido"
-      else {
+      } else {
         actionsHtml = `<span style="color:var(--muted); font-size:12px;">Restringido</span>`;
       }
 
