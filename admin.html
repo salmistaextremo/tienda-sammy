@@ -8,6 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
 <style>
+  /* ... (Todo el CSS se mantiene igual que en el paso anterior) ... */
   * { margin:0; padding:0; box-sizing:border-box; }
   :root{
     --bg:#f8f6f0;
@@ -373,9 +374,6 @@ const adminPanel = document.getElementById('adminPanel');
 const loginError = document.getElementById('loginError');
 const loginBtn = document.getElementById('loginBtn');
 
-let currentUserId = null;
-let currentUserRole = null; // Variable global para saber quién está logueado
-
 /* ============================================================
    AUTENTICACIÓN
    ============================================================ */
@@ -391,9 +389,7 @@ async function handleLogin(){
     const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
     if(error) throw error;
     
-    currentUserId = data.user.id;
-    
-    const { data: profile, error: profileError } = await supabaseClient.from('profiles').select('role, is_active').eq('id', currentUserId).single();
+    const { data: profile, error: profileError } = await supabaseClient.from('profiles').select('role, is_active').eq('id', data.user.id).single();
     if(profileError) throw profileError;
     
     if(!['super_admin', 'admin', 'vendedor'].includes(profile.role)){
@@ -406,7 +402,6 @@ async function handleLogin(){
       throw new Error("Tu cuenta ha sido deshabilitada por el administrador.");
     }
 
-    currentUserRole = profile.role; // Guardamos el rol
     showAdminPanel(data.user.email);
   } catch(err){
     loginError.textContent = "Error: " + (err.message || "Credenciales incorrectas.");
@@ -422,8 +417,6 @@ async function handleLogout(){
   document.getElementById('loginEmail').value = "";
   document.getElementById('loginPassword').value = "";
   loginError.textContent = "";
-  currentUserId = null;
-  currentUserRole = null;
 }
 
 function showAdminPanel(email){
@@ -697,22 +690,27 @@ async function deleteProduct(id){
 }
 
 /* ============================================================
-   GESTIÓN DE USUARIOS Y ROLES
+   GESTIÓN DE USUARIOS Y ROLES (Lógica Blindada)
    ============================================================ */
 let allUsers = [];
 
 async function loadUsers(){
   const tbody = document.getElementById('usersTableBody');
   try {
+    // 1. OBTENER EL ROL ACTUAL DIRECTO DE LA BASE DE DATOS (Sin caché)
+    const { data: { user } } = await supabaseClient.auth.getUser();
+    if (!user) return;
+
+    const { data: myProfile } = await supabaseClient.from('profiles').select('role').eq('id', user.id).single();
+    const isSuperAdmin = myProfile?.role === 'super_admin';
+
+    // 2. CARGAR LA LISTA DE TODOS LOS USUARIOS
     const { data, error } = await supabaseClient.from('profiles').select('*').order('created_at', { ascending: false });
     if(error) throw error;
     allUsers = data || [];
     
     if(allUsers.length === 0){ tbody.innerHTML = `<tr><td colspan="5" class="empty-state">No hay usuarios.</td></tr>`; return; }
     
-    // Verificamos si el usuario actual es Super Admin
-    const isSuperAdmin = currentUserRole === 'super_admin';
-
     tbody.innerHTML = allUsers.map(u => {
       const roleLabel = {
         'super_admin': 'Super Admin',
@@ -721,20 +719,25 @@ async function loadUsers(){
         'cliente': 'Cliente'
       }[u.role] || u.role;
 
-      const isSelf = u.id === currentUserId;
+      const isSelf = u.id === user.id;
       const statusLabel = u.is_active ? '<span class="tag tag-activo">Activo</span>' : '<span class="tag tag-inactivo">Inactivo</span>';
       const toggleBtnText = u.is_active ? 'Inhabilitar' : 'Habilitar';
 
-      // Lógica para mostrar u ocultar los botones de acción
       let actionsHtml = '';
+      
+      // SI ES SUPER ADMIN Y NO ES ÉL MISMO -> Muestra botones
       if (isSuperAdmin && !isSelf) {
         actionsHtml = `
           <button class="btn-sm btn-toggle" onclick="toggleUserStatus('${u.id}', ${u.is_active})">${toggleBtnText}</button>
           <button class="btn-sm btn-delete" onclick="deleteUser('${u.id}')">Borrar</button>
         `;
-      } else if (isSelf) {
+      } 
+      // SI ES ÉL MISMO -> Muestra "(Tú)"
+      else if (isSelf) {
         actionsHtml = `<span style="color:var(--muted); font-size:12px;">(Tú)</span>`;
-      } else {
+      } 
+      // SI ES VENDEDOR O ADMIN -> Muestra "Restringido"
+      else {
         actionsHtml = `<span style="color:var(--muted); font-size:12px;">Restringido</span>`;
       }
 
@@ -868,10 +871,8 @@ function switchTab(tabName, event){
 window.addEventListener('DOMContentLoaded', async () => {
   const { data: { session } } = await supabaseClient.auth.getSession();
   if(session){
-    currentUserId = session.user.id;
     const { data: profile } = await supabaseClient.from('profiles').select('role, is_active').eq('id', session.user.id).single();
     if(profile && ['super_admin','admin','vendedor'].includes(profile.role) && profile.is_active !== false) {
-      currentUserRole = profile.role; // Guardamos el rol al recargar la página
       showAdminPanel(session.user.email);
     }
   }
