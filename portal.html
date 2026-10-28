@@ -1,7 +1,246 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mis Pedidos — Tiendas Sammy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  :root{
+    --bg:#fcfbf8;
+    --surface:#ffffff;
+    --text:#111111;
+    --muted:#767676;
+    --border:#e8e5df;
+    --accent:#ffea61;
+    --danger:#ef4444;
+    --success:#22c55e;
+    --radius-lg:24px;
+    --radius-md:16px;
+    --radius-sm:100px;
+  }
+  html,body{ background:var(--bg); color:var(--text); font-family:'Outfit',sans-serif; line-height:1.5; -webkit-font-smoothing:antialiased; min-height: 100vh; display: flex; flex-direction: column; }
+  button{ font-family:inherit; cursor:pointer; border:none; background:none; color:inherit; }
+  a{ color:inherit; text-decoration:none; }
+  .container{ max-width:900px; margin:0 auto; padding:0 24px; width: 100%; }
+  
+  /* HEADER */
+  .header{ background:var(--bg); border-bottom:1px solid var(--border); padding: 20px 0; }
+  .header-inner{ display:flex; align-items:center; justify-content:space-between; }
+  .logo{ font-weight:700; font-size:22px; letter-spacing:-0.5px; }
+  .logo span{ background:var(--accent); padding:3px 10px; border-radius:8px; color:#111; }
+  .btn-back { font-size: 14px; font-weight: 600; color: var(--muted); display: flex; align-items: center; gap: 6px; transition: color 0.2s; }
+  .btn-back:hover { color: var(--text); }
+
+  /* AUTH SCREEN */
+  .auth-screen { flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px 20px; }
+  .auth-card { background: var(--surface); padding: 48px; border-radius: var(--radius-lg); width: 100%; max-width: 420px; box-shadow: 0 10px 40px rgba(0,0,0,0.03); border: 1px solid var(--border); }
+  .auth-card h2 { font-size: 24px; font-weight: 700; margin-bottom: 8px; text-align: center; }
+  .auth-card p { font-size: 14px; color: var(--muted); text-align: center; margin-bottom: 32px; }
+  .field { margin-bottom: 16px; }
+  .field label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 8px; }
+  .field input { width: 100%; padding: 16px; border-radius: var(--radius-md); background: var(--bg); border: 1px solid var(--border); font-family: inherit; font-size: 15px; transition: border 0.2s; }
+  .field input:focus { outline: none; border-color: var(--text); background: #fff; }
+  .btn-primary { width: 100%; padding: 16px; border-radius: var(--radius-md); background: var(--text); color: #fff; font-weight: 600; font-size: 15px; transition: background 0.2s; margin-top: 8px; display: flex; justify-content: center; align-items: center; }
+  .btn-primary:hover { background: #333; }
+  .auth-switch { text-align: center; margin-top: 24px; font-size: 14px; color: var(--muted); }
+  .auth-switch button { color: var(--text); font-weight: 600; text-decoration: underline; }
+  .err { color: var(--danger); font-size: 13px; margin-top: 12px; text-align: center; }
+
+  /* DASHBOARD SCREEN */
+  .dashboard { flex: 1; padding: 40px 0 80px; display: none; }
+  .dash-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 32px; }
+  .dash-header h1 { font-size: 32px; font-weight: 700; letter-spacing: -1px; }
+  .dash-header p { font-size: 15px; color: var(--muted); }
+  .btn-logout { font-size: 14px; font-weight: 600; color: var(--danger); border: 1px solid var(--border); padding: 10px 20px; border-radius: var(--radius-sm); transition: all 0.2s; }
+  .btn-logout:hover { background: #fee2e2; border-color: #fca5a5; }
+
+  .orders-list { display: flex; flex-direction: column; gap: 20px; }
+  .order-card { background: var(--surface); border-radius: var(--radius-lg); border: 1px solid var(--border); padding: 24px; transition: transform 0.2s; }
+  .order-card:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(0,0,0,0.04); }
+  .order-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 16px; }
+  .order-id { font-size: 18px; font-weight: 700; }
+  .order-date { font-size: 13px; color: var(--muted); margin-top: 4px; }
+  .order-status { padding: 6px 14px; border-radius: var(--radius-sm); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+  .status-pendiente { background: #fef3c7; color: #92400e; }
+  .status-confirmado { background: #dcfce7; color: #166534; }
+  .status-enviado { background: #dbeafe; color: #1e40af; }
+  .status-entregado { background: #dcfce7; color: #166534; }
+  .status-cancelado { background: #fee2e2; color: #991b1b; }
+
+  .order-details { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+  .detail-item { display: flex; flex-direction: column; gap: 4px; }
+  .detail-label { font-size: 12px; color: var(--muted); text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px; }
+  .detail-value { font-size: 16px; font-weight: 600; }
+  .detail-sub { font-size: 12px; color: var(--muted); }
+  .text-danger { color: var(--danger); }
+  .text-success { color: var(--success); }
+
+  .empty-state { text-align: center; padding: 60px 20px; background: var(--surface); border-radius: var(--radius-lg); border: 1px solid var(--border); }
+  .empty-state h3 { font-size: 20px; margin-bottom: 8px; }
+  .empty-state p { color: var(--muted); margin-bottom: 24px; }
+
+  @media(max-width: 600px) {
+    .auth-card { padding: 32px 24px; }
+    .dash-header { flex-direction: column; align-items: flex-start; gap: 16px; }
+    .order-details { grid-template-columns: 1fr; gap: 16px; }
+    .btn-logout { width: 100%; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="container header-inner">
+    <a href="/" class="logo">TIENDAS <span>SAMMY</span></a>
+    <a href="/" class="btn-back">← Volver a la tienda</a>
+  </div>
+</header>
+
+<!-- PANTALLA DE LOGIN/REGISTRO -->
+<div class="auth-screen" id="authScreen">
+  <div class="auth-card">
+    <h2 id="authTitle">Iniciar Sesión</h2>
+    <p id="authSub">Accede para ver tus pedidos y saldos pendientes.</p>
+    
+    <form id="authForm" onsubmit="handleAuth(event)">
+      <div class="field" id="nameField" style="display:none;">
+        <label>Nombre Completo</label>
+        <input type="text" id="authName" placeholder="Ej: María Rodríguez">
+      </div>
+      <div class="field">
+        <label>Correo Electrónico</label>
+        <input type="email" id="authEmail" required placeholder="tu@correo.com">
+      </div>
+      <div class="field">
+        <label>Contraseña</label>
+        <input type="password" id="authPassword" required placeholder="••••••••">
+      </div>
+      <button type="submit" class="btn-primary" id="btnAuthSubmit">Entrar</button>
+      <div id="authError" class="err"></div>
+    </form>
+
+    <div class="auth-switch">
+      <span id="switchText">¿No tienes cuenta?</span> 
+      <button onclick="toggleAuthMode()" id="switchBtn">Regístrate aquí</button>
+    </div>
+  </div>
+</div>
+
+<!-- PANTALLA DEL DASHBOARD (MIS PEDIDOS) -->
+<div class="dashboard" id="dashboardScreen">
+  <div class="container">
+    <div class="dash-header">
+      <div>
+        <h1>Mis Pedidos</h1>
+        <p>Hola, <span id="userNameDisplay" style="font-weight:600; color:var(--text);"></span>. Aquí está tu historial.</p>
+      </div>
+      <button class="btn-logout" onclick="handleLogout()">Cerrar Sesión</button>
+    </div>
+    
+    <div class="orders-list" id="ordersList">
+      <div style="text-align:center; padding:40px; color:var(--muted);">Cargando pedidos...</div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL      = "https://zxhufobqfxmbjpneyiam.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4aHVmb2JxZnhtYmpwbmV5aWFtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMxNjk2OTEsImV4cCI6MjEwODc0NTY5MX0.EUS-QUdhuhtSk9rgLB11wz-GYF9m01JqhXfT6yT9_Vs";
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let isLoginMode = true;
+
+/* =========================================
+   MANEJO DE AUTENTICACIÓN
+   ========================================= */
+function toggleAuthMode() {
+  isLoginMode = !isLoginMode;
+  document.getElementById('authTitle').textContent = isLoginMode ? "Iniciar Sesión" : "Crear Cuenta";
+  document.getElementById('authSub').textContent = isLoginMode ? "Accede para ver tus pedidos." : "Regístrate para gestionar tus compras.";
+  document.getElementById('btnAuthSubmit').textContent = isLoginMode ? "Entrar" : "Registrarse";
+  document.getElementById('nameField').style.display = isLoginMode ? 'none' : 'block';
+  document.getElementById('switchText').textContent = isLoginMode ? "¿No tienes cuenta?" : "¿Ya tienes cuenta?";
+  document.getElementById('switchBtn').textContent = isLoginMode ? "Regístrate aquí" : "Inicia sesión";
+  document.getElementById('authError').textContent = "";
+}
+
+async function handleAuth(e) {
+  e.preventDefault();
+  const email = document.getElementById('authEmail').value.trim();
+  const password = document.getElementById('authPassword').value;
+  const name = document.getElementById('authName').value.trim();
+  const errBox = document.getElementById('authError');
+  const btn = document.getElementById('btnAuthSubmit');
+  
+  errBox.textContent = "";
+  btn.disabled = true;
+  btn.textContent = "Procesando...";
+
+  try {
+    if (isLoginMode) {
+      const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+      checkSession();
+    } else {
+      if (!name) throw new Error("Por favor, ingresa tu nombre.");
+      const { data, error } = await supabaseClient.auth.signUp({
+        email, password,
+        options: { data: { full_name: name } }
+      });
+      if (error) throw error;
+      
+      if (data.session) {
+        checkSession();
+      } else {
+        alert("Cuenta creada. Revisa tu correo si necesitas confirmar tu cuenta, o inicia sesión.");
+        toggleAuthMode();
+      }
+    }
+  } catch (error) {
+    errBox.textContent = error.message === "Invalid login credentials" ? "Correo o contraseña incorrectos." : error.message;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = isLoginMode ? "Entrar" : "Registrarse";
+  }
+}
+
+async function handleLogout() {
+  await supabaseClient.auth.signOut();
+  document.getElementById('dashboardScreen').style.display = 'none';
+  document.getElementById('authScreen').style.display = 'flex';
+  document.getElementById('authForm').reset();
+}
+
+/* =========================================
+   VERIFICAR SESIÓN Y CARGAR PEDIDOS
+   ========================================= */
+async function checkSession() {
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  
+  if (session) {
+    document.getElementById('authScreen').style.display = 'none';
+    document.getElementById('dashboardScreen').style.display = 'block';
+    
+    // Nombre del usuario (desde sus metadatos o perfil)
+    const { data: profile } = await supabaseClient.from('profiles').select('full_name').eq('id', session.user.id).single();
+    const displayName = profile?.full_name || session.user.user_metadata?.full_name || session.user.email;
+    document.getElementById('userNameDisplay').textContent = displayName;
+
+    loadMyOrders(session.user.id, session.user.email);
+  } else {
+    document.getElementById('authScreen').style.display = 'flex';
+    document.getElementById('dashboardScreen').style.display = 'none';
+  }
+}
+
 async function loadMyOrders(userId, userEmail) {
   const list = document.getElementById('ordersList');
   try {
-    // Consulta directa usando el ID y el correo del usuario logueado
+    // Buscamos pedidos por ID de usuario O por el correo de la sesión
     const { data: orders, error } = await supabaseClient
       .from('orders')
       .select('*, installments(amount_bs, amount_usdt)')
@@ -24,6 +263,7 @@ async function loadMyOrders(userId, userEmail) {
       const shortId = String(o.id).slice(0,8).toUpperCase();
       const date = new Date(o.created_at).toLocaleDateString('es-VE', { day: '2-digit', month: 'long', year: 'numeric' });
       
+      // Calcular totales
       let abonadoBs = 0, abonadoUsdt = 0;
       if (o.installments && o.installments.length > 0) {
         o.installments.forEach(i => {
@@ -33,7 +273,9 @@ async function loadMyOrders(userId, userEmail) {
       }
       
       const totalBs = Number(o.total_bs);
+      const totalUsdt = Number(o.total_usdt);
       const saldoBs = Math.max(0, totalBs - abonadoBs);
+      const saldoUsdt = Math.max(0, totalUsdt - abonadoUsdt);
       const isPaid = saldoBs <= 0.1;
 
       const statusClass = `status-${o.status}`;
@@ -56,7 +298,7 @@ async function loadMyOrders(userId, userEmail) {
             <div class="detail-item">
               <span class="detail-label">Total del Pedido</span>
               <span class="detail-value">${totalBs.toLocaleString('es-VE')} Bs</span>
-              <span class="detail-sub">≈ ${Number(o.total_usdt).toFixed(2)} USDT</span>
+              <span class="detail-sub">≈ ${totalUsdt.toFixed(2)} USDT</span>
             </div>
             <div class="detail-item">
               <span class="detail-label">Total Abonado</span>
@@ -68,7 +310,7 @@ async function loadMyOrders(userId, userEmail) {
               ${isPaid 
                 ? `<span class="detail-value text-success">Pagado totalmente</span>` 
                 : `<span class="detail-value text-danger">${saldoBs.toLocaleString('es-VE')} Bs</span>
-                   <span class="detail-sub text-danger">≈ ${(Number(o.total_usdt) - abonadoUsdt).toFixed(2)} USDT</span>`
+                   <span class="detail-sub text-danger">≈ ${saldoUsdt.toFixed(2)} USDT</span>`
               }
             </div>
           </div>
@@ -81,3 +323,9 @@ async function loadMyOrders(userId, userEmail) {
     list.innerHTML = `<div class="empty-state"><p style="color:var(--danger)">Error al cargar pedidos: ${err.message}</p></div>`;
   }
 }
+
+// Inicializar la comprobación de sesión al cargar la página
+checkSession();
+</script>
+</body>
+</html>
