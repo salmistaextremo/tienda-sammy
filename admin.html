@@ -64,7 +64,7 @@
   .tag-activo{ background:#dcfce7; color:#166534; } 
   .tag-inactivo{ background:#fee2e2; color:#991b1b; }
   
-  .status-select{ padding:10px 16px; border-radius:var(--radius-sm); background:var(--bg); border:1px solid var(--border); font-size:13px; font-weight:600; outline:none; cursor:pointer; }
+  .status-select{ padding:10px 16px; border-radius:var(--radius-sm); background:var(--bg); border:1px solid var(--border); font-size:13px; font-weight:600; outline:none; cursor:pointer; max-width: 100%; }
   
   .btn-sm{ padding:8px 14px; border-radius:8px; font-size:13px; font-weight:600; }
   .btn-view{ background:var(--bg); border:1px solid var(--border); margin-right:8px; cursor:pointer; } 
@@ -90,14 +90,73 @@
   .item-detail-note { font-size: 12px; color: var(--text); font-style: italic; margin-top: 4px; display: block; background: var(--bg); padding: 2px 6px; border-radius: 4px; }
   .receipt-img-preview { width: 100%; max-height: 300px; object-fit: contain; border-radius: 8px; margin-top: 10px; border: 1px solid var(--border); cursor: pointer; }
 
+  /* =========================================
+     DISEÑO RESPONSIVO (MÓVIL)
+     ========================================= */
   @media(max-width:800px){ 
-    .admin-header{ padding:0 20px; } 
-    .admin-main{ padding:24px 20px; } 
-    .data-table th, .data-table td{ padding:16px; } 
+    .admin-header{ padding:0 20px; height: 64px; } 
+    .admin-header .logo img { height: 32px; }
+    .logout-btn { padding: 8px 14px; font-size: 13px; }
+    .admin-main{ padding:24px 16px; } 
     .modal{ padding:32px 24px; } 
     .kpi-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
     .kpi-card { padding: 16px; }
     .kpi-value { font-size: 22px; }
+    
+    /* TABS DESLIZABLES */
+    .tabs { display: flex; width: 100%; border-radius: var(--radius-md); }
+    
+    /* TRANSFORMACIÓN DE TABLAS A TARJETAS */
+    .data-table-wrap { background: transparent; box-shadow: none; overflow-x: visible; }
+    .data-table { min-width: 100%; display: block; }
+    .data-table thead { display: none; }
+    .data-table tbody { display: block; }
+    
+    .data-table tr { 
+      display: block; 
+      background: var(--surface); 
+      border-radius: var(--radius-md); 
+      margin-bottom: 16px; 
+      padding: 16px; 
+      box-shadow: 0 4px 15px rgba(0,0,0,0.03); 
+      border: 1px solid var(--border); 
+    }
+    
+    .data-table td { 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      padding: 10px 0; 
+      border-bottom: 1px dashed var(--border); 
+      text-align: right; 
+      font-size: 14px;
+    }
+    .data-table td:last-child { 
+      border-bottom: none; 
+      padding-bottom: 0; 
+      margin-top: 10px; 
+      justify-content: flex-end; 
+    }
+    
+    /* ETIQUETAS DINÁMICAS ANTES DE CADA DATO */
+    .data-table td::before { 
+      content: attr(data-label); 
+      font-weight: 600; 
+      color: var(--muted); 
+      text-align: left; 
+      margin-right: 16px;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    /* Ajustes específicos para acciones */
+    .data-table td[data-label="Acciones"]::before { display: none; }
+    .data-table td .btn-view, .data-table td .btn-sm { width: auto; margin: 0; }
+    
+    /* Botón nuevo a ancho completo */
+    .panel .btn-new { width: 100%; text-align: center; padding: 14px; margin-bottom: 12px; }
+    .panel-header-actions { flex-direction: column; align-items: stretch; gap: 12px; }
   }
   @media(max-width:500px) {
     .kpi-grid { grid-template-columns: 1fr; }
@@ -182,7 +241,10 @@
     </div>
 
     <div class="panel" id="panel-productos">
-      <div style="display:flex; justify-content:space-between; margin-bottom:16px;"><h3>Inventario</h3><button class="btn-new" onclick="openProductForm()">+ Nuevo</button></div>
+      <div class="panel-header-actions" style="display:flex; justify-content:space-between; margin-bottom:16px;">
+        <h3>Inventario</h3>
+        <button class="btn-new" onclick="openProductForm()">+ Nuevo</button>
+      </div>
       <div class="data-table-wrap">
         <table class="data-table">
           <thead><tr><th>Producto</th><th>Categoría</th><th>Precios</th><th>Stock</th><th>Acciones</th></tr></thead>
@@ -192,7 +254,10 @@
     </div>
 
     <div class="panel" id="panel-usuarios">
-      <div style="display:flex; justify-content:space-between; margin-bottom:16px;"><h3>Usuarios</h3><button class="btn-new" onclick="openUserForm()">+ Nuevo</button></div>
+      <div class="panel-header-actions" style="display:flex; justify-content:space-between; margin-bottom:16px;">
+        <h3>Usuarios</h3>
+        <button class="btn-new" onclick="openUserForm()">+ Nuevo</button>
+      </div>
       <div class="data-table-wrap">
         <table class="data-table">
           <thead><tr><th>Nombre</th><th>Email</th><th>Rol</th><th>Estado</th><th>Acciones</th></tr></thead>
@@ -385,16 +450,16 @@ async function loadOrders(){
 
     return `
       <tr>
-        <td><strong>#${String(o.id).slice(0,8).toUpperCase()}</strong><br><small>${new Date(o.created_at).toLocaleDateString()}</small></td>
-        <td>${o.customer_name}</td>
-        <td>${fmtBs(o.total_bs)}</td>
-        <td style="color:${saldoBs > 0 ? 'var(--danger)' : 'var(--success)'}; font-weight:600;">${saldoBs > 0 ? fmtBs(saldoBs) : 'Pagado'}</td>
-        <td>
+        <td data-label="Pedido"><strong>#${String(o.id).slice(0,8).toUpperCase()}</strong><br><small>${new Date(o.created_at).toLocaleDateString()}</small></td>
+        <td data-label="Cliente">${o.customer_name}</td>
+        <td data-label="Total">${fmtBs(o.total_bs)}</td>
+        <td data-label="Saldo" style="color:${saldoBs > 0 ? 'var(--danger)' : 'var(--success)'}; font-weight:600;">${saldoBs > 0 ? fmtBs(saldoBs) : 'Pagado'}</td>
+        <td data-label="Estado">
           <select class="status-select" onchange="updateOrderStatus('${o.id}', this.value)">
             ${statusOptions}
           </select>
         </td>
-        <td><button class="btn-sm btn-view" onclick="viewOrderDetails('${o.id}')">Ver Detalles</button></td>
+        <td data-label="Acciones"><button class="btn-sm btn-view" onclick="viewOrderDetails('${o.id}')">Ver Detalles</button></td>
       </tr>
     `;
   }).join('');
@@ -489,14 +554,14 @@ async function loadInstallments(){
 
   tbody.innerHTML = allInstallments.map(i => `
     <tr>
-      <td>#${String(i.order_id).slice(0,8)}</td>
-      <td>${fmtBs(i.amount_bs)}</td>
-      <td>${Number(i.amount_usdt).toFixed(2)}</td>
-      <td>${i.method}</td>
-      <td>${i.reference || '-'}</td>
-      <td>${new Date(i.paid_at).toLocaleDateString()}</td>
-      <td>${i.status === 'pendiente' ? '<span style="color:orange;font-weight:bold;">Pendiente</span>' : '<span style="color:green;">Verificado</span>'}</td>
-      <td>
+      <td data-label="Pedido">#${String(i.order_id).slice(0,8)}</td>
+      <td data-label="Monto Bs">${fmtBs(i.amount_bs)}</td>
+      <td data-label="Monto USDT">${Number(i.amount_usdt).toFixed(2)}</td>
+      <td data-label="Método">${i.method}</td>
+      <td data-label="Referencia">${i.reference || '-'}</td>
+      <td data-label="Fecha">${new Date(i.paid_at).toLocaleDateString()}</td>
+      <td data-label="Estado">${i.status === 'pendiente' ? '<span style="color:orange;font-weight:bold;">Pendiente</span>' : '<span style="color:green;">Verificado</span>'}</td>
+      <td data-label="Acciones">
         ${i.receipt_url ? `<a href="${i.receipt_url}" target="_blank" class="btn-sm" style="background:var(--bg); border:1px solid var(--border); text-decoration:none; display:inline-block; margin-bottom:4px;">Ver Comp.</a>` : ''}
         ${i.status === 'pendiente' ? `<button class="btn-sm" style="background:var(--success);color:#fff; display:block; width:100%;" onclick="verifyInstallment('${i.id}')">Verificar</button>` : ''}
       </td>
@@ -521,10 +586,10 @@ async function loadRequests() {
 
   tbody.innerHTML = data.map(r => `
     <tr>
-      <td><strong>${r.profiles?.full_name || 'Usuario'}</strong><br><small>${r.profiles?.email}</small></td>
-      <td>${new Date(r.created_at).toLocaleDateString()}</td>
-      <td>
-        <button class="btn-sm" style="background:var(--success); color:#fff; cursor:pointer;" onclick="approveRequest('${r.id}', '${r.user_id}')">Aprobar Vendedor</button>
+      <td data-label="Usuario"><strong>${r.profiles?.full_name || 'Usuario'}</strong><br><small>${r.profiles?.email}</small></td>
+      <td data-label="Fecha">${new Date(r.created_at).toLocaleDateString()}</td>
+      <td data-label="Acciones">
+        <button class="btn-sm" style="background:var(--success); color:#fff; cursor:pointer; width: 100%; padding: 12px;" onclick="approveRequest('${r.id}', '${r.user_id}')">Aprobar Vendedor</button>
       </td>
     </tr>
   `).join('');
@@ -545,7 +610,15 @@ async function loadProducts(){
   
   calculateKPIs();
 
-  tbody.innerHTML = allProducts.map(p => `<tr><td><strong>${p.name}</strong></td><td>${p.category}</td><td>${fmtBs(p.price_bs)}</td><td>${p.stock}</td><td><button class="btn-sm btn-view" onclick="editProduct('${p.id}')">Editar</button></td></tr>`).join('');
+  tbody.innerHTML = allProducts.map(p => `
+    <tr>
+      <td data-label="Producto"><strong>${p.name}</strong></td>
+      <td data-label="Categoría">${p.category}</td>
+      <td data-label="Precios">${fmtBs(p.price_bs)}</td>
+      <td data-label="Stock">${p.stock}</td>
+      <td data-label="Acciones"><button class="btn-sm btn-view" onclick="editProduct('${p.id}')">Editar</button></td>
+    </tr>
+  `).join('');
 }
 function openProductForm(){ document.getElementById('productForm').reset(); document.getElementById('pId').value=''; document.getElementById('imgPreview').style.display='none'; document.getElementById('productModal').classList.add('open'); }
 function editProduct(id){
@@ -584,7 +657,15 @@ async function loadUsers(){
   const tbody = document.getElementById('usersTableBody');
   const { data } = await supabaseClient.from('profiles').select('*').order('created_at', { ascending: false });
   allUsers = data || [];
-  tbody.innerHTML = allUsers.map(u => `<tr><td>${u.full_name||'-'}</td><td>${u.email||'-'}</td><td>${u.role}</td><td>${u.is_active ? 'Activo' : 'Inactivo'}</td><td>-</td></tr>`).join('');
+  tbody.innerHTML = allUsers.map(u => `
+    <tr>
+      <td data-label="Nombre">${u.full_name||'-'}</td>
+      <td data-label="Email">${u.email||'-'}</td>
+      <td data-label="Rol">${u.role}</td>
+      <td data-label="Estado">${u.is_active ? 'Activo' : 'Inactivo'}</td>
+      <td data-label="Acciones">-</td>
+    </tr>
+  `).join('');
 }
 function openUserForm(){ document.getElementById('userForm').reset(); document.getElementById('userModal').classList.add('open'); }
 async function saveUser(e){
