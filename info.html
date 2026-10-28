@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Información y Políticas — Tiendas Sam's</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  :root{ --bg:#fcfbf8; --surface:#ffffff; --text:#111111; --muted:#767676; --border:#e8e5df; --accent:#ffea61; --radius-lg:24px; --radius-md:16px; --radius-sm:100px; }
+  html,body{ background:var(--bg); color:var(--text); font-family:'Outfit',sans-serif; line-height:1.6; min-height: 100vh; display: flex; flex-direction: column; }
+  button{ font-family:inherit; cursor:pointer; border:none; background:none; color:inherit; }
+  a{ color:inherit; text-decoration:none; }
+  .container{ max-width:900px; margin:0 auto; padding:0 24px; width: 100%; }
+  
+  /* HEADER */
+  .header{ border-bottom:1px solid var(--border); padding: 20px 0; background: var(--surface); }
+  .header-inner{ display:flex; align-items:center; justify-content:space-between; }
+  .logo img { height: 40px; width: auto; object-fit: contain; }
+  .btn-back { font-size: 14px; font-weight: 600; color: var(--muted); transition: color 0.2s; display: flex; align-items: center; gap: 6px; }
+  .btn-back:hover { color: var(--text); }
+
+  /* MAIN CONTENT */
+  .main-content { flex: 1; padding: 60px 0 80px; }
+  .page-title { font-size: 42px; font-weight: 700; letter-spacing: -1px; margin-bottom: 16px; text-align: center; }
+  .page-subtitle { font-size: 16px; color: var(--muted); text-align: center; margin-bottom: 60px; max-width: 600px; margin-left: auto; margin-right: auto; }
+
+  .info-grid { display: flex; flex-direction: column; gap: 40px; }
+  
+  .info-card { background: var(--surface); border-radius: var(--radius-lg); padding: 40px; border: 1px solid var(--border); box-shadow: 0 4px 20px rgba(0,0,0,0.02); }
+  .info-card h2 { font-size: 24px; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; gap: 12px; }
+  .info-card p { color: #444; margin-bottom: 16px; font-size: 15px; }
+  .info-card ul { list-style-position: inside; margin-bottom: 16px; color: #444; font-size: 15px; }
+  .info-card li { margin-bottom: 8px; }
+  .info-card strong { color: var(--text); }
+
+  /* ACORDEÓN FAQ */
+  .faq-item { border-bottom: 1px solid var(--border); }
+  .faq-item:last-child { border-bottom: none; }
+  .faq-question { width: 100%; text-align: left; padding: 20px 0; font-size: 16px; font-weight: 600; display: flex; justify-content: space-between; align-items: center; transition: color 0.2s; }
+  .faq-question:hover { color: var(--muted); }
+  .faq-question .icon { font-size: 20px; transition: transform 0.3s; }
+  .faq-item.open .faq-question .icon { transform: rotate(45deg); }
+  .faq-answer { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; color: #444; font-size: 15px; }
+  .faq-item.open .faq-answer { max-height: 500px; padding-bottom: 20px; }
+
+  /* FOOTER */
+  .footer{ text-align: center; padding: 40px 0; border-top: 1px solid var(--border); font-size: 13px; color: var(--muted); background: var(--surface); }
+
+  @media(max-width: 600px) {
+    .page-title { font-size: 32px; }
+    .info-card { padding: 24px; }
+    .info-card h2 { font-size: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="container header-inner">
+    <a href="/" class="logo">
+      <img src="https://zxhufobqfxmbjpneyiam.supabase.co/storage/v1/object/public/brand-assets/logo.png" alt="Tiendas Sam's">
+    </a>
+    <a href="/" class="btn-back">← Volver a la tienda</a>
+  </div>
+</header>
+
+<main class="main-content">
+  <div class="container">
+    <h1 class="page-title">Información y Políticas</h1>
+    <p class="page-subtitle">Todo lo que necesitas saber sobre envíos, pagos, apartados y devoluciones en Tiendas Sam's.</p>
+
+    <div class="info-grid">
+      
+      <!-- ENVÍOS -->
+      <div class="info-card">
+        <h2>🚚 Envíos y Entregas</h2>
+        <p>Hacemos envíos a todo el territorio nacional. Trabajamos con las principales empresas de encomiendas para garantizar que tu pedido llegue seguro.</p>
+        <ul>
+          <li><strong>Tiempo de entrega:</strong> De 2 a 5 días hábiles dependiendo de la ciudad.</li>
+          <li><strong>Costo de envío:</strong> Se calcula al momento de la entrega o se coordina por WhatsApp dependiendo de la zona.</li>
+          <li><strong>Envío gratis:</strong> En compras mayores a $50 (o su equivalente en Bs).</li>
+          <li><strong>Entregas personales:</strong> Disponibles en la ciudad principal previa coordinación.</li>
+        </ul>
+      </div>
+
+      <!-- PAGOS Y MODALIDADES -->
+      <div class="info-card">
+        <h2>💳 Métodos de Pago</h2>
+        <p>Aceptamos múltiples métodos para tu comodidad. Todos los pagos deben ser reportados a través del portal o enviando el comprobante.</p>
+        <ul>
+          <li><strong>Pago Móvil / Transferencia:</strong> Aceptamos Banesco (Bs).</li>
+          <li><strong>Binance (USDT):</strong> Aceptamos transferencias en criptomoneda (TRC-20).</li>
+        </ul>
+        <p style="margin-top: 24px;"><strong>Modalidades de Compra:</strong></p>
+        <ul>
+          <li><strong>Contado:</strong> Pagas el 100% del pedido al momento de la compra.</li>
+          <li><strong>Crédito:</strong> El total se divide en 3 cuotas iguales. Pagas la primera para procesar el pedido y las otras dos quedan pendientes.</li>
+          <li><strong>Apartado:</strong> Pagas un abono inicial (mínimo 30%) y el resto lo pagas en un plazo máximo de 30 días antes de retirar la mercancía.</li>
+        </ul>
+      </div>
+
+      <!-- DEVOLUCIONES -->
+      <div class="info-card">
+        <h2>🔄 Cambios y Devoluciones</h2>
+        <p>Queremos que estés 100% satisfecho con tu compra. Si hay algún inconveniente, contáctanos de inmediato.</p>
+        <ul>
+          <li><strong>Plazo:</strong> Tienes hasta 7 días continuos después de recibir tu pedido para solicitar un cambio.</li>
+          <li><strong>Condiciones:</strong> La prenda debe estar en perfecto estado, sin uso, con sus etiquetas originales y en su empaque.</li>
+          <li><strong>Cambio por talla:</strong> Si la talla no te quedó, puedes cambiarla sujeto a disponibilidad de inventario.</li>
+          <li><strong>Costos de envío:</strong> En caso de cambio por talla o error del cliente, el costo del envío de retorno corre por cuenta del cliente.</li>
+        </ul>
+      </div>
+
+      <!-- PREGUNTAS FRECUENTES (FAQ) -->
+      <div class="info-card">
+        <h2>❓ Preguntas Frecuentes</h2>
+        
+        <div class="faq-item">
+          <button class="faq-question" onclick="toggleFaq(this)">
+            ¿Cómo sé si mi pedido fue confirmado?
+            <span class="icon">+</span>
+          </button>
+          <div class="faq-answer">
+            Una vez que realices tu pedido, podrás verlo en la sección "Mi Cuenta" de la tienda. Además, te contactaremos por WhatsApp para confirmar los detalles de pago y envío.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question" onclick="toggleFaq(this)">
+            ¿Puedo pagar mi apartado en varias partes?
+            <span class="icon">+</span>
+          </button>
+          <div class="faq-answer">
+            ¡Sí! Desde tu portal de cliente en la sección "Mis Pedidos", puedes hacer clic en "Realizar Pago" y subir el comprobante de los abonos que vayas haciendo hasta completar el total.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question" onclick="toggleFaq(this)">
+            ¿Qué pasa si el producto que quiero está agotado?
+            <span class="icon">+</span>
+          </button>
+          <div class="faq-answer">
+            Si el producto aparece como "AGOTADO", significa que no tenemos stock en este momento. Te recomendamos seguirnos en Instagram o escribirnos por WhatsApp para avisarte cuando llegue el nuevo drop.
+          </div>
+        </div>
+        
+        <div class="faq-item">
+          <button class="faq-question" onclick="toggleFaq(this)">
+            ¿Los precios están en dólares o en bolívares?
+            <span class="icon">+</span>
+          </button>
+          <div class="faq-answer">
+            Nuestros precios base están calculados en USDT (Cripto), pero mostramos su equivalente en Bolívares (Bs) a la tasa del día para que puedas pagar como prefieras.
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<footer class="footer">
+  <div class="container">
+    <p>© 2025 Tiendas Sam's. Todos los derechos reservados.</p>
+  </div>
+</footer>
+
+<script>
+  function toggleFaq(button) {
+    const item = button.parentElement;
+    const wasOpen = item.classList.contains('open');
+    
+    // Cerrar todos los demás
+    document.querySelectorAll('.faq-item').forEach(el => el.classList.remove('open'));
+    
+    // Si no estaba abierto, abrirlo
+    if (!wasOpen) {
+      item.classList.add('open');
+    }
+  }
+</script>
+</body>
+</html>
