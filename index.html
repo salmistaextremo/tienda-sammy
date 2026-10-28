@@ -8,6 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
 <style>
+  /* (El CSS se mantiene exactamente igual que en el paso anterior) */
   * { margin:0; padding:0; box-sizing:border-box; }
   :root{ --bg:#fcfbf8; --surface:#ffffff; --text:#111111; --muted:#767676; --border:#e8e5df; --accent:#ffea61; --radius-lg:24px; --radius-md:16px; --radius-sm:100px; }
   html,body{ background:var(--bg); color:var(--text); font-family:'Outfit',sans-serif; line-height:1.5; scroll-behavior: smooth; }
@@ -183,6 +184,19 @@ supabaseClient.auth.onAuthStateChange((event, session) => {
 async function loadProducts(){
   const { data, error } = await supabaseClient.from('products').select('*').eq('is_active', true).order('created_at', { ascending: true });
   if(!error) { PRODUCTS = data || []; renderFilters(); renderProducts(); }
+}
+
+/* =========================================
+   TIEMPO REAL EN LA TIENDA
+   ========================================= */
+function suscribirseProductos() {
+  supabaseClient
+    .channel('cambios-tienda')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, payload => {
+      // Si un producto cambia de stock, se recarga la tienda
+      loadProducts();
+    })
+    .subscribe();
 }
 
 function renderFilters(){
@@ -361,37 +375,11 @@ function renderCheckout(prefName){
   
   let methodFields = "";
   if (paymentMethod === 'bs_pago_movil') {
-    methodFields = `
-      <div style="background:var(--bg); padding:16px; border-radius:12px; margin-bottom:24px; border:1px solid var(--border);">
-        <p style="font-size:13px; color:var(--text); margin-bottom:12px; font-weight:600;">Transfiere a estos datos y sube tu captura:</p>
-        <div style="font-size:15px; line-height:2; color:var(--text); background:var(--surface); padding:12px; border-radius:8px;">
-          <strong>Banco:</strong> 0134 Banesco<br>
-          <strong>Teléfono:</strong> 04243351245<br>
-          <strong>Cédula:</strong> 26464322
-        </div>
-      </div>
-    `;
+    methodFields = `<div style="background:var(--bg); padding:16px; border-radius:12px; margin-bottom:24px; border:1px solid var(--border);"><p style="font-size:13px; color:var(--text); margin-bottom:12px; font-weight:600;">Transfiere a estos datos y sube tu captura:</p><div style="font-size:15px; line-height:2; color:var(--text); background:var(--surface); padding:12px; border-radius:8px;"><strong>Banco:</strong> 0134 Banesco<br><strong>Teléfono:</strong> 04243351245<br><strong>Cédula:</strong> 26464322</div></div>`;
   } else if (paymentMethod === 'bs_transfer') {
-    methodFields = `
-      <div style="background:var(--bg); padding:16px; border-radius:12px; margin-bottom:24px; border:1px solid var(--border);">
-        <p style="font-size:13px; color:var(--text); margin-bottom:12px; font-weight:600;">Transfiere a estos datos y sube tu captura:</p>
-        <div style="font-size:15px; line-height:2; color:var(--text); background:var(--surface); padding:12px; border-radius:8px;">
-          <strong>Banco:</strong> Banesco (0134)<br>
-          <strong>Cédula:</strong> 26464322<br>
-          <strong>Titular:</strong> Tiendas Sammy
-        </div>
-      </div>
-    `;
+    methodFields = `<div style="background:var(--bg); padding:16px; border-radius:12px; margin-bottom:24px; border:1px solid var(--border);"><p style="font-size:13px; color:var(--text); margin-bottom:12px; font-weight:600;">Transfiere a estos datos y sube tu captura:</p><div style="font-size:15px; line-height:2; color:var(--text); background:var(--surface); padding:12px; border-radius:8px;"><strong>Banco:</strong> Banesco (0134)<br><strong>Cédula:</strong> 26464322<br><strong>Titular:</strong> Tiendas Sammy</div></div>`;
   } else if (paymentMethod === 'usdt_binance') {
-    methodFields = `
-      <div style="background:var(--bg); padding:16px; border-radius:12px; margin-bottom:24px; border:1px solid var(--border);">
-        <p style="font-size:13px; color:var(--text); margin-bottom:12px; font-weight:600;">Transfiere a estos datos y sube tu captura:</p>
-        <div style="font-size:15px; line-height:2; color:var(--text); background:var(--surface); padding:12px; border-radius:8px;">
-          <strong>Correo:</strong> samiibelisario@gmail.com<br>
-          <strong>UID:</strong> 219555454
-        </div>
-      </div>
-    `;
+    methodFields = `<div style="background:var(--bg); padding:16px; border-radius:12px; margin-bottom:24px; border:1px solid var(--border);"><p style="font-size:13px; color:var(--text); margin-bottom:12px; font-weight:600;">Transfiere a estos datos y sube tu captura:</p><div style="font-size:15px; line-height:2; color:var(--text); background:var(--surface); padding:12px; border-radius:8px;"><strong>Correo:</strong> samiibelisario@gmail.com<br><strong>UID:</strong> 219555454</div></div>`;
   }
 
   document.getElementById('checkoutModalInner').innerHTML = `
@@ -411,15 +399,9 @@ function renderCheckout(prefName){
 
     <div id="creditFields" style="display:${paymentPlan==='credito'?'block':'none'}; margin-bottom:24px; background:var(--bg); padding:16px; border-radius:12px; border:1px solid var(--border);">
       <p style="font-size:13px; color:var(--text); margin-bottom:12px; font-weight:600;">Cuotas (selecciona las que pagarás ahora):</p>
-      <label style="display:flex; align-items:center; gap:8px; margin-bottom:8px; font-size:14px; cursor:pointer;">
-        <input type="checkbox" id="cuota1" checked onchange="updateCheckoutTotal()" style="width:18px; height:18px; accent-color:var(--text);"> Cuota 01 (${fmtBs(cuotaBs)})
-      </label>
-      <label style="display:flex; align-items:center; gap:8px; margin-bottom:8px; font-size:14px; cursor:pointer;">
-        <input type="checkbox" id="cuota2" onchange="updateCheckoutTotal()" style="width:18px; height:18px; accent-color:var(--text);"> Cuota 02 (${fmtBs(cuotaBs)})
-      </label>
-      <label style="display:flex; align-items:center; gap:8px; font-size:14px; cursor:pointer;">
-        <input type="checkbox" id="cuota3" onchange="updateCheckoutTotal()" style="width:18px; height:18px; accent-color:var(--text);"> Cuota 03 (${fmtBs(totalBs - (cuotaBs*2))})
-      </label>
+      <label style="display:flex; align-items:center; gap:8px; margin-bottom:8px; font-size:14px; cursor:pointer;"><input type="checkbox" id="cuota1" checked onchange="updateCheckoutTotal()" style="width:18px; height:18px; accent-color:var(--text);"> Cuota 01 (${fmtBs(cuotaBs)})</label>
+      <label style="display:flex; align-items:center; gap:8px; margin-bottom:8px; font-size:14px; cursor:pointer;"><input type="checkbox" id="cuota2" onchange="updateCheckoutTotal()" style="width:18px; height:18px; accent-color:var(--text);"> Cuota 02 (${fmtBs(cuotaBs)})</label>
+      <label style="display:flex; align-items:center; gap:8px; font-size:14px; cursor:pointer;"><input type="checkbox" id="cuota3" onchange="updateCheckoutTotal()" style="width:18px; height:18px; accent-color:var(--text);"> Cuota 03 (${fmtBs(totalBs - (cuotaBs*2))})</label>
     </div>
 
     <div id="layawayFields" style="display:${paymentPlan==='apartado'?'block':'none'}; margin-bottom:24px; background:var(--bg); padding:16px; border-radius:12px; border:1px solid var(--border);">
@@ -459,7 +441,6 @@ function selPlan(p, el){
   paymentPlan = p; 
   document.querySelectorAll('.plan').forEach(e => e.classList.remove('selected'));
   el.classList.add('selected');
-  
   if(p === 'credito') {
     document.getElementById('creditFields').style.display = 'block';
     document.getElementById('layawayFields').style.display = 'none';
@@ -472,7 +453,6 @@ function selPlan(p, el){
   }
   updateCheckoutTotal();
 }
-
 function selMethod(m, el){ 
   paymentMethod = m; 
   document.querySelectorAll('.method').forEach(e => e.classList.remove('selected'));
@@ -496,16 +476,11 @@ function updateCheckoutTotal() {
   } else if (paymentPlan === 'apartado') {
     const abonoInput = parseFloat(document.getElementById('abonoAmount')?.value || 0);
     amountToPay = isNaN(abonoInput) ? 0 : abonoInput;
-    
     const remaining = Math.max(0, totalBs - amountToPay);
-    if(document.getElementById('remainingBalance')) {
-       document.getElementById('remainingBalance').textContent = fmtBs(remaining);
-    }
+    if(document.getElementById('remainingBalance')) document.getElementById('remainingBalance').textContent = fmtBs(remaining);
   }
 
-  if(document.getElementById('amountToPay')) {
-    document.getElementById('amountToPay').textContent = fmtBs(amountToPay);
-  }
+  if(document.getElementById('amountToPay')) document.getElementById('amountToPay').textContent = fmtBs(amountToPay);
 }
 
 async function submitOrder(){
@@ -514,8 +489,8 @@ async function submitOrder(){
   const phone = document.getElementById('fPhone').value.trim();
   if(!phone) { errBox.textContent = "El teléfono es obligatorio para la entrega."; return; }
 
-  // VALIDACIÓN DE STOCK ANTES DE PROCEDER
   const btn = document.querySelector('#checkoutModalInner .btn-primary'); btn.disabled = true; btn.textContent = "Verificando stock...";
+  
   try {
     for (let item of cart) {
       const { data: prod, error } = await supabaseClient.from('products').select('stock, name').eq('id', item.productId).single();
@@ -525,9 +500,7 @@ async function submitOrder(){
       }
     }
   } catch (err) {
-    errBox.textContent = err.message;
-    btn.disabled = false; btn.textContent = "Confirmar Pedido";
-    return;
+    errBox.textContent = err.message; btn.disabled = false; btn.textContent = "Confirmar Pedido"; return;
   }
 
   const totalBs = cart.reduce((s,i)=>s + i.price_bs*i.qty, 0), totalUsdt = cart.reduce((s,i)=>s + i.price_usdt*i.qty, 0);
@@ -553,8 +526,8 @@ async function submitOrder(){
     amountToPayBs = installmentsRecords.reduce((s,r) => s + r.amount_bs, 0);
   } else if (paymentPlan === 'apartado') {
     const abonoInput = parseFloat(document.getElementById('abonoAmount').value);
-    if (isNaN(abonoInput) || abonoInput <= 0) { errBox.textContent = "Debes ingresar un monto válido para el abono."; btn.disabled = false; btn.textContent = "Confirmar Pedido"; return; }
-    if (abonoInput > totalBs) { errBox.textContent = "El abono no puede ser mayor al total del pedido."; btn.disabled = false; btn.textContent = "Confirmar Pedido"; return; }
+    if (isNaN(abonoInput) || abonoInput <= 0) { errBox.textContent = "Debes ingresar un monto válido."; btn.disabled = false; btn.textContent = "Confirmar Pedido"; return; }
+    if (abonoInput > totalBs) { errBox.textContent = "El abono no puede ser mayor al total."; btn.disabled = false; btn.textContent = "Confirmar Pedido"; return; }
     
     planDetails.abono_inicial = abonoInput;
     planDetails.saldo_pendiente = totalBs - abonoInput;
@@ -599,18 +572,12 @@ async function submitOrder(){
       custom_note: i.note || null, unit_price_bs: i.price_bs, unit_price_usdt: i.price_usdt, subtotal_bs: i.price_bs * i.qty, subtotal_usdt: i.price_usdt * i.qty
     }));
     
-    // EL TRIGGER EN SUPABASE RESTARÁ EL STOCK AUTOMÁTICAMENTE AL INSERTAR ESTOS ITEMS
     const { error: itemsErr } = await supabaseClient.from('order_items').insert(items);
     if(itemsErr) throw itemsErr;
 
     const installmentsToInsert = installmentsRecords.map(rec => ({
-       order_id: orderData.id,
-       amount_bs: rec.amount_bs,
-       amount_usdt: rec.amount_bs / (totalBs / totalUsdt),
-       method: paymentMethod,
-       reference: rec.reference,
-       notes: "Checkout",
-       status: "verificado" // Los pagos iniciales se dan por verificados
+       order_id: orderData.id, amount_bs: rec.amount_bs, amount_usdt: rec.amount_bs / (totalBs / totalUsdt),
+       method: paymentMethod, reference: rec.reference, notes: "Checkout", status: "verificado"
     }));
     if(installmentsToInsert.length > 0) {
       const { error: instErr } = await supabaseClient.from('installments').insert(installmentsToInsert);
@@ -635,7 +602,9 @@ async function submitOrder(){
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  loadProducts(); renderCart();
+  loadProducts(); 
+  renderCart();
+  suscribirseProductos(); // <--- LLAMAMOS A LA SUSCRIPCIÓN
   supabaseClient.auth.getSession().then(({data: {session}}) => { if(session) document.getElementById('btnAccount').style.display = 'inline-block'; });
 });
 </script>
