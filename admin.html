@@ -1,9 +1,5 @@
 <!DOCTYPE html>
 <html lang="es">
-   <!-- PWA -->
-  <link rel="manifest" href="/manifest.json">
-  <meta name="theme-color" content="#111111">
-  <link rel="apple-touch-icon" href="https://zxhufobqfxmbjpneyiam.supabase.co/storage/v1/object/public/brand-assets/logo.png">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,6 +7,10 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
+<!-- PWA -->
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#111111">
+<link rel="apple-touch-icon" href="https://zxhufobqfxmbjpneyiam.supabase.co/storage/v1/object/public/brand-assets/logo.png">
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
   :root{ 
@@ -339,6 +339,12 @@ let currentUserId = null, currentUserRole = null;
 let allOrdersData = [], allProducts = [], allUsers = [], allInstallments = [];
 const fmtBs = n => "Bs " + Number(n).toLocaleString('es-VE',{minimumFractionDigits:0,maximumFractionDigits:2});
 
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW error:', err));
+  });
+}
+
 async function handleLogin(){
   const email = document.getElementById('loginEmail').value, password = document.getElementById('loginPassword').value;
   const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
@@ -582,21 +588,43 @@ async function verifyInstallment(id) {
 
 async function loadRequests() {
   const tbody = document.getElementById('requestsTableBody');
-  const { data, error } = await supabaseClient.from('upgrade_requests').select('*, profiles(full_name, email)').eq('status', 'pendiente');
-  if(error || !data || data.length === 0) {
+  
+  const { data: requests, error } = await supabaseClient
+    .from('upgrade_requests')
+    .select('*')
+    .eq('status', 'pendiente');
+
+  if (error) {
+    tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:var(--danger);">Error al cargar solicitudes.</td></tr>`;
+    return;
+  }
+
+  if (!requests || requests.length === 0) {
     tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;">No hay solicitudes pendientes.</td></tr>`;
     return;
   }
 
-  tbody.innerHTML = data.map(r => `
-    <tr>
-      <td data-label="Usuario"><strong>${r.profiles?.full_name || 'Usuario'}</strong><br><small>${r.profiles?.email}</small></td>
-      <td data-label="Fecha">${new Date(r.created_at).toLocaleDateString()}</td>
-      <td data-label="Acciones">
-        <button class="btn-sm" style="background:var(--success); color:#fff; cursor:pointer; width: 100%; padding: 12px;" onclick="approveRequest('${r.id}', '${r.user_id}')">Aprobar Vendedor</button>
-      </td>
-    </tr>
-  `).join('');
+  const userIds = requests.map(r => r.user_id);
+  const { data: profiles } = await supabaseClient.from('profiles').select('id, full_name, email').in('id', userIds);
+
+  const profileMap = {};
+  profiles.forEach(p => { profileMap[p.id] = p; });
+
+  tbody.innerHTML = requests.map(r => {
+    const profile = profileMap[r.user_id];
+    return `
+      <tr>
+        <td data-label="Usuario">
+          <strong>${profile?.full_name || 'Usuario'}</strong><br>
+          <small>${profile?.email || 'Sin email'}</small>
+        </td>
+        <td data-label="Fecha">${new Date(r.created_at).toLocaleDateString()}</td>
+        <td data-label="Acciones">
+          <button class="btn-sm" style="background:var(--success); color:#fff; cursor:pointer; width: 100%; padding: 12px;" onclick="approveRequest('${r.id}', '${r.user_id}')">Aprobar Vendedor</button>
+        </td>
+      </tr>
+    `;
+  }).join('');
 }
 
 async function approveRequest(reqId, userId) {
@@ -684,15 +712,5 @@ async function saveUser(e){
 
 function switchTab(name, event){ document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active')); document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active')); event.target.classList.add('active'); document.getElementById('panel-'+name).classList.add('active'); }
 </script>
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js')
-          .then(registration => console.log('ServiceWorker registrado:', registration.scope))
-          .catch(error => console.log('Error al registrar ServiceWorker:', error));
-      });
-    }
-  </script>
-   
 </body>
 </html>
