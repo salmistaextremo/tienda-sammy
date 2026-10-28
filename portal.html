@@ -45,10 +45,14 @@
   .status-registro_pago { background: #fef3c7; color: #92400e; }
 
   .order-items { margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px dashed var(--border); }
-  .item-row { display: flex; gap: 16px; align-items: center; font-size: 14px; margin-bottom: 12px; }
-  .item-img { width: 50px; height: 60px; object-fit: cover; border-radius: 8px; background: var(--bg); }
+  
+  /* NUEVO DISEÑO DE ITEMS CON IMAGEN Y DESCRIPCIÓN */
+  .item-row { display: flex; gap: 16px; align-items: flex-start; font-size: 14px; margin-bottom: 16px; }
+  .item-img { width: 60px; height: 75px; object-fit: cover; border-radius: 8px; background: var(--bg); flex-shrink: 0; }
   .item-details { flex: 1; }
-  .item-note { font-size: 12px; color: var(--muted); font-style: italic; display: block; margin-top: 2px; }
+  .item-desc { font-size: 12px; color: var(--muted); margin: 4px 0; display: block; line-height: 1.3; }
+  .item-note { font-size: 12px; color: var(--text); font-style: italic; background: var(--bg); padding: 4px 8px; border-radius: 4px; display: inline-block; margin-top: 4px; }
+  .item-price { font-weight: 600; white-space: nowrap; }
   
   .order-details { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
   .detail-item { display: flex; flex-direction: column; gap: 4px; }
@@ -68,13 +72,12 @@
   .btn-loyalty { background: #10b981; color: #fff; padding: 10px 20px; border-radius: var(--radius-sm); font-weight: 600; font-size: 14px; cursor:pointer; }
   .btn-loyalty:disabled { background: #d1fae5; color: #065f46; cursor: not-allowed; }
 
-  /* MODAL DE PAGO */
   .modal-wrap{ position:fixed; inset:0; z-index:200; display:none; align-items:center; justify-content:center; padding:20px; background:rgba(0,0,0,0.5); backdrop-filter:blur(5px); overflow-y:auto; }
   .modal-wrap.open{ display:flex; }
   .modal{ background:var(--surface); border-radius:var(--radius-lg); max-width:500px; width:100%; max-height:92vh; overflow-y:auto; position:relative; padding:40px; }
   .modal-x{ position:absolute; top:20px; right:20px; width:36px; height:36px; border-radius:50%; background:var(--bg); display:grid; place-items:center; cursor:pointer; }
   
-  @media(max-width: 600px) { .dash-header { flex-direction: column; align-items: flex-start; gap: 16px; } .order-details { grid-template-columns: 1fr; } .btn-logout { width: 100%; text-align: center; } .loyalty-banner { flex-direction: column; gap: 16px; text-align: center; } }
+  @media(max-width: 600px) { .dash-header { flex-direction: column; align-items: flex-start; gap: 16px; } .order-details { grid-template-columns: 1fr; } .btn-logout { width: 100%; text-align: center; } .loyalty-banner { flex-direction: column; gap: 16px; text-align: center; } .item-row { flex-direction: column; gap: 8px; } .item-img { width: 100%; height: 150px; } }
 </style>
 </head>
 <body>
@@ -113,7 +116,6 @@
   </div>
 </div>
 
-<!-- MODAL PARA REALIZAR PAGO -->
 <div class="modal-wrap" id="paymentModal" onclick="if(event.target.id==='paymentModal') closePaymentModal()">
   <div class="modal">
     <button class="modal-x" onclick="closePaymentModal()">✕</button>
@@ -134,9 +136,7 @@
       </select>
     </div>
     
-    <div id="payDetails" style="background:var(--bg); padding:16px; border-radius:12px; margin-bottom:16px; font-size:14px; line-height:1.6;">
-      <!-- Se llena dinámicamente -->
-    </div>
+    <div id="payDetails" style="background:var(--bg); padding:16px; border-radius:12px; margin-bottom:16px; font-size:14px; line-height:1.6;"></div>
     
     <div class="field">
       <label>Comprobante de Pago *</label>
@@ -227,7 +227,6 @@ function suscribirseCambiosCliente() {
       }
     })
     .on('postgres_changes', { event: '*', schema: 'public', table: 'installments' }, payload => {
-       // Si hay cambios en installments, recargar
        loadMyOrders(currentUserId, currentUserEmail);
     })
     .subscribe();
@@ -236,10 +235,10 @@ function suscribirseCambiosCliente() {
 async function loadMyOrders(userId, userEmail) {
   const list = document.getElementById('ordersList');
   try {
-    // Añadimos products(image_url) para la miniatura
+    // AQUÍ AÑADIMOS DESCRIPTION Y image_url DEL PRODUCTO
     const { data: orders, error } = await supabaseClient
       .from('orders')
-      .select('*, order_items(*, products(image_url)), installments(*)')
+      .select('*, order_items(*, products(image_url, description)), installments(*)')
       .or(`user_id.eq.${userId},customer_email.eq.${userEmail}`)
       .order('created_at', { ascending: false });
       
@@ -272,14 +271,16 @@ async function loadMyOrders(userId, userEmail) {
       const statusClass = `status-${o.status}`;
       const statusText = statusLabels[o.status] || o.status;
 
+      // ITEMS ACTUALIZADOS CON IMAGEN Y DESCRIPCIÓN
       const itemsHtml = (o.order_items || []).map(item => `
         <div class="item-row">
           ${item.products?.image_url ? `<img src="${item.products.image_url}" class="item-img">` : `<div class="item-img"></div>`}
           <div class="item-details">
-            <strong>${item.quantity}x</strong> ${item.product_name} (Talla: ${item.size})
+            <div><strong>${item.quantity}x</strong> ${item.product_name} (Talla: ${item.size})</div>
+            ${item.products?.description ? `<span class="item-desc">${item.products.description}</span>` : ''}
             ${item.custom_note ? `<span class="item-note">Nota: "${item.custom_note}"</span>` : ''}
           </div>
-          <div style="font-weight:600;">${fmtBs(item.subtotal_bs)}</div>
+          <div class="item-price">${fmtBs(item.subtotal_bs)}</div>
         </div>
       `).join('');
 
@@ -314,7 +315,6 @@ async function loadMyOrders(userId, userEmail) {
         </div>
       ` : '';
 
-      // Comprobante principal del pedido (si lo subió al inicio)
       const mainReceiptHtml = o.receipt_url 
         ? `<a href="${o.receipt_url}" target="_blank" class="upload-receipt-btn view-receipt-btn">👁️ Ver Comprobante Inicial</a>`
         : '';
@@ -387,40 +387,28 @@ async function requestUpgrade() {
   if (!error) btn.textContent = 'Solicitud enviada con éxito'; else { alert("Error: " + error.message); btn.disabled = false; btn.textContent = 'Solicitar Ascenso'; }
 }
 
-/* =========================================
-   LÓGICA DE PAGOS DESDE EL PORTAL
-   ========================================= */
 let currentPayOrderId = null;
 let currentPaySaldoBs = 0;
 
 function openPaymentModal(orderId, saldoBs) {
   currentPayOrderId = orderId;
   currentPaySaldoBs = saldoBs;
-  
   document.getElementById('payAmount').value = saldoBs;
   document.getElementById('payMethod').value = 'bs_pago_movil';
   updatePayDetails();
   document.getElementById('payReceipt').value = "";
   document.getElementById('payError').textContent = "";
-  
   document.getElementById('paymentModal').classList.add('open');
 }
 
-function closePaymentModal() {
-  document.getElementById('paymentModal').classList.remove('open');
-}
+function closePaymentModal() { document.getElementById('paymentModal').classList.remove('open'); }
 
 function updatePayDetails() {
   const method = document.getElementById('payMethod').value;
   const div = document.getElementById('payDetails');
-  
-  if (method === 'bs_pago_movil') {
-    div.innerHTML = `<strong>Banco:</strong> 0134 Banesco<br><strong>Teléfono:</strong> 04243351245<br><strong>Cédula:</strong> 26464322`;
-  } else if (method === 'bs_transfer') {
-    div.innerHTML = `<strong>Banco:</strong> Banesco (0134)<br><strong>Cédula:</strong> 26464322<br><strong>Titular:</strong> Tiendas Sammy`;
-  } else if (method === 'usdt_binance') {
-    div.innerHTML = `<strong>Correo:</strong> samiibelisario@gmail.com<br><strong>UID:</strong> 219555454`;
-  }
+  if (method === 'bs_pago_movil') div.innerHTML = `<strong>Banco:</strong> 0134 Banesco<br><strong>Teléfono:</strong> 04243351245<br><strong>Cédula:</strong> 26464322`;
+  else if (method === 'bs_transfer') div.innerHTML = `<strong>Banco:</strong> Banesco (0134)<br><strong>Cédula:</strong> 26464322<br><strong>Titular:</strong> Tiendas Sammy`;
+  else if (method === 'usdt_binance') div.innerHTML = `<strong>Correo:</strong> samiibelisario@gmail.com<br><strong>UID:</strong> 219555454`;
 }
 
 async function submitPayment() {
@@ -463,10 +451,8 @@ async function submitPayment() {
     });
     
     if (instError) throw instError;
-    
     closePaymentModal();
     checkSession();
-    
   } catch(err) {
     errBox.textContent = err.message;
   } finally {
