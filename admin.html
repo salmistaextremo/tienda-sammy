@@ -8,7 +8,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
 <style>
-  /* [Mismo CSS del panel anterior, con adiciones para modales] */
   * { margin:0; padding:0; box-sizing:border-box; }
   :root{ --bg:#f8f6f0; --surface:#ffffff; --text:#1a1a1a; --muted:#7a7a7a; --border:#e8e4db; --accent:#ffea61; --danger:#ef4444; --success:#22c55e; --radius-lg:24px; --radius-md:16px; --radius-sm:100px; }
   html,body{ background:var(--bg); color:var(--text); font-family:'Outfit',sans-serif; }
@@ -28,7 +27,7 @@
   .admin-main{ padding:40px 32px; max-width:1240px; margin:0 auto; }
   .admin-title{ font-size:32px; margin-bottom:8px; } .admin-sub{ font-size:15px; color:var(--muted); margin-bottom:40px; }
   .tabs{ display:flex; gap:8px; margin-bottom:32px; background:var(--surface); padding:8px; border-radius:var(--radius-md); display:inline-flex; }
-  .tab{ padding:12px 24px; font-size:15px; font-weight:600; color:var(--muted); border-radius:var(--radius-sm); } .tab.active{ background:var(--accent); color:#111; }
+  .tab{ padding:12px 24px; font-size:15px; font-weight:600; color:var(--muted); border-radius:var(--radius-sm); cursor:pointer; } .tab.active{ background:var(--accent); color:#111; }
   .panel{ display:none; } .panel.active{ display:block; }
 
   .data-table-wrap{ background:var(--surface); border-radius:var(--radius-lg); box-shadow:0 10px 30px rgba(0,0,0,0.04); overflow-x:auto; }
@@ -41,13 +40,13 @@
   .status-select{ padding:10px 16px; border-radius:var(--radius-sm); background:var(--bg); border:1px solid var(--border); font-size:13px; font-weight:600; outline:none; }
   
   .btn-sm{ padding:8px 14px; border-radius:8px; font-size:13px; font-weight:600; }
-  .btn-view{ background:var(--bg); border:1px solid var(--border); margin-right:8px; } .btn-view:hover{ border-color:var(--text); }
-  .btn-new{ background:var(--accent); color:#111; padding:10px 20px; border-radius:var(--radius-sm); font-weight:700; font-size:14px; }
+  .btn-view{ background:var(--bg); border:1px solid var(--border); margin-right:8px; cursor:pointer; } .btn-view:hover{ border-color:var(--text); }
+  .btn-new{ background:var(--accent); color:#111; padding:10px 20px; border-radius:var(--radius-sm); font-weight:700; font-size:14px; cursor:pointer; }
 
   .modal-wrap{ position:fixed; inset:0; z-index:200; display:none; align-items:center; justify-content:center; padding:20px; background:rgba(0,0,0,0.5); backdrop-filter:blur(5px); overflow-y:auto; }
   .modal-wrap.open{ display:flex; }
   .modal{ background:var(--surface); border-radius:var(--radius-lg); max-width:640px; width:100%; max-height:92vh; overflow-y:auto; position:relative; padding:40px; }
-  .modal-x{ position:absolute; top:20px; right:20px; width:40px; height:40px; border-radius:50%; background:var(--bg); display:grid; place-items:center; }
+  .modal-x{ position:absolute; top:20px; right:20px; width:40px; height:40px; border-radius:50%; background:var(--bg); display:grid; place-items:center; cursor:pointer; }
   .modal h3{ font-size:24px; margin-bottom:24px; font-weight:700; }
   
   .form-group{ margin-bottom:16px; } .form-group label{ display:block; font-size:13px; font-weight:600; margin-bottom:8px; }
@@ -55,7 +54,7 @@
   
   .item-detail-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px dashed var(--border); font-size: 14px; }
   .item-detail-note { font-size: 12px; color: var(--muted); font-style: italic; display: block; margin-top: 4px; }
-  .receipt-img-preview { width: 100%; max-height: 300px; object-fit: contain; border-radius: 8px; margin-top: 10px; border: 1px solid var(--border); }
+  .receipt-img-preview { width: 100%; max-height: 300px; object-fit: contain; border-radius: 8px; margin-top: 10px; border: 1px solid var(--border); cursor: pointer; }
 
   @media(max-width:800px){ .admin-header{ padding:0 20px; } .admin-main{ padding:24px 20px; } .data-table th, .data-table td{ padding:16px; } .modal{ padding:32px 24px; } }
 </style>
@@ -69,7 +68,7 @@
     <div class="field"><label>Correo</label><input id="loginEmail" type="email"></div>
     <div class="field"><label>Contraseña</label><input id="loginPassword" type="password"></div>
     <button class="btn-primary" id="loginBtn" onclick="handleLogin()">Iniciar sesión</button>
-    <div class="err" id="loginError"></div>
+    <div class="err" id="loginError" style="color:var(--danger); text-align:center; margin-top:12px; font-size:14px;"></div>
   </div>
 </div>
 
@@ -82,11 +81,11 @@
   <main class="admin-main">
     <h1 class="admin-title">Dashboard</h1>
     <div class="tabs">
-      <button class="tab active" onclick="switchTab('pedidos', event)">📦 Pedidos</button>
-      <button class="tab" onclick="switchTab('abonos', event)">💳 Abonos</button>
-      <button class="tab" onclick="switchTab('productos', event)">🛍️ Productos</button>
-      <button class="tab" onclick="switchTab('usuarios', event)">👥 Usuarios</button>
-      <button class="tab" onclick="switchTab('solicitudes', event)">⭐ Solicitudes</button>
+      <div class="tab active" onclick="switchTab('pedidos', event)">📦 Pedidos</div>
+      <div class="tab" onclick="switchTab('abonos', event)">💳 Abonos</div>
+      <div class="tab" onclick="switchTab('productos', event)">🛍️ Productos</div>
+      <div class="tab" onclick="switchTab('usuarios', event)">👥 Usuarios</div>
+      <div class="tab" onclick="switchTab('solicitudes', event)">⭐ Solicitudes</div>
     </div>
 
     <!-- PEDIDOS -->
@@ -259,22 +258,56 @@ function viewOrderDetails(orderId) {
     </div>
   `).join('');
 
+  // FORMATEAR DETALLES DEL PAGO
+  let detailsHtml = "";
+  if (o.payment_details) {
+    const d = o.payment_details;
+    if (o.payment_method === 'bs_pago_movil') {
+      detailsHtml = `<ul style="font-size:13px; margin-left:16px; color:var(--text); line-height: 1.8;">
+        <li><strong>Banco:</strong> Banesco (0134)</li>
+        <li><strong>Cédula:</strong> ${d.cedula || '-'}</li>
+        <li><strong>Teléfono:</strong> ${d.telefono || '-'}</li>
+      </ul>`;
+    } else if (o.payment_method === 'bs_transfer') {
+      detailsHtml = `<ul style="font-size:13px; margin-left:16px; color:var(--text); line-height: 1.8;">
+        <li><strong>Banco:</strong> Banesco (0134)</li>
+        <li><strong>Cédula:</strong> ${d.cedula || '-'}</li>
+        <li><strong>Nombre:</strong> ${d.nombre || '-'}</li>
+        <li><strong>Tipo de Cuenta:</strong> ${d.tipo_cuenta || '-'}</li>
+      </ul>`;
+    } else if (o.payment_method === 'usdt_binance') {
+      detailsHtml = `<ul style="font-size:13px; margin-left:16px; color:var(--text); line-height: 1.8;">
+        <li><strong>UID / Correo Binance:</strong> ${d.uid_correo || '-'}</li>
+      </ul>`;
+    }
+  } else {
+    detailsHtml = `<p style="font-size:13px; color:var(--muted); margin-left:16px;">Sin datos adicionales registrados.</p>`;
+  }
+
   const receiptHtml = o.receipt_url 
-    ? `<div style="margin-top:16px;"><label style="font-size:12px; color:var(--muted); font-weight:600;">Comprobante de Pago:</label><img src="${o.receipt_url}" class="receipt-img-preview" onclick="window.open('${o.receipt_url}', '_blank')"></div>`
+    ? `<div style="margin-top:16px;"><label style="font-size:12px; color:var(--muted); font-weight:600;">Comprobante de Pago (Clic para ampliar):</label><img src="${o.receipt_url}" class="receipt-img-preview" onclick="window.open('${o.receipt_url}', '_blank')"></div>`
     : `<div style="margin-top:16px; color:var(--muted); font-size:13px;">El cliente no ha subido comprobante aún.</div>`;
 
   document.getElementById('orderDetailContent').innerHTML = `
     <div style="margin-bottom:16px; font-size:14px; color:var(--muted);">
       Cliente: <strong>${o.customer_name}</strong> | Tel: <strong>${o.customer_phone}</strong>
     </div>
+    
     <div style="margin-bottom:20px;">
       <h4 style="font-size:14px; margin-bottom:8px;">Productos Comprados</h4>
       ${itemsHtml}
     </div>
-    <div style="background:var(--bg); padding:16px; border-radius:8px; font-size:14px;">
+
+    <div style="background:var(--bg); padding:16px; border-radius:8px; font-size:14px; margin-bottom:16px;">
       <div style="display:flex; justify-content:space-between; margin-bottom:8px;"><span>Total:</span><strong>${Number(o.total_bs).toLocaleString('es-VE')} Bs</strong></div>
       <div style="display:flex; justify-content:space-between;"><span>Saldo:</span><strong style="color:${saldoBs > 0 ? 'var(--danger)' : 'var(--success)'};">${saldoBs.toLocaleString('es-VE')} Bs</strong></div>
     </div>
+
+    <div style="background:var(--bg); padding:16px; border-radius:8px; margin-bottom:16px;">
+      <h4 style="font-size:14px; margin-bottom:8px;">Datos del Pago (${o.payment_method})</h4>
+      ${detailsHtml}
+    </div>
+
     ${receiptHtml}
   `;
   document.getElementById('orderDetailModal').classList.add('open');
@@ -294,7 +327,7 @@ async function loadRequests() {
       <td><strong>${r.profiles?.full_name || 'Usuario'}</strong><br><small>${r.profiles?.email}</small></td>
       <td>${new Date(r.created_at).toLocaleDateString()}</td>
       <td>
-        <button class="btn-sm" style="background:var(--success); color:#fff;" onclick="approveRequest('${r.id}', '${r.user_id}')">Aprobar Vendedor</button>
+        <button class="btn-sm" style="background:var(--success); color:#fff; cursor:pointer;" onclick="approveRequest('${r.id}', '${r.user_id}')">Aprobar Vendedor</button>
       </td>
     </tr>
   `).join('');
@@ -312,7 +345,7 @@ async function approveRequest(reqId, userId) {
 async function loadInstallments(){
   const tbody = document.getElementById('installmentsTableBody');
   const { data } = await supabaseClient.from('installments').select('*, orders(customer_name)').order('paid_at', { ascending: false });
-  tbody.innerHTML = (data || []).map(i => `<tr><td>#${String(i.order_id).slice(0,8)}</td><td>${Number(i.amount_bs).toLocaleString()}</td><td>${Number(i.amount_usdt).toFixed(2)}</td><td>${i.method}</td><td>${i.reference || '-'}</td><td>${new Date(i.paid_at).toLocaleDateString()}</td></tr>`).join('') || `<tr><td colspan="6">Sin abonos</td></tr>`;
+  tbody.innerHTML = (data || []).map(i => `<tr><td>#${String(i.order_id).slice(0,8)}</td><td>${Number(i.amount_bs).toLocaleString()}</td><td>${Number(i.amount_usdt).toFixed(2)}</td><td>${i.method}</td><td>${i.reference || '-'}</td><td>${new Date(i.paid_at).toLocaleDateString()}</td></tr>`).join('') || `<tr><td colspan="6" style="text-align:center;">Sin abonos</td></tr>`;
 }
 
 /* PRODUCTOS */
