@@ -372,7 +372,9 @@ const loginView = document.getElementById('loginView');
 const adminPanel = document.getElementById('adminPanel');
 const loginError = document.getElementById('loginError');
 const loginBtn = document.getElementById('loginBtn');
+
 let currentUserId = null;
+let currentUserRole = null; // Variable global para saber quién está logueado
 
 /* ============================================================
    AUTENTICACIÓN
@@ -404,6 +406,7 @@ async function handleLogin(){
       throw new Error("Tu cuenta ha sido deshabilitada por el administrador.");
     }
 
+    currentUserRole = profile.role; // Guardamos el rol
     showAdminPanel(data.user.email);
   } catch(err){
     loginError.textContent = "Error: " + (err.message || "Credenciales incorrectas.");
@@ -420,6 +423,7 @@ async function handleLogout(){
   document.getElementById('loginPassword').value = "";
   loginError.textContent = "";
   currentUserId = null;
+  currentUserRole = null;
 }
 
 function showAdminPanel(email){
@@ -706,6 +710,9 @@ async function loadUsers(){
     
     if(allUsers.length === 0){ tbody.innerHTML = `<tr><td colspan="5" class="empty-state">No hay usuarios.</td></tr>`; return; }
     
+    // Verificamos si el usuario actual es Super Admin
+    const isSuperAdmin = currentUserRole === 'super_admin';
+
     tbody.innerHTML = allUsers.map(u => {
       const roleLabel = {
         'super_admin': 'Super Admin',
@@ -717,14 +724,26 @@ async function loadUsers(){
       const isSelf = u.id === currentUserId;
       const statusLabel = u.is_active ? '<span class="tag tag-activo">Activo</span>' : '<span class="tag tag-inactivo">Inactivo</span>';
       const toggleBtnText = u.is_active ? 'Inhabilitar' : 'Habilitar';
-      const toggleBtnClass = u.is_active ? 'btn-delete' : 'btn-activo'; // Usa colores distintos
+
+      // Lógica para mostrar u ocultar los botones de acción
+      let actionsHtml = '';
+      if (isSuperAdmin && !isSelf) {
+        actionsHtml = `
+          <button class="btn-sm btn-toggle" onclick="toggleUserStatus('${u.id}', ${u.is_active})">${toggleBtnText}</button>
+          <button class="btn-sm btn-delete" onclick="deleteUser('${u.id}')">Borrar</button>
+        `;
+      } else if (isSelf) {
+        actionsHtml = `<span style="color:var(--muted); font-size:12px;">(Tú)</span>`;
+      } else {
+        actionsHtml = `<span style="color:var(--muted); font-size:12px;">Restringido</span>`;
+      }
 
       return `
         <tr>
           <td><strong>${u.full_name || 'Sin nombre'}</strong> ${isSelf ? '(Tú)' : ''}</td>
           <td>${u.email || 'N/A'}</td>
           <td>
-            <select class="status-select" onchange="updateUserRole('${u.id}', this.value)" ${isSelf ? 'disabled title="No puedes cambiar tu propio rol"' : ''}>
+            <select class="status-select" onchange="updateUserRole('${u.id}', this.value)" ${(!isSuperAdmin || isSelf) ? 'disabled title="Solo el Super Admin puede cambiar roles"' : ''}>
               <option value="vendedor" ${u.role==='vendedor'?'selected':''}>Vendedor</option>
               <option value="admin" ${u.role==='admin'?'selected':''}>Administrador</option>
               <option value="super_admin" ${u.role==='super_admin'?'selected':''}>Super Admin</option>
@@ -732,10 +751,7 @@ async function loadUsers(){
             </select>
           </td>
           <td>${statusLabel}</td>
-          <td>
-            <button class="btn-sm btn-toggle" onclick="toggleUserStatus('${u.id}', ${u.is_active})" ${isSelf ? 'disabled style="opacity:0.5; cursor:not-allowed;"' : ''}>${toggleBtnText}</button>
-            <button class="btn-sm btn-delete" onclick="deleteUser('${u.id}')" ${isSelf ? 'disabled style="opacity:0.5; cursor:not-allowed;"' : ''}>Borrar</button>
-          </td>
+          <td>${actionsHtml}</td>
         </tr>
       `;
     }).join('');
@@ -828,7 +844,6 @@ async function deleteUser(userId){
   if(!confirm("¿Estás seguro de ELIMINAR permanentemente a este usuario? Esta acción borrará su cuenta de acceso y no se puede deshacer.")) return;
   
   try {
-    // Llamada a la función RPC que creamos en la base de datos
     const { error } = await supabaseClient.rpc('delete_user', { user_id: userId });
     if(error) throw error;
     loadUsers();
@@ -856,6 +871,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     currentUserId = session.user.id;
     const { data: profile } = await supabaseClient.from('profiles').select('role, is_active').eq('id', session.user.id).single();
     if(profile && ['super_admin','admin','vendedor'].includes(profile.role) && profile.is_active !== false) {
+      currentUserRole = profile.role; // Guardamos el rol al recargar la página
       showAdminPanel(session.user.email);
     }
   }
