@@ -1,9 +1,5 @@
 <!DOCTYPE html>
 <html lang="es">
-   <!-- PWA -->
-  <link rel="manifest" href="/manifest.json">
-  <meta name="theme-color" content="#111111">
-  <link rel="apple-touch-icon" href="https://zxhufobqfxmbjpneyiam.supabase.co/storage/v1/object/public/brand-assets/logo.png">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,6 +7,10 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
+<!-- PWA -->
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#111111">
+<link rel="apple-touch-icon" href="https://zxhufobqfxmbjpneyiam.supabase.co/storage/v1/object/public/brand-assets/logo.png">
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
   :root{ --bg:#fcfbf8; --surface:#ffffff; --text:#111111; --muted:#767676; --border:#e8e5df; --accent:#ffea61; --radius-lg:24px; --radius-md:16px; --radius-sm:100px; }
@@ -142,39 +142,30 @@
 <footer class="footer">
   <div class="container">
     <div class="fgrid">
-      <!-- Columna 1: Logo -->
       <div>
         <a href="/" class="logo" style="display:block; margin-bottom:16px;">
           <img src="https://zxhufobqfxmbjpneyiam.supabase.co/storage/v1/object/public/brand-assets/logo.png" alt="Tiendas Sam's" style="height:40px; width:auto;">
         </a>
         <p style="color:var(--muted); font-size:14px;">Ropa oversize y otros productos de calidad.</p>
       </div>
-
-      <!-- Columna 2: Tienda -->
       <div>
         <h4>Tienda</h4>
         <a href="#catalog" onclick="setFilter('oversize')">Oversize</a>
         <a href="#catalog" onclick="setFilter('camisetas')">Camisetas</a>
         <a href="#catalog" onclick="setFilter('pantalones')">Pantalones</a>
       </div>
-
-      <!-- Columna 3: Pagos -->
       <div>
         <h4>Pagos</h4>
         <a href="#">Contado</a>
         <a href="#">Crédito</a>
         <a href="#">Apartado</a>
       </div>
-
-      <!-- Columna 4: Contacto -->
       <div>
         <h4>Contacto</h4>
         <a href="#">WhatsApp</a>
         <a href="#">Instagram</a>
         <a href="#">Correo</a>
       </div>
-
-      <!-- Columna 5: Información -->
       <div>
         <h4>Información</h4>
         <a href="/info.html">Envíos y Entregas</a>
@@ -219,6 +210,11 @@
   </div>
 </div>
 
+<!-- BOTÓN DE INSTALACIÓN PWA -->
+<button id="installAppBtn" style="display: none; position: fixed; bottom: 24px; left: 24px; z-index: 1000; background: var(--accent); color: #111; padding: 12px 20px; border-radius: 100px; font-weight: 700; border: none; box-shadow: 0 4px 15px rgba(0,0,0,0.2); cursor: pointer;">
+  📲 Instalar App
+</button>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const SUPABASE_URL = "https://zxhufobqfxmbjpneyiam.supabase.co";
@@ -233,6 +229,31 @@ const fmtBs = n => "Bs " + Number(n).toLocaleString('es-VE');
 const fmtUsdt = n => Number(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) + " USDT";
 const getProduct = id => PRODUCTS.find(p => p.id === id);
 
+// LÓGICA PWA
+let deferredPrompt;
+const installBtn = document.getElementById('installAppBtn');
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  installBtn.style.display = 'block';
+});
+installBtn.addEventListener('click', async () => {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    console.log(`Usuario eligió: ${outcome}`);
+    deferredPrompt = null;
+    installBtn.style.display = 'none';
+  }
+});
+window.addEventListener('appinstalled', () => { installBtn.style.display = 'none'; });
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW error:', err));
+  });
+}
+
 supabaseClient.auth.onAuthStateChange((event, session) => {
   document.getElementById('btnAccount').style.display = session ? 'inline-block' : 'none';
 });
@@ -245,9 +266,7 @@ async function loadProducts(){
 function suscribirseProductos() {
   supabaseClient
     .channel('cambios-tienda')
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, payload => {
-      loadProducts();
-    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, payload => { loadProducts(); })
     .subscribe();
 }
 
@@ -660,15 +679,5 @@ document.addEventListener('DOMContentLoaded', () => {
   supabaseClient.auth.getSession().then(({data: {session}}) => { if(session) document.getElementById('btnAccount').style.display = 'inline-block'; });
 });
 </script>
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js')
-          .then(registration => console.log('ServiceWorker registrado:', registration.scope))
-          .catch(error => console.log('Error al registrar ServiceWorker:', error));
-      });
-    }
-  </script>
-   
 </body>
 </html>
