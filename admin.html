@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tiendas Sammy — Admin</title>
+<title>Tiendas Sam's — Admin</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
@@ -21,8 +21,8 @@
   /* LOGIN */
   .login-wrapper{ min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px; }
   .login-card{ background:var(--surface); border-radius:var(--radius-lg); padding:48px; width:100%; max-width:420px; box-shadow:0 10px 30px rgba(0,0,0,0.04); }
-  .logo{ font-weight:700; font-size:24px; margin-bottom:8px; text-align:center; } 
-  .logo span{ background:var(--accent); padding:2px 8px; border-radius:8px; color:#111; }
+  .login-logo { text-align: center; margin-bottom: 32px; display: flex; justify-content: center; }
+  .login-logo img { height: 60px; width: auto; object-fit: contain; }
   .field{ margin-bottom:20px; } 
   .field label{ display:block; font-size:13px; font-weight:600; margin-bottom:8px; } 
   .field input{ width:100%; padding:16px; border-radius:var(--radius-md); background:var(--bg); border:1px solid var(--border); font-family:inherit; }
@@ -31,7 +31,7 @@
   /* PANEL */
   #adminPanel{ display:none; }
   .admin-header{ background:var(--surface); border-bottom:1px solid var(--border); padding:0 32px; height:80px; display:flex; align-items:center; justify-content:space-between; }
-  .admin-header .logo{ font-size:20px; margin:0; } 
+  .admin-header .logo img { height: 40px; width: auto; object-fit: contain; }
   .admin-header-right{ display:flex; align-items:center; gap:20px; }
   .logout-btn{ padding:10px 20px; border-radius:var(--radius-sm); background:var(--bg); font-size:14px; font-weight:600; border:1px solid var(--border); cursor:pointer; }
 
@@ -39,7 +39,7 @@
   .admin-title{ font-size:32px; margin-bottom:8px; } 
   .admin-sub{ font-size:15px; color:var(--muted); margin-bottom:32px; }
   
-  /* NUEVAS TARJETAS DE ESTADÍSTICAS (KPIs) */
+  /* TARJETAS DE ESTADÍSTICAS (KPIs) */
   .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 40px; }
   .kpi-card { background: var(--surface); border-radius: var(--radius-md); padding: 24px; box-shadow: 0 4px 15px rgba(0,0,0,0.02); border: 1px solid var(--border); position: relative; overflow: hidden; }
   .kpi-card::before { content: ''; position: absolute; top:0; left:0; width: 4px; height: 100%; background: var(--accent); }
@@ -108,7 +108,9 @@
 
 <div class="login-wrapper" id="loginView">
   <div class="login-card">
-    <div class="logo">TIENDAS <span>SAMMY</span></div>
+    <div class="login-logo">
+      <img src="https://zxhufobqfxmbjpneyiam.supabase.co/storage/v1/object/public/brand-assets/logo.png" alt="Tiendas Sam's">
+    </div>
     <h2 style="text-align:center; font-size:16px; color:var(--muted); margin-bottom:32px;">Panel de Administración</h2>
     <div class="field"><label>Correo</label><input id="loginEmail" type="email"></div>
     <div class="field"><label>Contraseña</label><input id="loginPassword" type="password"></div>
@@ -119,13 +121,15 @@
 
 <div id="adminPanel">
   <header class="admin-header">
-    <div class="logo">SAMMY <span>ADMIN</span></div>
+    <div class="logo">
+      <img src="https://zxhufobqfxmbjpneyiam.supabase.co/storage/v1/object/public/brand-assets/logo.png" alt="Tiendas Sam's">
+    </div>
     <div class="admin-header-right"><button class="logout-btn" onclick="handleLogout()">Cerrar sesión</button></div>
   </header>
 
   <main class="admin-main">
     <h1 class="admin-title">Dashboard</h1>
-    <p class="admin-sub">Resumen general de Tiendas Sammy</p>
+    <p class="admin-sub">Resumen general de Tiendas Sam's</p>
 
     <!-- NUEVA SECCIÓN DE ESTADÍSTICAS (KPIs) -->
     <div class="kpi-grid" id="dashboardKPIs">
@@ -294,37 +298,24 @@ function loadAllData() {
 function suscribirseCambios() {
   supabaseClient
     .channel('cambios-admin')
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, payload => { 
-      loadOrders(); 
-    })
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'installments' }, payload => { 
-      loadInstallments(); 
-      loadOrders(); 
-    })
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, payload => { 
-      loadProducts(); // <--- NUEVO: Recarga la tabla de productos y los KPIs
-    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, payload => { loadOrders(); })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'installments' }, payload => { loadInstallments(); loadOrders(); })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, payload => { loadProducts(); })
     .subscribe();
 }
 
-/* =========================================
-   CÁLCULO DE ESTADÍSTICAS (KPIs)
-   ========================================= */
 function calculateKPIs() {
   const now = new Date();
   let salesBs = 0;
   let salesUsdt = 0;
   let pendingOrdersCount = 0;
 
-  // Calcular Ventas y Pedidos Pendientes
   allOrdersData.forEach(o => {
     const d = new Date(o.created_at);
-    // Ventas del mes actual (excluyendo cancelados)
     if (d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear() && o.status !== 'cancelado') {
       salesBs += Number(o.total_bs);
       salesUsdt += Number(o.total_usdt);
     }
-    // Pedidos que requieren atención (no enviados ni cancelados)
     if (!['enviado', 'cancelado', 'entregado'].includes(o.status)) {
       pendingOrdersCount++;
     }
@@ -334,14 +325,12 @@ function calculateKPIs() {
   document.getElementById('kpiSalesUsdt').textContent = "≈ " + salesUsdt.toFixed(2) + " USDT";
   document.getElementById('kpiPendingOrders').textContent = pendingOrdersCount;
 
-  // Calcular Pagos Pendientes de Verificar
   let pendingPayments = 0;
   if(allInstallments) {
     allInstallments.forEach(i => { if(i.status === 'pendiente') pendingPayments++; });
   }
   document.getElementById('kpiPendingPayments').textContent = pendingPayments;
 
-  // Calcular Bajo Inventario (5 o menos unidades)
   let lowStockCount = 0;
   let lowStockNames = [];
   allProducts.forEach(p => {
@@ -354,9 +343,6 @@ function calculateKPIs() {
   document.getElementById('kpiLowStockNames').textContent = lowStockNames.length > 0 ? lowStockNames.join(', ') + (lowStockCount > 3 ? '...' : '') : 'Todo en orden';
 }
 
-/* =========================================
-   CARGA DE DATOS
-   ========================================= */
 async function loadOrders(){
   const tbody = document.getElementById('ordersTableBody');
   const { data, error } = await supabaseClient.from('orders').select('*, order_items(*, products(image_url, description)), installments(amount_bs, amount_usdt, status)').order('created_at', { ascending: false });
@@ -420,7 +406,7 @@ async function updateOrderStatus(orderId, newStatus){
     if(error) throw error;
     const index = allOrdersData.findIndex(o => o.id === orderId);
     if(index > -1) allOrdersData[index].status = newStatus;
-    calculateKPIs(); // Recalcular KPI de pedidos pendientes
+    calculateKPIs();
   } catch(err) { alert("Error al actualizar: " + err.message); loadOrders(); }
 }
 
