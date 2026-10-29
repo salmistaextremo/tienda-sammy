@@ -151,6 +151,7 @@
       <div class="tab active" onclick="switchTab('pedidos', event)">📦 Pedidos</div>
       <div class="tab" onclick="switchTab('abonos', event)">💳 Abonos</div>
       <div class="tab" onclick="switchTab('productos', event)">🛍️ Productos</div>
+      <div class="tab" onclick="switchTab('categorias', event)">📑 Categorías</div>
       <div class="tab" onclick="switchTab('usuarios', event)">👥 Usuarios</div>
       <div class="tab" onclick="switchTab('solicitudes', event)">⭐ Solicitudes</div>
       <div class="tab" onclick="switchTab('config', event)">🎨 Diseño Web</div>
@@ -183,6 +184,34 @@
           <thead><tr><th>Producto</th><th>Categoría</th><th>Precios</th><th>Stock</th><th>Acciones</th></tr></thead>
           <tbody id="productsTableBody"></tbody>
         </table>
+      </div>
+    </div>
+
+    <!-- NUEVO PANEL CATEGORÍAS -->
+    <div class="panel" id="panel-categorias">
+      <div class="panel-header-actions" style="display:flex; justify-content:space-between; margin-bottom:16px;">
+        <h3>Categorías de Productos</h3>
+      </div>
+      <div class="data-table-wrap" style="margin-bottom: 24px;">
+        <table class="data-table">
+          <thead><tr><th>Nombre</th><th>Enlace (Slug)</th><th>Acciones</th></tr></thead>
+          <tbody id="categoriesTableBody"><tr><td colspan="3" style="text-align:center;">Cargando...</td></tr></tbody>
+        </table>
+      </div>
+      
+      <div style="background: var(--surface); padding: 24px; border-radius: var(--radius-lg); border: 1px solid var(--border);">
+        <h3 style="margin-bottom: 16px;">Añadir Nueva Categoría</h3>
+        <form id="categoryForm" onsubmit="saveCategory(event)" style="display:flex; gap:16px; align-items:flex-end; flex-wrap:wrap;">
+          <div class="form-group" style="flex:1; margin:0; min-width: 200px;">
+            <label>Nombre de la Categoría (Ej. Gorras)</label>
+            <input type="text" id="cName" required placeholder="Ej. Gorras">
+          </div>
+          <div class="form-group" style="flex:1; margin:0; min-width: 200px;">
+            <label>Enlace / Slug (Ej. gorras)</label>
+            <input type="text" id="cSlug" required placeholder="Ej. gorras">
+          </div>
+          <button type="submit" class="btn-primary" style="width:auto; padding:14px 24px; margin:0;">Añadir</button>
+        </form>
       </div>
     </div>
 
@@ -286,7 +315,12 @@
     <form id="productForm" onsubmit="saveProduct(event)">
       <input type="hidden" id="pId">
       <div class="form-group"><label>Nombre *</label><input type="text" id="pName" required></div>
-      <div class="form-group"><label>Categoría *</label><select id="pCategory" required><option value="oversize">Oversize</option><option value="camisetas">Camisetas</option><option value="pantalones">Pantalones</option><option value="accesorios">Accesorios</option></select></div>
+      <div class="form-group">
+        <label>Categoría *</label>
+        <select id="pCategory" required>
+          <!-- Se llena dinámicamente -->
+        </select>
+      </div>
       <div class="form-group"><label>Tallas (coma separada) *</label><input type="text" id="pSizes" required placeholder="S, M, L"></div>
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
         <div class="form-group"><label>Precio en $ (USD) *</label><input type="number" step="0.01" id="pPriceUsdt" required></div>
@@ -334,7 +368,7 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const tempSupabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 let currentUserId = null, currentUserRole = null;
-let allOrdersData = [], allProducts = [], allUsers = [], allInstallments = [];
+let allOrdersData = [], allProducts = [], allUsers = [], allInstallments = [], allCategories = [];
 let currentSiteConfig = {};
 
 const fmtUSD = n => "$ " + Number(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -365,7 +399,6 @@ async function handleLogin(){
   const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
   if(error) { document.getElementById('loginError').textContent = error.message; return; }
   
-  // SEGURIDAD: getUser para validar la sesión
   const { data: { user } } = await supabaseClient.auth.getUser();
   if(!user) { document.getElementById('loginError').textContent = "Error de autenticación."; return; }
   
@@ -382,7 +415,7 @@ async function handleLogin(){
 async function handleLogout() { await supabaseClient.auth.signOut(); location.reload(); }
 
 function loadAllData() { 
-  loadOrders(); loadInstallments(); loadProducts(); loadUsers(); loadRequests(); loadSiteConfig();
+  loadOrders(); loadInstallments(); loadProducts(); loadCategoriesAdmin(); loadUsers(); loadRequests(); loadSiteConfig();
 }
 
 function suscribirseCambios() {
@@ -683,6 +716,66 @@ async function saveProduct(e){
   } catch(err) { alert("Error al guardar: " + err.message); } finally { btn.disabled=false; btn.textContent = "Guardar"; }
 }
 
+/* =========================================
+   LÓGICA DE CATEGORÍAS
+   ========================================= */
+async function loadCategoriesAdmin() {
+  const { data, error } = await supabaseClient.from('categories').select('*').order('name');
+  const tbody = document.getElementById('categoriesTableBody');
+  
+  if (error || !data || data.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;">No hay categorías.</td></tr>`;
+    return;
+  }
+
+  allCategories = data;
+  
+  // Llenar la tabla
+  tbody.innerHTML = data.map(c => `
+    <tr>
+      <td data-label="Nombre"><strong>${escapeHTML(c.name)}</strong></td>
+      <td data-label="Slug">${escapeHTML(c.slug)}</td>
+      <td data-label="Acciones">
+        <button class="btn-sm btn-delete" onclick="deleteCategory('${c.id}')">Eliminar</button>
+      </td>
+    </tr>
+  `).join('');
+
+  // Llenar el Select del Formulario de Productos
+  const select = document.getElementById('pCategory');
+  select.innerHTML = data.map(c => `<option value="${c.slug}">${escapeHTML(c.name)}</option>`).join('');
+}
+
+async function saveCategory(e) {
+  e.preventDefault();
+  const name = document.getElementById('cName').value.trim();
+  const slug = document.getElementById('cSlug').value.trim().toLowerCase().replace(/\s+/g, '-');
+  
+  const btn = document.querySelector('#categoryForm button');
+  btn.disabled = true; btn.textContent = "Guardando...";
+
+  try {
+    const { error } = await supabaseClient.from('categories').insert([{ name, slug }]);
+    if(error) throw error;
+    
+    document.getElementById('categoryForm').reset();
+    loadCategoriesAdmin();
+    alert("Categoría añadida.");
+  } catch(err) {
+    alert("Error al añadir: " + err.message);
+  } finally {
+    btn.disabled = false; btn.textContent = "Añadir";
+  }
+}
+
+async function deleteCategory(id) {
+  if(!confirm("¿Eliminar esta categoría? Los productos asociados no se borrarán, pero deberás asignarles otra.")) return;
+  try {
+    await supabaseClient.from('categories').delete().eq('id', id);
+    loadCategoriesAdmin();
+  } catch(err) { alert("Error al eliminar: " + err.message); }
+}
+
 async function loadUsers(){
   const tbody = document.getElementById('usersTableBody');
   const { data } = await supabaseClient.from('profiles').select('*').order('created_at', { ascending: false });
@@ -762,36 +855,4 @@ async function saveHeroImages(e) {
 
 async function savePromoConfig(e) {
   e.preventDefault();
-  const btn = document.getElementById('btnSavePromo');
-  btn.disabled = true; btn.textContent = "Guardando...";
-
-  const active = document.getElementById('promoActive').checked;
-  const title = document.getElementById('promoTitle').value.trim();
-  const text = document.getElementById('promoText').value.trim();
-  const link = document.getElementById('promoLink').value.trim();
-  const imgFile = document.getElementById('promoImage').files[0];
-
-  try {
-    let image_url = currentSiteConfig.promo_image;
-
-    if (imgFile) {
-      btn.textContent = "Subiendo imagen...";
-      const fileToUpload = await imageCompression(imgFile, { maxSizeMB: 0.5, maxWidthOrHeight: 800, useWebWorker: true });
-      const fileName = `promo_${Date.now()}.${fileToUpload.name.split('.').pop()}`;
-      const { error: uploadError } = await supabaseClient.storage.from('brand-assets').upload(fileName, fileToUpload);
-      if (uploadError) throw uploadError;
-      image_url = supabaseClient.storage.from('brand-assets').getPublicUrl(fileName).data.publicUrl;
-    }
-
-    const { error } = await supabaseClient.from('site_config').update({
-      promo_active: active, promo_image: image_url, promo_title: title, promo_text: text, promo_link: link
-    }).eq('id', 1);
-
-    if(error) throw error;
-    alert("Ventana emergente guardada con éxito.");
-    loadSiteConfig();
-  } catch(err) { alert("Error al guardar: " + err.message); } finally { btn.disabled = false; btn.textContent = "Guardar Promoción"; }
-}
-</script>
-</body>
-</html>
+  const btn =
