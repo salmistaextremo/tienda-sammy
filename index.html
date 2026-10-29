@@ -360,6 +360,19 @@ let heroInterval;
 const CATEGORIES = [{ key:"todo", label:"Todo" }, { key:"oversize", label:"Oversize" }, { key:"camisetas", label:"Camisetas" }, {key: "pantalones", label: "Pantalones"}];
 const getProduct = id => PRODUCTS.find(p => p.id === id);
 
+ function escapeHTML(str) {
+  if (!str) return '';
+  return String(str).replace(/[&<>'"]/g, 
+    tag => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      "'": '&#39;',
+      '"': '&quot;'
+    }[tag])
+  );
+}
+
 function goToSlide(index) {
   currentHeroSlide = index;
   const track = document.getElementById('heroTrack');
