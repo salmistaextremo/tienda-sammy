@@ -92,7 +92,9 @@
   .btn-loyalty { background: #10b981; color: #fff; padding: 8px 16px; border-radius: var(--radius-sm); font-weight: 600; font-size: 13px; cursor:pointer; }
   .btn-loyalty:disabled { background: #d1fae5; color: #065f46; cursor: not-allowed; }
 
-  /* NAVEGACIÓN INFERIOR (ESTILO APP) */
+  /* =========================================
+     NAVEGACIÓN INFERIOR MINIMALISTA
+     ========================================= */
   .bottom-nav {
     position: fixed;
     bottom: 0; left: 0; right: 0;
@@ -101,41 +103,40 @@
     display: flex;
     justify-content: space-around;
     align-items: center;
-    height: 70px;
+    height: 72px;
     z-index: 1000;
-    padding-bottom: env(safe-area-inset-bottom); /* Soporte para iPhone */
+    padding-bottom: env(safe-area-inset-bottom);
   }
+  
   .nav-item {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 4px;
+    justify-content: center;
+    gap: 6px;
     color: var(--muted);
     font-size: 11px;
-    font-weight: 600;
+    font-weight: 500;
     transition: all 0.2s;
     flex: 1;
     height: 100%;
-    justify-content: center;
   }
-  .nav-item .icon {
-    font-size: 20px;
-    transition: transform 0.2s;
+  
+  .nav-item svg {
+    width: 22px;
+    height: 22px;
+    stroke-width: 1.5;
+    transition: all 0.2s;
   }
+  
   .nav-item.active {
     color: var(--text);
+    font-weight: 700;
   }
-  .nav-item.active .icon {
-    transform: translateY(-2px) scale(1.1);
-  }
-  .nav-item.active::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    width: 40%;
-    height: 3px;
-    background: var(--accent);
-    border-radius: 3px 3px 0 0;
+  
+  .nav-item.active svg {
+    stroke-width: 2.5;
+    transform: translateY(-2px);
   }
 
   /* MODALES */
@@ -150,7 +151,7 @@
     .btn-logout { width: 100%; text-align: center; } 
     .item-row { flex-direction: row; gap: 12px; } 
     .item-price { align-self: flex-start; }
-    .bottom-nav { height: 65px; }
+    .bottom-nav { height: 68px; }
   }
 </style>
 </head>
@@ -194,18 +195,33 @@
   </div>
 </div>
 
-<!-- BARRA DE NAVEGACIÓN INFERIOR (ESTILO APP) -->
+<!-- BARRA DE NAVEGACIÓN INFERIOR MINIMALISTA -->
 <div class="bottom-nav" id="bottomNav" style="display: none;">
   <button class="nav-item" onclick="switchPortalTab('pendientes', this)">
-    <span class="icon">⏳</span>
+    <!-- Icono de Reloj de Arena / Pendiente (Outline) -->
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="10"></circle>
+      <polyline points="12 6 12 12 16 14"></polyline>
+    </svg>
     Pendientes
   </button>
+  
   <button class="nav-item active" onclick="switchPortalTab('todos', this)">
-    <span class="icon">📦</span>
+    <!-- Icono de Bolsa / Mis Pedidos (Outline) -->
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <path d="M16 10a4 4 0 0 1-8 0"></path>
+    </svg>
     Mis Pedidos
   </button>
+  
   <button class="nav-item" onclick="switchPortalTab('finalizados', this)">
-    <span class="icon">✅</span>
+    <!-- Icono de Check / Finalizados (Outline) -->
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+      <polyline points="22 4 12 14.01 9 11.01"></polyline>
+    </svg>
     Finalizados
   </button>
 </div>
@@ -254,8 +270,8 @@ const fmtBs = n => "Bs " + Number(n).toLocaleString('es-VE',{minimumFractionDigi
 let isLoginMode = true;
 let currentUserId = null;
 let currentUserEmail = null;
-let myOrdersData = []; // Almacén local de pedidos
-let currentTab = 'todos'; // Pestaña actual
+let myOrdersData = []; 
+let currentTab = 'todos'; 
 
 const statusLabels = {
   'pendiente': 'Pendiente',
@@ -313,7 +329,7 @@ async function checkSession() {
     currentUserEmail = session.user.email;
     document.getElementById('authScreen').style.display = 'none'; 
     document.getElementById('dashboardScreen').style.display = 'block';
-    document.getElementById('bottomNav').style.display = 'flex'; // Mostrar barra inferior
+    document.getElementById('bottomNav').style.display = 'flex'; 
     
     const { data: profile } = await supabaseClient.from('profiles').select('full_name').eq('id', session.user.id).single();
     document.getElementById('userNameDisplay').textContent = profile?.full_name || session.user.user_metadata?.full_name || session.user.email;
@@ -355,25 +371,20 @@ async function loadMyOrders(userId, userEmail) {
     checkLoyaltyStatus(orders, userId);
     myOrdersData = orders || [];
     
-    renderFilteredOrders(); // Renderizar según la pestaña actual
+    renderFilteredOrders(); 
 
   } catch (err) { list.innerHTML = `<div class="empty-state"><p style="color:var(--danger)">Error: ${err.message}</p></div>`; }
 }
 
 function switchPortalTab(tabName, btnElement) {
   currentTab = tabName;
-  
-  // Actualizar clases activas
   document.querySelectorAll('.bottom-nav .nav-item').forEach(btn => btn.classList.remove('active'));
   if(btnElement) btnElement.classList.add('active');
-
   renderFilteredOrders();
 }
 
 function renderFilteredOrders() {
   const list = document.getElementById('ordersList');
-  
-  // Filtrar pedidos
   let filtered = myOrdersData;
   
   if (currentTab === 'pendientes') {
