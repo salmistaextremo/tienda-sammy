@@ -11,7 +11,6 @@
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#111111">
 <link rel="apple-touch-icon" href="https://zxhufobqfxmbjpneyiam.supabase.co/storage/v1/object/public/brand-assets/logo.png">
-<!-- FAVICON -->
 <link rel="icon" type="image/png" href="https://zxhufobqfxmbjpneyiam.supabase.co/storage/v1/object/public/brand-assets/icon-192.png">
 
 <style>
@@ -23,7 +22,6 @@
   .container{ max-width:1240px; margin:0 auto; padding:0 24px; width: 100%; }
   .display{ font-family:'Outfit',sans-serif; font-weight:700; letter-spacing:-1.5px; line-height:1; }
   
-  /* SELECCIÓN Y SCROLLBAR PREMIUM */
   ::selection { background: var(--accent); color: var(--text); }
   ::-webkit-scrollbar { width: 8px; height: 8px; }
   ::-webkit-scrollbar-track { background: var(--bg); }
@@ -45,13 +43,27 @@
   .cart-btn{ display:flex; align-items:center; gap:10px; background:var(--text); color:#fff; padding:12px 22px; border-radius:var(--radius-sm); font-weight:600; font-size:14px; }
   .cart-count{ background:var(--accent); color:#111; min-width:22px; height:22px; border-radius:11px; display:grid; place-items:center; font-size:11px; font-weight:700; padding:0 7px; }
   
-  .hero{ padding:60px 0 80px; } .hero-banner{ display:grid; grid-template-columns: 1fr 1fr; gap:60px; align-items:center; }
-  .hero-content{ max-width:500px; } .hero-badge{ display:inline-block; background:var(--accent); color:#111; font-size:11px; font-weight:700; padding:8px 16px; border-radius:var(--radius-sm); margin-bottom:24px; }
-  .hero h1{ font-size:64px; margin-bottom:24px; } .hero p{ font-size:17px; color:var(--muted); margin-bottom:40px; }
+  /* =========================================
+     NUEVO HERO CARRUSEL
+     ========================================= */
+  .hero { padding: 40px 0 60px; }
+  .hero-carousel { position: relative; overflow: hidden; border-radius: var(--radius-lg); background: var(--surface); box-shadow: var(--shadow); }
+  .hero-track { display: flex; transition: transform 0.5s ease-in-out; }
+  .hero-slide { min-width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; padding: 60px; }
+  
+  .hero-content { max-width: 500px; } 
+  .hero-badge{ display:inline-block; background:var(--accent); color:#111; font-size:11px; font-weight:700; padding:8px 16px; border-radius:var(--radius-sm); margin-bottom:24px; }
+  .hero h1{ font-size:56px; margin-bottom:24px; } 
+  .hero p{ font-size:17px; color:var(--muted); margin-bottom:40px; }
   .btn-primary{ background:var(--text); color:#fff; padding:18px 36px; border-radius:var(--radius-sm); font-weight:600; font-size:16px; display:inline-flex; justify-content:center; width: 100%; transition: background 0.2s; }
   .btn-primary:hover { background: #333; }
-  .hero-image-wrap { border-radius: var(--radius-lg); overflow: hidden; aspect-ratio: 4/5; } .hero-image { width:100%; height:100%; object-fit:cover; }
+  .hero-image-wrap { border-radius: var(--radius-lg); overflow: hidden; aspect-ratio: 4/5; } 
+  .hero-image { width:100%; height:100%; object-fit:cover; }
   
+  .hero-dots { display: flex; justify-content: center; gap: 10px; margin-top: 20px; }
+  .hero-dot { width: 10px; height: 10px; border-radius: 50%; background: #ccc; cursor: pointer; transition: background 0.2s; }
+  .hero-dot.active { background: var(--text); transform: scale(1.2); }
+
   .catalog{ padding:40px 0 100px; } .section-head{ display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:40px; border-bottom: 1px solid var(--border); padding-bottom: 24px; }
   .section-head h2{ font-size:32px; } .filters{ display:flex; gap:8px; flex-wrap:wrap; }
   .filter{ padding:10px 20px; border-radius:var(--radius-sm); font-size:13px; color:var(--muted); border:1px solid transparent; transition: all 0.2s;}
@@ -82,8 +94,22 @@
   .modal-wrap{ position:fixed; inset:0; z-index:200; display:none; align-items:center; justify-content:center; padding:20px; background:rgba(0,0,0,0.4); backdrop-filter:blur(4px); overflow-y:auto; }
   .modal-wrap.open{ display:flex; } .modal{ background:var(--surface); border-radius:var(--radius-lg); max-width:900px; width:100%; max-height:92vh; overflow-y:auto; position:relative; }
   .modal-x{ position:absolute; top:20px; right:20px; z-index:2; width:36px; height:36px; border-radius:50%; background:var(--bg); display:grid; place-items:center; cursor:pointer; }
-  .detail{ display:grid; grid-template-columns:1fr 1fr; } .detail-img-wrap{ background:var(--bg); padding:32px; } .detail-img{ aspect-ratio:4/5; object-fit:cover; width:100%; border-radius:var(--radius-md); }
-  .detail-info{ padding:48px; display:flex; flex-direction:column; justify-content:center; } .detail-info h3{ font-size:28px; margin-bottom:12px; }
+  
+  /* =========================================
+     NUEVO MODAL DE PRODUCTO CON GALERÍA
+     ========================================= */
+  .detail{ display:grid; grid-template-columns:1fr 1fr; } 
+  .detail-img-wrap{ background:var(--bg); padding:32px; display: flex; flex-direction: column; justify-content: center; }
+  
+  .gallery-main { aspect-ratio:4/5; object-fit:cover; width:100%; border-radius:var(--radius-md); margin-bottom: 16px; background: #fff;}
+  .gallery-thumbs { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 8px; }
+  .gallery-thumbs::-webkit-scrollbar { height: 4px; }
+  .gallery-thumb { width: 60px; height: 75px; object-fit: cover; border-radius: 6px; cursor: pointer; opacity: 0.6; transition: opacity 0.2s, border 0.2s; border: 2px solid transparent; }
+  .gallery-thumb.active { opacity: 1; border-color: var(--text); }
+  .gallery-thumb:hover { opacity: 1; }
+
+  .detail-info{ padding:48px; display:flex; flex-direction:column; justify-content:center; } 
+  .detail-info h3{ font-size:28px; margin-bottom:12px; }
   .dprice{ font-size:28px; font-weight:700; } .dusdt{ font-size:14px; color:var(--muted); margin-bottom:32px; }
   .dlabel{ font-size:13px; font-weight:600; margin-bottom:12px; } .sizes{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:24px; }
   .s-opt{ min-width:48px; padding:12px 16px; border-radius:8px; border:1px solid var(--border); cursor: pointer; transition: all 0.2s;} .s-opt.selected{ background:var(--text); color:#fff; }
@@ -100,66 +126,23 @@
   .file-upload-wrapper:hover { border-color: var(--text); }
   .auth-modal { max-width: 420px; padding: 40px; }
   
-  /* =========================================
-     FOOTER CORREGIDO CON AUTO-FIT (Inteligente)
-     ========================================= */
+  /* FOOTER CORREGIDO */
   .footer{ background:var(--surface); border-top:1px solid var(--border); padding:64px 0 32px; } 
-  
-  .fgrid { 
-    display: grid; 
-    /* Esto ajusta las columnas automáticamente. Mínimo 160px por columna. */
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); 
-    gap: 40px; 
-    margin-bottom: 48px; 
-    align-items: start;
-  }
-
-  /* Hacemos que la primera columna (Logo) ocupe más espacio si hay oportunidad */
-  .fgrid > div:first-child {
-    grid-column: span 2;
-    max-width: 300px;
-  }
-  
-  .footer-logo img {
-    max-width: 150px;
-    height: auto;
-    object-fit: contain;
-    margin-bottom: 16px;
-  }
-
-  .footer h4{ 
-    font-size:13px; 
-    font-weight: 700; 
-    text-transform: uppercase; 
-    letter-spacing: 0.5px; 
-    margin-bottom:16px; 
-    color: var(--text);
-  } 
-  
-  .footer a{ 
-    display:block; 
-    color:var(--muted); 
-    font-size:14px; 
-    margin-bottom:10px; 
-    transition: color 0.2s; 
-  } 
-  
+  .fgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 40px; margin-bottom: 48px; align-items: start; }
+  .fgrid > div:first-child { grid-column: span 2; max-width: 300px; }
+  .footer-logo img { max-width: 150px; height: auto; object-fit: contain; margin-bottom: 16px; }
+  .footer h4{ font-size:13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom:16px; color: var(--text); } 
+  .footer a{ display:block; color:var(--muted); font-size:14px; margin-bottom:10px; transition: color 0.2s; } 
   .footer a:hover { color: var(--text); }
   .footer p { color:var(--muted); font-size:14px; line-height: 1.5; }
+  .fbot{ border-top:1px solid var(--border); padding-top:32px; display: flex; justify-content: space-between; font-size:13px; color:var(--muted); }
   
-  .fbot{ 
-    border-top:1px solid var(--border); 
-    padding-top:32px; 
-    display: flex; 
-    justify-content: space-between; 
-    font-size:13px; 
-    color:var(--muted); 
-  }
-  
-  /* RESPONSIVE PARA CELULARES (Solo se apila si es muy pequeño) */
   @media(max-width:768px){ 
     .fgrid { grid-template-columns: 1fr 1fr; gap: 32px; }
     .fgrid > div:first-child { grid-column: span 2; max-width: 100%; margin-bottom: 16px;}
+    .hero-slide { grid-template-columns: 1fr; padding: 32px; text-align: center; }
+    .hero h1 { font-size: 40px; }
+    .hero p { margin: 0 auto 24px auto; }
   }
   @media(max-width:600px){ 
     .product-grid{ grid-template-columns:1fr 1fr; gap:20px 12px; } 
@@ -171,6 +154,7 @@
     .btn-account { display: none !important; } 
     .fgrid { grid-template-columns: 1fr; }
     .fgrid > div:first-child { grid-column: span 1; }
+    .detail { grid-template-columns: 1fr; }
   }
 </style>
 </head>
@@ -197,16 +181,57 @@
   </div>
 </header>
 
+<!-- NUEVO HERO CARRUSEL -->
 <section class="hero">
-  <div class="container hero-banner">
-    <div class="hero-content">
-      <span class="hero-badge">NUEVA COLECCIÓN 2025</span>
-      <h1 class="display">Oversize<br>Sin Límites.</h1>
-      <p>Descubre nuestra nueva colección con envío a todo el país. Paga en Bs o USDT, de contado, a crédito o apartado.</p>
-      <button class="btn-primary" onclick="document.getElementById('catalog').scrollIntoView({behavior:'smooth'})">Ver Colección</button>
+  <div class="container">
+    <div class="hero-carousel">
+      <div class="hero-track" id="heroTrack">
+        
+        <!-- Slide 1: Oversize -->
+        <div class="hero-slide">
+          <div class="hero-content">
+            <span class="hero-badge">NUEVA COLECCIÓN 2025</span>
+            <h1 class="display">Oversize<br>Sin Límites.</h1>
+            <p>Descubre nuestra nueva colección con envío a todo el país. Paga en Bs o USDT, de contado, a crédito o apartado.</p>
+            <button class="btn-primary" onclick="setFilter('oversize')">Ver Colección</button>
+          </div>
+          <div class="hero-image-wrap">
+            <img class="hero-image" src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1000&auto=format&fit=crop" alt="Oversize">
+          </div>
+        </div>
+
+        <!-- Slide 2: Camisetas -->
+        <div class="hero-slide">
+          <div class="hero-content">
+            <span class="hero-badge" style="background:#ff5b1f; color:#fff;">TENDENCIA URBANA</span>
+            <h1 class="display">Camisetas<br>que Destacan.</h1>
+            <p>Estampados únicos y cortes perfectos para tu día a día. Diseños exclusivos que no encontrarás en otro lugar.</p>
+            <button class="btn-primary" onclick="setFilter('camisetas')">Ver Camisetas</button>
+          </div>
+          <div class="hero-image-wrap">
+            <img class="hero-image" src="https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?q=80&w=1000&auto=format&fit=crop" alt="Camisetas">
+          </div>
+        </div>
+
+        <!-- Slide 3: Pantalones -->
+        <div class="hero-slide">
+          <div class="hero-content">
+            <span class="hero-badge" style="background:#3b82f6; color:#fff;">COMODIDAD PREMIUM</span>
+            <h1 class="display">Pantalones<br>Wide Leg.</h1>
+            <p>La comodidad se encuentra con el estilo. Nuestros pantalones cargo y wide leg son la pieza clave de tu outfit.</p>
+            <button class="btn-primary" onclick="setFilter('pantalones')">Ver Pantalones</button>
+          </div>
+          <div class="hero-image-wrap">
+            <img class="hero-image" src="https://images.unsplash.com/photo-1517423568366-8b83523034fd?q=80&w=1000&auto=format&fit=crop" alt="Pantalones">
+          </div>
+        </div>
+
+      </div>
     </div>
-    <div class="hero-image-wrap">
-      <img class="hero-image" src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1000&auto=format&fit=crop" alt="Modelo oversize">
+    <div class="hero-dots" id="heroDots">
+      <div class="hero-dot active" onclick="goToSlide(0)"></div>
+      <div class="hero-dot" onclick="goToSlide(1)"></div>
+      <div class="hero-dot" onclick="goToSlide(2)"></div>
     </div>
   </div>
 </section>
@@ -221,39 +246,30 @@
 <footer class="footer">
   <div class="container">
     <div class="fgrid">
-      <!-- Columna 1: Logo (Ocupa 2 espacios) -->
       <div>
         <a href="/" class="footer-logo">
           <img src="https://zxhufobqfxmbjpneyiam.supabase.co/storage/v1/object/public/brand-assets/logo.png" alt="Tiendas Sam's">
         </a>
         <p>Ropa oversize y otros productos de calidad. Pago en bolívares y USDT.</p>
       </div>
-
-      <!-- Columna 2: Tienda -->
       <div>
         <h4>Tienda</h4>
         <a href="#catalog" onclick="setFilter('oversize')">Oversize</a>
         <a href="#catalog" onclick="setFilter('camisetas')">Camisetas</a>
         <a href="#catalog" onclick="setFilter('pantalones')">Pantalones</a>
       </div>
-
-      <!-- Columna 3: Pagos -->
       <div>
         <h4>Pagos</h4>
         <a href="/info.html">Contado</a>
         <a href="/info.html">Crédito</a>
         <a href="/info.html">Apartado</a>
       </div>
-
-      <!-- Columna 4: Contacto -->
       <div>
         <h4>Contacto</h4>
         <a href="#">WhatsApp</a>
         <a href="#">Instagram</a>
         <a href="#">Correo</a>
       </div>
-
-      <!-- Columna 5: Información -->
       <div>
         <h4>Información</h4>
         <a href="/info.html">Envíos y Entregas</a>
@@ -298,7 +314,6 @@
   </div>
 </div>
 
-<!-- BOTÓN DE INSTALACIÓN PWA -->
 <button id="installAppBtn" style="display: none; position: fixed; bottom: 24px; left: 24px; z-index: 1000; background: var(--accent); color: #111; padding: 12px 20px; border-radius: 100px; font-weight: 700; border: none; box-shadow: 0 4px 15px rgba(0,0,0,0.2); cursor: pointer;">
   📲 Instalar App
 </button>
@@ -312,10 +327,40 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 let PRODUCTS = [], cart = [], currentFilter = "todo", selectedSize = null, currentProduct = null, currentQty = 1, paymentPlan = "contado", paymentMethod = "bs_transfer";
 let isLoginMode = true;
 
-const CATEGORIES = [{ key:"todo", label:"Todo" }, { key:"oversize", label:"Oversize" }, { key:"camisetas", label:"Camisetas" }];
+// VARIABLES PARA EL CARRUSEL DEL HERO
+let currentHeroSlide = 0;
+const totalHeroSlides = 3;
+let heroInterval;
+
+const CATEGORIES = [{ key:"todo", label:"Todo" }, { key:"oversize", label:"Oversize" }, { key:"camisetas", label:"Camisetas" }, {key: "pantalones", label: "Pantalones"}];
 const fmtBs = n => "Bs " + Number(n).toLocaleString('es-VE');
 const fmtUsdt = n => Number(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) + " USDT";
 const getProduct = id => PRODUCTS.find(p => p.id === id);
+
+// LÓGICA DEL HERO CARRUSEL
+function goToSlide(index) {
+  currentHeroSlide = index;
+  const track = document.getElementById('heroTrack');
+  track.style.transform = `translateX(-${index * 100}%)`;
+  
+  // Actualizar puntos (dots)
+  const dots = document.querySelectorAll('.hero-dot');
+  dots.forEach((dot, i) => {
+    if(i === index) dot.classList.add('active');
+    else dot.classList.remove('active');
+  });
+
+  // Reiniciar el temporizador
+  clearInterval(heroInterval);
+  startHeroAutoplay();
+}
+
+function startHeroAutoplay() {
+  heroInterval = setInterval(() => {
+    let nextSlide = (currentHeroSlide + 1) % totalHeroSlides;
+    goToSlide(nextSlide);
+  }, 5000); // Cambia cada 5 segundos
+}
 
 // LÓGICA PWA
 let deferredPrompt;
@@ -361,7 +406,12 @@ function suscribirseProductos() {
 function renderFilters(){
   document.getElementById('filters').innerHTML = CATEGORIES.map(c => `<button class="filter ${c.key===currentFilter?'active':''}" onclick="setFilter('${c.key}')">${c.label}</button>`).join('');
 }
-function setFilter(key){ currentFilter = key; renderFilters(); renderProducts(); }
+function setFilter(key){ 
+  currentFilter = key; 
+  renderFilters(); 
+  renderProducts();
+  document.getElementById('catalog').scrollIntoView({behavior:'smooth'});
+}
 
 function renderProducts(){
   const list = currentFilter === 'todo' ? PRODUCTS : PRODUCTS.filter(p => p.category === currentFilter);
@@ -381,16 +431,39 @@ function renderProducts(){
   `).join('');
 }
 
+// VARIABLES PARA EL CARRUSEL DEL PRODUCTO
+let productGalleryImages = [];
+let currentProductImageIndex = 0;
+
 function openProduct(id){
   const p = getProduct(id); if(!p) return;
   currentProduct = p; selectedSize = (p.sizes && p.sizes[0]) || "Única"; currentQty = 1;
   
   const isOutOfStock = p.stock <= 0;
 
+  // Preparar imágenes de la galería (imagen principal + array de la BD si existe)
+  productGalleryImages = [p.image_url, ...(p.gallery || [])].filter(Boolean);
+  currentProductImageIndex = 0;
+
+  // Generar los thumbnails si hay más de 1 imagen
+  let thumbsHtml = "";
+  if (productGalleryImages.length > 1) {
+    thumbsHtml = `
+      <div class="gallery-thumbs">
+        ${productGalleryImages.map((img, idx) => `
+          <img src="${img}" class="gallery-thumb ${idx === 0 ? 'active' : ''}" onclick="changeProductImage(${idx}, this)">
+        `).join('')}
+      </div>
+    `;
+  }
+
   document.getElementById('productModalInner').innerHTML = `
     <button class="modal-x" onclick="closeProduct()">✕</button>
     <div class="detail">
-      <div class="detail-img-wrap"><img class="detail-img" src="${p.image_url || ''}"></div>
+      <div class="detail-img-wrap">
+        <img id="mainProductImage" class="gallery-main" src="${productGalleryImages[0]}">
+        ${thumbsHtml}
+      </div>
       <div class="detail-info">
         <div class="pcat">${p.category}</div>
         <h3>${p.name}</h3>
@@ -417,6 +490,17 @@ function openProduct(id){
     </div>
   `;
   document.getElementById('productModal').classList.add('open');
+}
+
+// Lógica para cambiar imagen en el modal del producto
+function changeProductImage(index, thumbElement) {
+  currentProductImageIndex = index;
+  document.getElementById('mainProductImage').src = productGalleryImages[index];
+  
+  // Actualizar clase activa en thumbnails
+  const thumbs = document.querySelectorAll('.gallery-thumb');
+  thumbs.forEach(t => t.classList.remove('active'));
+  if(thumbElement) thumbElement.classList.add('active');
 }
 
 function pickSize(s){ selectedSize = s; document.querySelectorAll('#sizesBox .s-opt').forEach(el=>el.classList.toggle('selected', el.textContent === s)); }
@@ -764,6 +848,7 @@ document.addEventListener('DOMContentLoaded', () => {
   loadProducts(); 
   renderCart();
   suscribirseProductos();
+  startHeroAutoplay(); // Iniciar carrusel automático
   supabaseClient.auth.getSession().then(({data: {session}}) => { if(session) document.getElementById('btnAccount').style.display = 'inline-block'; });
 });
 </script>
