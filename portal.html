@@ -267,6 +267,8 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const fmtUSD = n => "$ " + Number(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
 const fmtBs = n => "Bs " + Number(n).toLocaleString('es-VE',{minimumFractionDigits:0,maximumFractionDigits:2});
 
+ 
+
 let isLoginMode = true;
 let currentUserId = null;
 let currentUserEmail = null;
@@ -288,6 +290,19 @@ if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW error:', err));
   });
+}
+
+ function escapeHTML(str) {
+  if (!str) return '';
+  return String(str).replace(/[&<>'"]/g, 
+    tag => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      "'": '&#39;',
+      '"': '&quot;'
+    }[tag])
+  );
 }
 
 function toggleAuthMode() {
