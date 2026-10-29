@@ -54,7 +54,7 @@
   .hero-badge{ display:inline-block; background:var(--accent); color:#111; font-size:11px; font-weight:700; padding:8px 16px; border-radius:var(--radius-sm); margin-bottom:24px; letter-spacing: 0.5px; }
   .hero h1{ font-size:56px; margin-bottom:20px; color: #fff; } 
   .hero p{ font-size:17px; color: rgba(255,255,255,0.8); margin-bottom:32px; }
-  .btn-primary{ background:var(--accent); color:#111; padding:16px 36px; border-radius:var(--radius-sm); font-weight:700; font-size:16px; display:inline-flex; justify-content:center; transition: all 0.2s; width: auto; cursor: pointer; }
+  .btn-primary{ background:var(--accent); color:#111; padding:16px 36px; border-radius:var(--radius-sm); font-weight:700; font-size:16px; display:inline-flex; justify-content:center; transition: all 0.2s; width: auto; cursor: pointer; border: none;}
   .btn-primary:hover { background: #fff; transform: translateY(-2px); }
   .hero-dots { display: flex; justify-content: center; gap: 10px; margin-top: 20px; }
   .hero-dot { width: 10px; height: 10px; border-radius: 50%; background: #ccc; cursor: pointer; transition: background 0.2s; }
@@ -94,44 +94,81 @@
   .modal-wrap.open{ display:flex; } .modal{ background:var(--surface); border-radius:var(--radius-lg); max-width:900px; width:100%; max-height:92vh; overflow-y:auto; position:relative; }
   .modal-x{ position:absolute; top:20px; right:20px; z-index:2; width:36px; height:36px; border-radius:50%; background:var(--bg); display:grid; place-items:center; cursor:pointer; }
   
-  /* DISEÑO DEL MODAL DEL PRODUCTO CON GALERÍA (ESTILO CAPTURA) */
+  /* DISEÑO DEL MODAL DEL PRODUCTO CON CARRUSEL */
   .detail{ display:grid; grid-template-columns:1fr 1fr; } 
-  .detail-img-wrap{ background:var(--bg); padding:32px; display: flex; flex-direction: column; justify-content: center; }
+  .detail-img-wrap{ background:var(--bg); padding:32px; display: flex; flex-direction: column; justify-content: center; align-items: center;}
   
-  .gallery-main { 
-    aspect-ratio: 1/1; 
-    object-fit: cover; 
-    width:100%; 
-    border-radius: var(--radius-md); 
-    margin-bottom: 12px; 
+  .product-carousel {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1/1;
+    border-radius: var(--radius-md);
+    overflow: hidden;
     background: #fff;
     box-shadow: 0 4px 15px rgba(0,0,0,0.05);
   }
-  
-  .gallery-thumbs { 
-    display: flex; 
-    gap: 10px; 
-    overflow-x: auto; 
-    padding-bottom: 8px; 
+
+  .carousel-track {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
   }
-  .gallery-thumbs::-webkit-scrollbar { height: 4px; }
-  
-  .gallery-thumb { 
-    width: 65px; 
-    height: 65px; 
-    object-fit: cover; 
-    border-radius: 8px; 
-    cursor: pointer; 
-    opacity: 0.6; 
-    transition: all 0.2s; 
-    border: 2px solid transparent; 
+
+  .carousel-img {
+    min-width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
-  .gallery-thumb.active { 
-    opacity: 1; 
-    border-color: var(--text); 
-    transform: scale(1.05);
+
+  .carousel-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255,255,255,0.8);
+    color: var(--text);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    z-index: 10;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: background 0.2s, transform 0.2s;
+    font-size: 16px;
+    font-weight: bold;
   }
-  .gallery-thumb:hover { opacity: 1; }
+  .carousel-arrow:hover { background: #fff; transform: translateY(-50%) scale(1.1); }
+  .carousel-arrow.left { left: 10px; }
+  .carousel-arrow.right { right: 10px; }
+
+  .carousel-dots {
+    position: absolute;
+    bottom: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 8px;
+    z-index: 10;
+    background: rgba(255,255,255,0.5);
+    padding: 6px 10px;
+    border-radius: 20px;
+    backdrop-filter: blur(4px);
+  }
+
+  .carousel-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.2);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .carousel-dot.active {
+    background: var(--text);
+    transform: scale(1.3);
+  }
 
   .detail-info{ padding:48px; display:flex; flex-direction:column; justify-content:center; } 
   .detail-info h3{ font-size:28px; margin-bottom:12px; }
@@ -171,6 +208,7 @@
     .fgrid > div:first-child { grid-column: span 2; max-width: 100%; margin-bottom: 16px;}
     .detail{ grid-template-columns:1fr; } 
     .plans{ grid-template-columns:1fr; } 
+    .detail-info { padding: 24px; }
   }
   @media(max-width:600px){ 
     .product-grid{ grid-template-columns:1fr 1fr; gap:20px 12px; } 
@@ -185,8 +223,7 @@
     .btn-account { display: none !important; } 
     .fgrid { grid-template-columns: 1fr; }
     .fgrid > div:first-child { grid-column: span 1; }
-    .detail-info { padding: 24px; }
-    .gallery-main { height: 250px; }
+    .product-carousel { height: 300px; }
   }
 </style>
 </head>
@@ -468,13 +505,14 @@ function openProduct(id){
   productGalleryImages = [p.image_url, ...(p.gallery || [])].filter(Boolean);
   currentProductImageIndex = 0;
 
-  let thumbsHtml = "";
+  // Crear el HTML del carrusel
+  let carouselHtml = "";
   if (productGalleryImages.length > 1) {
-    thumbsHtml = `
-      <div class="gallery-thumbs">
-        ${productGalleryImages.map((img, idx) => `
-          <img src="${img}" class="gallery-thumb ${idx === 0 ? 'active' : ''}" onclick="changeProductImage(${idx}, this)">
-        `).join('')}
+    carouselHtml = `
+      <button class="carousel-arrow left" onclick="moveProductCarousel(-1)">❮</button>
+      <button class="carousel-arrow right" onclick="moveProductCarousel(1)">❯</button>
+      <div class="carousel-dots" id="carouselDots">
+        ${productGalleryImages.map((_, i) => `<span class="carousel-dot ${i === 0 ? 'active' : ''}" onclick="goToProductImage(${i})"></span>`).join('')}
       </div>
     `;
   }
@@ -483,8 +521,12 @@ function openProduct(id){
     <button class="modal-x" onclick="closeProduct()">✕</button>
     <div class="detail">
       <div class="detail-img-wrap">
-        <img id="mainProductImage" class="gallery-main" src="${productGalleryImages[0]}">
-        ${thumbsHtml}
+        <div class="product-carousel">
+          <div class="carousel-track" id="productCarouselTrack">
+            ${productGalleryImages.map(img => `<img src="${img}" class="carousel-img">`).join('')}
+          </div>
+          ${carouselHtml}
+        </div>
       </div>
       <div class="detail-info">
         <div class="pcat" style="text-transform: uppercase; font-size: 12px; letter-spacing: 1px; color: var(--muted); margin-bottom: 8px;">${p.category}</div>
@@ -514,13 +556,32 @@ function openProduct(id){
   document.getElementById('productModal').classList.add('open');
 }
 
-function changeProductImage(index, thumbElement) {
-  currentProductImageIndex = index;
-  document.getElementById('mainProductImage').src = productGalleryImages[index];
+function moveProductCarousel(direction) {
+  if(productGalleryImages.length <= 1) return;
   
-  const thumbs = document.querySelectorAll('.gallery-thumb');
-  thumbs.forEach(t => t.classList.remove('active'));
-  if(thumbElement) thumbElement.classList.add('active');
+  currentProductImageIndex += direction;
+  if (currentProductImageIndex >= productGalleryImages.length) currentProductImageIndex = 0;
+  if (currentProductImageIndex < 0) currentProductImageIndex = productGalleryImages.length - 1;
+  
+  updateCarouselPosition();
+}
+
+function goToProductImage(index) {
+  currentProductImageIndex = index;
+  updateCarouselPosition();
+}
+
+function updateCarouselPosition() {
+  const track = document.getElementById('productCarouselTrack');
+  if(track) {
+    track.style.transform = `translateX(-${currentProductImageIndex * 100}%)`;
+  }
+
+  const dots = document.querySelectorAll('#carouselDots .carousel-dot');
+  dots.forEach((dot, i) => {
+    if(i === currentProductImageIndex) dot.classList.add('active');
+    else dot.classList.remove('active');
+  });
 }
 
 function pickSize(s){ selectedSize = s; document.querySelectorAll('#sizesBox .s-opt').forEach(el=>el.classList.toggle('selected', el.textContent === s)); }
@@ -738,7 +799,6 @@ function updateCheckoutTotal() {
     if (document.getElementById('cuota3')?.checked) amountToPay += totalUsdt - (totalUsdt/3*2);
   } else if (paymentPlan === 'apartado') {
     const abonoInputBs = parseFloat(document.getElementById('abonoAmount')?.value || 0);
-    // Convertir el abono ingresado en Bs a USD para mostrarlo en el resumen
     const ratio = totalBs / totalUsdt;
     amountToPay = isNaN(abonoInputBs) ? 0 : (abonoInputBs / ratio);
     
