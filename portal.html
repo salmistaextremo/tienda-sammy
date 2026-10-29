@@ -22,19 +22,17 @@
   html,body{ 
     background:var(--bg); color:var(--text); font-family:'Outfit',sans-serif; 
     min-height: 100vh; display: flex; flex-direction: column; 
-    padding-bottom: 80px; /* Espacio para el menú inferior */
+    padding-bottom: 80px;
   }
   button{ font-family:inherit; cursor:pointer; border:none; background:none; color:inherit; } 
   a{ color:inherit; text-decoration:none; }
   .container{ max-width:900px; margin:0 auto; padding:0 24px; width: 100%; }
   
-  /* HEADER */
   .header{ border-bottom:1px solid var(--border); padding: 20px 0; background: var(--surface); } 
   .header-inner{ display:flex; align-items:center; justify-content:space-between; }
   .logo img { height: 40px; width: auto; object-fit: contain; }
   .btn-back { font-size: 14px; font-weight: 600; color: var(--muted); } .btn-back:hover { color: var(--text); }
   
-  /* LOGIN */
   .auth-screen { flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px 20px; }
   .auth-card { background: var(--surface); padding: 48px; border-radius: var(--radius-lg); width: 100%; max-width: 420px; box-shadow: 0 10px 40px rgba(0,0,0,0.03); border: 1px solid var(--border); }
   .auth-card h2 { font-size: 24px; font-weight: 700; margin-bottom: 8px; text-align: center; } .auth-card p { font-size: 14px; color: var(--muted); text-align: center; margin-bottom: 32px; }
@@ -45,7 +43,6 @@
   .auth-switch { text-align: center; margin-top: 24px; font-size: 14px; color: var(--muted); } .auth-switch button { color: var(--text); font-weight: 600; text-decoration: underline; }
   .err { color: var(--danger); font-size: 13px; margin-top: 12px; text-align: center; }
 
-  /* DASHBOARD */
   .dashboard { flex: 1; padding: 32px 0 40px; display: none; }
   .dash-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 24px; }
   .dash-header h1 { font-size: 28px; font-weight: 700; } .dash-header p { font-size: 15px; color: var(--muted); }
@@ -92,54 +89,16 @@
   .btn-loyalty { background: #10b981; color: #fff; padding: 8px 16px; border-radius: var(--radius-sm); font-weight: 600; font-size: 13px; cursor:pointer; }
   .btn-loyalty:disabled { background: #d1fae5; color: #065f46; cursor: not-allowed; }
 
-  /* =========================================
-     NAVEGACIÓN INFERIOR MINIMALISTA
-     ========================================= */
+  /* NAVEGACIÓN INFERIOR */
   .bottom-nav {
-    position: fixed;
-    bottom: 0; left: 0; right: 0;
-    background: var(--surface);
-    border-top: 1px solid var(--border);
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    height: 72px;
-    z-index: 1000;
-    padding-bottom: env(safe-area-inset-bottom);
+    position: fixed; bottom: 0; left: 0; right: 0; background: var(--surface); border-top: 1px solid var(--border);
+    display: flex; justify-content: space-around; align-items: center; height: 72px; z-index: 1000; padding-bottom: env(safe-area-inset-bottom);
   }
-  
-  .nav-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    color: var(--muted);
-    font-size: 11px;
-    font-weight: 500;
-    transition: all 0.2s;
-    flex: 1;
-    height: 100%;
-  }
-  
-  .nav-item svg {
-    width: 22px;
-    height: 22px;
-    stroke-width: 1.5;
-    transition: all 0.2s;
-  }
-  
-  .nav-item.active {
-    color: var(--text);
-    font-weight: 700;
-  }
-  
-  .nav-item.active svg {
-    stroke-width: 2.5;
-    transform: translateY(-2px);
-  }
+  .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; color: var(--muted); font-size: 11px; font-weight: 500; transition: all 0.2s; flex: 1; height: 100%; }
+  .nav-item svg { width: 22px; height: 22px; stroke-width: 1.5; transition: all 0.2s; }
+  .nav-item.active { color: var(--text); font-weight: 700; }
+  .nav-item.active svg { stroke-width: 2.5; transform: translateY(-2px); }
 
-  /* MODALES */
   .modal-wrap{ position:fixed; inset:0; z-index:2000; display:none; align-items:center; justify-content:center; padding:20px; background:rgba(0,0,0,0.5); backdrop-filter:blur(5px); overflow-y:auto; }
   .modal-wrap.open{ display:flex; }
   .modal{ background:var(--surface); border-radius:var(--radius-lg); max-width:500px; width:100%; max-height:92vh; overflow-y:auto; position:relative; padding:32px; }
@@ -195,10 +154,8 @@
   </div>
 </div>
 
-<!-- BARRA DE NAVEGACIÓN INFERIOR MINIMALISTA -->
 <div class="bottom-nav" id="bottomNav" style="display: none;">
   <button class="nav-item" onclick="switchPortalTab('pendientes', this)">
-    <!-- Icono de Reloj de Arena / Pendiente (Outline) -->
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
       <circle cx="12" cy="12" r="10"></circle>
       <polyline points="12 6 12 12 16 14"></polyline>
@@ -207,7 +164,6 @@
   </button>
   
   <button class="nav-item active" onclick="switchPortalTab('todos', this)">
-    <!-- Icono de Bolsa / Mis Pedidos (Outline) -->
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
       <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
       <line x1="3" y1="6" x2="21" y2="6"></line>
@@ -217,7 +173,6 @@
   </button>
   
   <button class="nav-item" onclick="switchPortalTab('finalizados', this)">
-    <!-- Icono de Check / Finalizados (Outline) -->
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
       <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
       <polyline points="22 4 12 14.01 9 11.01"></polyline>
@@ -226,7 +181,6 @@
   </button>
 </div>
 
-<!-- MODAL DE PAGO -->
 <div class="modal-wrap" id="paymentModal" onclick="if(event.target.id==='paymentModal') closePaymentModal()">
   <div class="modal">
     <button class="modal-x" onclick="closePaymentModal()">✕</button>
@@ -267,7 +221,13 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const fmtUSD = n => "$ " + Number(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
 const fmtBs = n => "Bs " + Number(n).toLocaleString('es-VE',{minimumFractionDigits:0,maximumFractionDigits:2});
 
- 
+// FUNCIÓN DE SEGURIDAD XSS
+function escapeHTML(str) {
+  if (!str) return '';
+  return String(str).replace(/[&<>'"]/g, 
+    tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag])
+  );
+}
 
 let isLoginMode = true;
 let currentUserId = null;
@@ -290,19 +250,6 @@ if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW error:', err));
   });
-}
-
- function escapeHTML(str) {
-  if (!str) return '';
-  return String(str).replace(/[&<>'"]/g, 
-    tag => ({
-      '&': '&amp;',
-      '<': '&lt;',
-      '>': '&gt;',
-      "'": '&#39;',
-      '"': '&quot;'
-    }[tag])
-  );
 }
 
 function toggleAuthMode() {
@@ -338,16 +285,18 @@ async function handleAuth(e) {
 async function handleLogout() { await supabaseClient.auth.signOut(); location.reload(); }
 
 async function checkSession() {
-  const { data: { session } } = await supabaseClient.auth.getSession();
-  if (session) {
-    currentUserId = session.user.id;
-    currentUserEmail = session.user.email;
+  // SEGURIDAD: Usamos getUser() para validar la sesión contra el servidor de Supabase
+  const { data: { user }, error } = await supabaseClient.auth.getUser();
+  
+  if (user && !error) {
+    currentUserId = user.id;
+    currentUserEmail = user.email;
     document.getElementById('authScreen').style.display = 'none'; 
     document.getElementById('dashboardScreen').style.display = 'block';
     document.getElementById('bottomNav').style.display = 'flex'; 
     
-    const { data: profile } = await supabaseClient.from('profiles').select('full_name').eq('id', session.user.id).single();
-    document.getElementById('userNameDisplay').textContent = profile?.full_name || session.user.user_metadata?.full_name || session.user.email;
+    const { data: profile } = await supabaseClient.from('profiles').select('full_name').eq('id', user.id).single();
+    document.getElementById('userNameDisplay').textContent = profile?.full_name || user.user_metadata?.full_name || user.email;
     
     loadMyOrders(currentUserId, currentUserEmail);
     suscribirseCambiosCliente();
@@ -396,6 +345,21 @@ function switchPortalTab(tabName, btnElement) {
   document.querySelectorAll('.bottom-nav .nav-item').forEach(btn => btn.classList.remove('active'));
   if(btnElement) btnElement.classList.add('active');
   renderFilteredOrders();
+}
+
+// FUNCIÓN PARA VER COMPROBANTES CON URL FIRMADA
+async function viewReceipt(fileName) {
+  if(!fileName) return alert("No hay comprobante.");
+  // Si es una URL antigua, la abrimos directo
+  if(fileName.startsWith('http')) {
+    window.open(fileName, '_blank');
+    return;
+  }
+  
+  // Generar URL firmada válida por 60 minutos (3600 seg)
+  const { data, error } = await supabaseClient.storage.from('receipts').createSignedUrl(fileName, 3600);
+  if(error) return alert("Error al cargar comprobante: " + error.message);
+  window.open(data.signedUrl, '_blank');
 }
 
 function renderFilteredOrders() {
@@ -447,10 +411,10 @@ function renderFilteredOrders() {
       <div class="item-row">
         ${item.products?.image_url ? `<img src="${item.products.image_url}" class="item-img">` : `<div class="item-img"></div>`}
         <div class="item-details">
-          <div class="item-title">${item.product_name}</div>
+          <div class="item-title">${escapeHTML(item.product_name)}</div>
           <div class="item-variant">Talla: ${item.size} | Cant: ${item.quantity}</div>
-          ${item.products?.description ? `<div class="item-desc">${item.products.description}</div>` : ''}
-          ${item.custom_note ? `<div class="item-note">📝 Nota: "${item.custom_note}"</div>` : ''}
+          ${item.products?.description ? `<div class="item-desc">${escapeHTML(item.products.description)}</div>` : ''}
+          ${item.custom_note ? `<div class="item-note">📝 Nota: "${escapeHTML(item.custom_note)}"</div>` : ''}
         </div>
         <div class="item-price">${fmtUSD(item.subtotal_usdt)}</div>
       </div>
@@ -488,7 +452,7 @@ function renderFilteredOrders() {
     ` : '';
 
     const mainReceiptHtml = o.receipt_url 
-      ? `<a href="${o.receipt_url}" target="_blank" class="upload-receipt-btn view-receipt-btn">👁️ Ver Comprobante Inicial</a>`
+      ? `<button onclick="viewReceipt('${o.receipt_url}')" class="upload-receipt-btn view-receipt-btn">👁️ Ver Comprobante Inicial</button>`
       : '';
 
     return `
@@ -604,7 +568,9 @@ async function submitPayment() {
     
     const { error: uploadError } = await supabaseClient.storage.from('receipts').upload(fileName, compressedFile);
     if (uploadError) throw new Error("Error al subir comprobante: " + uploadError.message);
-    const receipt_url = supabaseClient.storage.from('receipts').getPublicUrl(fileName).data.publicUrl;
+    
+    // SEGURIDAD: Guardamos solo el nombre del archivo
+    const receipt_fileName = fileName;
     
     const { data: order } = await supabaseClient.from('orders').select('total_bs, total_usdt').eq('id', currentPayOrderId).single();
     const ratio = Number(order.total_bs) / Number(order.total_usdt);
@@ -616,7 +582,7 @@ async function submitPayment() {
       amount_usdt: amountUsdt,
       method: method,
       reference: "Pago desde Portal",
-      receipt_url: receipt_url,
+      receipt_url: receipt_fileName,
       notes: "Pendiente de verificación",
       status: "pendiente"
     });
