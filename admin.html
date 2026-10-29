@@ -12,6 +12,7 @@
 <meta name="theme-color" content="#111111">
 <link rel="apple-touch-icon" href="https://zxhufobqfxmbjpneyiam.supabase.co/storage/v1/object/public/brand-assets/logo.png">
 <link rel="icon" type="image/png" href="https://zxhufobqfxmbjpneyiam.supabase.co/storage/v1/object/public/brand-assets/icon-192.png">
+
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
   :root{ 
@@ -95,9 +96,11 @@
   .item-detail-note { font-size: 12px; color: var(--text); font-style: italic; margin-top: 4px; display: block; background: var(--bg); padding: 2px 6px; border-radius: 4px; }
   .receipt-img-preview { width: 100%; max-height: 300px; object-fit: contain; border-radius: 8px; margin-top: 10px; border: 1px solid var(--border); cursor: pointer; }
 
-  /* =========================================
-     DISEÑO RESPONSIVO (MÓVIL)
-     ========================================= */
+  /* VISTA PREVIA DE GALERÍA */
+  .gallery-preview { display: flex; gap: 10px; margin-top: 10px; overflow-x: auto; padding-bottom: 8px; }
+  .gallery-preview::-webkit-scrollbar { height: 4px; }
+  .gallery-preview img { width: 60px; height: 75px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border); }
+
   @media(max-width:800px){ 
     .admin-header{ padding:0 20px; height: 64px; } 
     .admin-header .logo img { height: 32px; }
@@ -108,112 +111,24 @@
     .kpi-card { padding: 16px; }
     .kpi-value { font-size: 22px; }
     
-    /* TABS DESLIZABLES */
     .tabs { display: flex; width: 100%; border-radius: var(--radius-md); }
     
-    /* TRANSFORMACIÓN DE TABLAS A TARJETAS */
     .data-table-wrap { background: transparent; box-shadow: none; overflow-x: visible; }
     .data-table { min-width: 100%; display: block; }
     .data-table thead { display: none; }
     .data-table tbody { display: block; }
     
-    .data-table tr { 
-      display: block; 
-      background: var(--surface); 
-      border-radius: var(--radius-md); 
-      margin-bottom: 16px; 
-      padding: 16px; 
-      box-shadow: 0 4px 15px rgba(0,0,0,0.03); 
-      border: 1px solid var(--border); 
-    }
-    
-    .data-table td { 
-      display: flex; 
-      justify-content: space-between; 
-      align-items: center; 
-      padding: 10px 0; 
-      border-bottom: 1px dashed var(--border); 
-      text-align: right; 
-      font-size: 14px;
-    }
-    .data-table td:last-child { 
-      border-bottom: none; 
-      padding-bottom: 0; 
-      margin-top: 10px; 
-      justify-content: flex-end; 
-    }
-    
-    /* ETIQUETAS DINÁMICAS ANTES DE CADA DATO */
-    .data-table td::before { 
-      content: attr(data-label); 
-      font-weight: 600; 
-      color: var(--muted); 
-      text-align: left; 
-      margin-right: 16px;
-      font-size: 12px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    
-    /* Ajustes específicos para acciones */
+    .data-table tr { display: block; background: var(--surface); border-radius: var(--radius-md); margin-bottom: 16px; padding: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); border: 1px solid var(--border); }
+    .data-table td { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px dashed var(--border); text-align: right; font-size: 14px; }
+    .data-table td:last-child { border-bottom: none; padding-bottom: 0; margin-top: 10px; justify-content: flex-end; }
+    .data-table td::before { content: attr(data-label); font-weight: 600; color: var(--muted); text-align: left; margin-right: 16px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
     .data-table td[data-label="Acciones"]::before { display: none; }
     .data-table td .btn-view, .data-table td .btn-sm { width: auto; margin: 0; }
     
-    /* Botón nuevo a ancho completo */
     .panel .btn-new { width: 100%; text-align: center; padding: 14px; margin-bottom: 12px; }
     .panel-header-actions { flex-direction: column; align-items: stretch; gap: 12px; }
   }
-  @media(max-width:500px) {
-    .kpi-grid { grid-template-columns: 1fr; }
-  }
-
-   /* =========================================
-     TOQUES ESTÉTICOS PREMIUM
-     ========================================= */
-  
-  /* 1. Selección de texto (Cuando el usuario selecciona con el mouse) */
-  ::selection {
-    background: var(--accent);
-    color: var(--text);
-  }
-
-  /* 2. Barra de desplazamiento personalizada (Scrollbar) */
-  ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-  }
-  ::-webkit-scrollbar-track {
-    background: var(--bg);
-  }
-  ::-webkit-scrollbar-thumb {
-    background: #d4d4d4;
-    border-radius: 4px;
-  }
-  ::-webkit-scrollbar-thumb:hover {
-    background: #a3a3a3;
-  }
-
-  /* 3. Transiciones suaves para botones y enlaces */
-  button, a, input, select {
-    transition: all 0.2s ease-in-out;
-  }
-
-  /* 4. Efecto de foco en los inputs (cuando el usuario hace clic para escribir) */
-  input:focus, select:focus, textarea:focus {
-    outline: none;
-    border-color: var(--text) !important;
-    box-shadow: 0 0 0 3px rgba(17, 17, 17, 0.1);
-  }
-
-  /* 5. Efecto de carga al hacer clic en los botones (Ripple) */
-  button:active {
-    transform: scale(0.98);
-  }
-
-  /* 6. Imágenes que no cargan (Ej: productos borrados) */
-  img {
-    background-color: var(--bg);
-  }
+  @media(max-width:500px) { .kpi-grid { grid-template-columns: 1fr; } }
 </style>
 </head>
 <body>
@@ -243,7 +158,6 @@
     <h1 class="admin-title">Dashboard</h1>
     <p class="admin-sub">Resumen general de Tiendas Sam's</p>
 
-    <!-- NUEVA SECCIÓN DE ESTADÍSTICAS (KPIs) -->
     <div class="kpi-grid" id="dashboardKPIs">
       <div class="kpi-card" style="--accent:#22c55e;">
         <div class="kpi-title">Ventas del Mes</div>
@@ -330,6 +244,7 @@
   </main>
 </div>
 
+<!-- MODALES -->
 <div class="modal-wrap" id="orderDetailModal" onclick="if(event.target.id==='orderDetailModal') this.classList.remove('open')">
   <div class="modal">
     <button class="modal-x" onclick="document.getElementById('orderDetailModal').classList.remove('open')">✕</button>
@@ -344,20 +259,39 @@
     <h3 id="modalProductTitle">Añadir Producto</h3>
     <form id="productForm" onsubmit="saveProduct(event)">
       <input type="hidden" id="pId">
+      
       <div class="form-group"><label>Nombre *</label><input type="text" id="pName" required></div>
       <div class="form-group"><label>Categoría *</label><select id="pCategory" required><option value="oversize">Oversize</option><option value="camisetas">Camisetas</option><option value="pantalones">Pantalones</option><option value="accesorios">Accesorios</option></select></div>
       <div class="form-group"><label>Tallas (coma separada) *</label><input type="text" id="pSizes" required placeholder="S, M, L"></div>
+      
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
         <div class="form-group"><label>Precio Bs *</label><input type="number" step="0.01" id="pPriceBs" required></div>
         <div class="form-group"><label>Precio USDT *</label><input type="number" step="0.01" id="pPriceUsdt" required></div>
       </div>
+      
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
         <div class="form-group"><label>Stock *</label><input type="number" id="pStock" required></div>
         <div class="form-group"><label>Etiqueta</label><input type="text" id="pBadge"></div>
       </div>
-      <div class="form-group"><label>Imagen</label><input type="file" id="pImage" accept="image/*" onchange="previewImage(event)"><img id="imgPreview" style="display:none; width:100%; height:150px; object-fit:cover; margin-top:10px; border-radius:8px;"></div>
+
+      <!-- IMAGEN PRINCIPAL -->
+      <div class="form-group">
+        <label>Imagen Principal (Portada)</label>
+        <input type="file" id="pImage" accept="image/*" onchange="previewImage(event)">
+        <img id="imgPreview" style="display:none; width:100%; height:150px; object-fit:cover; margin-top:10px; border-radius:8px;">
+      </div>
+
+      <!-- GALERÍA DE IMÁGENES EXTRA -->
+      <div class="form-group">
+        <label>Galería Adicional (Selecciona varias fotos)</label>
+        <input type="file" id="pGallery" accept="image/*" multiple>
+        <p style="font-size:12px; color:var(--muted); margin-top:4px;">Si subes nuevas fotos, reemplazarán a las anteriores.</p>
+        <div id="galleryPreview" class="gallery-preview"></div>
+      </div>
+
       <div class="form-group"><label>Descripción</label><textarea id="pDescription" rows="3"></textarea></div>
       <div class="form-group"><label style="display:flex; gap:8px;"><input type="checkbox" id="pActive" checked> Producto Activo</label></div>
+      
       <button type="submit" class="btn-primary" id="btnSaveProduct">Guardar</button>
     </form>
   </div>
@@ -637,25 +571,12 @@ async function verifyInstallment(id) {
 
 async function loadRequests() {
   const tbody = document.getElementById('requestsTableBody');
-  
-  const { data: requests, error } = await supabaseClient
-    .from('upgrade_requests')
-    .select('*')
-    .eq('status', 'pendiente');
-
-  if (error) {
-    tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:var(--danger);">Error al cargar solicitudes.</td></tr>`;
-    return;
-  }
-
-  if (!requests || requests.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;">No hay solicitudes pendientes.</td></tr>`;
-    return;
-  }
+  const { data: requests, error } = await supabaseClient.from('upgrade_requests').select('*').eq('status', 'pendiente');
+  if (error) { tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:var(--danger);">Error al cargar solicitudes.</td></tr>`; return; }
+  if (!requests || requests.length === 0) { tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;">No hay solicitudes pendientes.</td></tr>`; return; }
 
   const userIds = requests.map(r => r.user_id);
   const { data: profiles } = await supabaseClient.from('profiles').select('id, full_name, email').in('id', userIds);
-
   const profileMap = {};
   profiles.forEach(p => { profileMap[p.id] = p; });
 
@@ -663,14 +584,9 @@ async function loadRequests() {
     const profile = profileMap[r.user_id];
     return `
       <tr>
-        <td data-label="Usuario">
-          <strong>${profile?.full_name || 'Usuario'}</strong><br>
-          <small>${profile?.email || 'Sin email'}</small>
-        </td>
+        <td data-label="Usuario"><strong>${profile?.full_name || 'Usuario'}</strong><br><small>${profile?.email || 'Sin email'}</small></td>
         <td data-label="Fecha">${new Date(r.created_at).toLocaleDateString()}</td>
-        <td data-label="Acciones">
-          <button class="btn-sm" style="background:var(--success); color:#fff; cursor:pointer; width: 100%; padding: 12px;" onclick="approveRequest('${r.id}', '${r.user_id}')">Aprobar Vendedor</button>
-        </td>
+        <td data-label="Acciones"><button class="btn-sm" style="background:var(--success); color:#fff; cursor:pointer; width: 100%; padding: 12px;" onclick="approveRequest('${r.id}', '${r.user_id}')">Aprobar Vendedor</button></td>
       </tr>
     `;
   }).join('');
@@ -701,37 +617,122 @@ async function loadProducts(){
     </tr>
   `).join('');
 }
-function openProductForm(){ document.getElementById('productForm').reset(); document.getElementById('pId').value=''; document.getElementById('imgPreview').style.display='none'; document.getElementById('productModal').classList.add('open'); }
+
+function openProductForm(){ 
+  document.getElementById('productForm').reset(); 
+  document.getElementById('pId').value=''; 
+  document.getElementById('imgPreview').style.display='none'; 
+  document.getElementById('galleryPreview').innerHTML = '';
+  document.getElementById('productModal').classList.add('open'); 
+}
+
 function editProduct(id){
   const p = allProducts.find(x => x.id === id); if(!p) return;
-  document.getElementById('pId').value=p.id; document.getElementById('pName').value=p.name; document.getElementById('pCategory').value=p.category;
-  document.getElementById('pSizes').value=(p.sizes||[]).join(', '); document.getElementById('pPriceBs').value=p.price_bs; document.getElementById('pPriceUsdt').value=p.price_usdt;
-  document.getElementById('pStock').value=p.stock; document.getElementById('pBadge').value=p.badge||''; document.getElementById('pActive').checked=p.is_active;
+  document.getElementById('pId').value=p.id; 
+  document.getElementById('pName').value=p.name; 
+  document.getElementById('pCategory').value=p.category;
+  document.getElementById('pSizes').value=(p.sizes||[]).join(', '); 
+  document.getElementById('pPriceBs').value=p.price_bs; 
+  document.getElementById('pPriceUsdt').value=p.price_usdt;
+  document.getElementById('pStock').value=p.stock; 
+  document.getElementById('pBadge').value=p.badge||''; 
+  document.getElementById('pActive').checked=p.is_active;
   document.getElementById('pDescription').value=p.description || '';
-  if(p.image_url){ document.getElementById('imgPreview').src=p.image_url; document.getElementById('imgPreview').style.display='block'; } else { document.getElementById('imgPreview').style.display='none'; }
+  
+  if(p.image_url){ document.getElementById('imgPreview').src=p.image_url; document.getElementById('imgPreview').style.display='block'; } 
+  else { document.getElementById('imgPreview').style.display='none'; }
+
+  // Cargar vista previa de la galería existente
+  const galleryContainer = document.getElementById('galleryPreview');
+  galleryContainer.innerHTML = '';
+  if(p.gallery && p.gallery.length > 0) {
+    p.gallery.forEach(url => {
+      galleryContainer.innerHTML += `<img src="${url}">`;
+    });
+  }
+  
   document.getElementById('productModal').classList.add('open');
 }
-function previewImage(event){ const file = event.target.files[0]; if(!file) return; const reader = new FileReader(); reader.onload = e => { document.getElementById('imgPreview').src=e.target.result; document.getElementById('imgPreview').style.display='block'; }; reader.readAsDataURL(file); }
+
+function previewImage(event){ 
+  const file = event.target.files[0]; if(!file) return; 
+  const reader = new FileReader(); 
+  reader.onload = e => { document.getElementById('imgPreview').src=e.target.result; document.getElementById('imgPreview').style.display='block'; }; 
+  reader.readAsDataURL(file); 
+}
+
 async function saveProduct(e){
-  e.preventDefault(); const btn = document.getElementById('btnSaveProduct'); btn.disabled=true;
-  const id=document.getElementById('pId').value, name=document.getElementById('pName').value.trim(), category=document.getElementById('pCategory').value, sizes=document.getElementById('pSizes').value.split(',').map(s=>s.trim()), price_bs=parseFloat(document.getElementById('pPriceBs').value), price_usdt=parseFloat(document.getElementById('pPriceUsdt').value), stock=parseInt(document.getElementById('pStock').value), badge=document.getElementById('pBadge').value.trim(), description=document.getElementById('pDescription').value.trim(), is_active=document.getElementById('pActive').checked, imageFile=document.getElementById('pImage').files[0];
+  e.preventDefault(); 
+  const btn = document.getElementById('btnSaveProduct'); 
+  btn.disabled=true; 
+  btn.textContent = "Guardando...";
+  
+  const id=document.getElementById('pId').value;
+  const name=document.getElementById('pName').value.trim();
+  const category=document.getElementById('pCategory').value;
+  const sizes=document.getElementById('pSizes').value.split(',').map(s=>s.trim());
+  const price_bs=parseFloat(document.getElementById('pPriceBs').value);
+  const price_usdt=parseFloat(document.getElementById('pPriceUsdt').value);
+  const stock=parseInt(document.getElementById('pStock').value);
+  const badge=document.getElementById('pBadge').value.trim();
+  const description=document.getElementById('pDescription').value.trim();
+  const is_active=document.getElementById('pActive').checked;
+  
+  const imageFile = document.getElementById('pImage').files[0];
+  const galleryFiles = document.getElementById('pGallery').files;
+
   try {
     let image_url = null;
+    
+    // 1. Subir imagen principal si hay
     if (imageFile) {
       const fileToUpload = await imageCompression(imageFile, { maxSizeMB: 0.5, maxWidthOrHeight: 1000, useWebWorker: true });
-      const fileName = `${Date.now()}.${fileToUpload.name.split('.').pop()}`;
+      const fileName = `${Date.now()}_main.${fileToUpload.name.split('.').pop()}`;
       await supabaseClient.storage.from('product-images').upload(fileName, fileToUpload);
       image_url = supabaseClient.storage.from('product-images').getPublicUrl(fileName).data.publicUrl;
     }
+
+    // 2. Subir imágenes de la galería si hay
+    let galleryUrls = [];
+    if (galleryFiles && galleryFiles.length > 0) {
+      btn.textContent = "Subiendo galería...";
+      for (let i = 0; i < galleryFiles.length; i++) {
+        const file = galleryFiles[i];
+        const fileToUpload = await imageCompression(file, { maxSizeMB: 0.5, maxWidthOrHeight: 1000, useWebWorker: true });
+        const fileName = `${Date.now()}_gal_${i}.${fileToUpload.name.split('.').pop()}`;
+        await supabaseClient.storage.from('product-images').upload(fileName, fileToUpload);
+        const publicUrl = supabaseClient.storage.from('product-images').getPublicUrl(fileName).data.publicUrl;
+        galleryUrls.push(publicUrl);
+      }
+    }
+
     const productData = { name, category, sizes, price_bs, price_usdt, stock, badge, description, is_active };
+    
+    // Asignar imagen principal
     if(image_url) productData.image_url = image_url;
     else if(id) productData.image_url = allProducts.find(x=>x.id===id)?.image_url;
+
+    // Asignar galería (si se subieron nuevas, reemplazan a las anteriores)
+    if(galleryUrls.length > 0) {
+      productData.gallery = galleryUrls;
+    } else if (id) {
+      // Si editamos y no subimos nuevas fotos, mantenemos las que tenía
+      productData.gallery = allProducts.find(x=>x.id===id)?.gallery || [];
+    } else {
+      productData.gallery = []; // Si es nuevo y no subió galería
+    }
 
     if(id) await supabaseClient.from('products').update(productData).eq('id', id);
     else await supabaseClient.from('products').insert([productData]);
     
-    document.getElementById('productModal').classList.remove('open'); loadProducts();
-  } catch(err) { alert(err.message); } finally { btn.disabled=false; }
+    document.getElementById('productModal').classList.remove('open'); 
+    loadProducts();
+  } catch(err) { 
+    alert("Error al guardar: " + err.message); 
+  } finally { 
+    btn.disabled=false; 
+    btn.textContent = "Guardar";
+  }
 }
 
 async function loadUsers(){
@@ -748,7 +749,9 @@ async function loadUsers(){
     </tr>
   `).join('');
 }
+
 function openUserForm(){ document.getElementById('userForm').reset(); document.getElementById('userModal').classList.add('open'); }
+
 async function saveUser(e){
   e.preventDefault(); const btn = document.getElementById('btnSaveUser'); btn.disabled=true;
   try {
