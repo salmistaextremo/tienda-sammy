@@ -72,9 +72,11 @@
   
   .status-select{ padding:10px 16px; border-radius:var(--radius-sm); background:var(--bg); border:1px solid var(--border); font-size:13px; font-weight:600; outline:none; cursor:pointer; max-width: 100%; }
   
-  .btn-sm{ padding:8px 14px; border-radius:8px; font-size:13px; font-weight:600; }
-  .btn-view{ background:var(--bg); border:1px solid var(--border); margin-right:8px; cursor:pointer; } 
+  .btn-sm{ padding:8px 14px; border-radius:8px; font-size:13px; font-weight:600; transition: all 0.2s; }
+  .btn-view{ background:var(--bg); border:1px solid var(--border); cursor:pointer; } 
   .btn-view:hover{ border-color:var(--text); }
+  .btn-delete{ background:#fee2e2; color:#991b1b; border: none; margin-left: 8px; cursor: pointer;}
+  .btn-delete:hover{ background:#fca5a5; }
   .btn-new{ background:var(--accent); color:#111; padding:10px 20px; border-radius:var(--radius-sm); font-weight:700; font-size:14px; cursor:pointer; }
 
   /* MODALES */
@@ -97,9 +99,22 @@
   .receipt-img-preview { width: 100%; max-height: 300px; object-fit: contain; border-radius: 8px; margin-top: 10px; border: 1px solid var(--border); cursor: pointer; }
 
   /* VISTA PREVIA DE GALERÍA */
-  .gallery-preview { display: flex; gap: 10px; margin-top: 10px; overflow-x: auto; padding-bottom: 8px; }
+  .file-upload-box {
+    border: 1px dashed var(--border);
+    padding: 12px;
+    border-radius: var(--radius-md);
+    background: var(--bg);
+    margin-bottom: 8px;
+  }
+  .file-upload-box input[type="file"] {
+    width: 100%;
+    font-size: 13px;
+    color: var(--muted);
+    cursor: pointer;
+  }
+  .gallery-preview { display: flex; gap: 8px; margin-top: 10px; overflow-x: auto; padding-bottom: 8px; }
   .gallery-preview::-webkit-scrollbar { height: 4px; }
-  .gallery-preview img { width: 60px; height: 75px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border); }
+  .gallery-preview img { width: 50px; height: 65px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border); }
 
   @media(max-width:800px){ 
     .admin-header{ padding:0 20px; height: 64px; } 
@@ -265,8 +280,8 @@
       <div class="form-group"><label>Tallas (coma separada) *</label><input type="text" id="pSizes" required placeholder="S, M, L"></div>
       
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
-        <div class="form-group"><label>Precio Bs *</label><input type="number" step="0.01" id="pPriceBs" required></div>
-        <div class="form-group"><label>Precio USDT *</label><input type="number" step="0.01" id="pPriceUsdt" required></div>
+        <div class="form-group"><label>Precio en $ (USD) *</label><input type="number" step="0.01" id="pPriceUsdt" required></div>
+        <div class="form-group"><label>Precio en Bs *</label><input type="number" step="0.01" id="pPriceBs" required></div>
       </div>
       
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
@@ -277,15 +292,19 @@
       <!-- IMAGEN PRINCIPAL -->
       <div class="form-group">
         <label>Imagen Principal (Portada)</label>
-        <input type="file" id="pImage" accept="image/*" onchange="previewImage(event)">
+        <div class="file-upload-box">
+          <input type="file" id="pImage" accept="image/*" onchange="previewImage(event)">
+        </div>
         <img id="imgPreview" style="display:none; width:100%; height:150px; object-fit:cover; margin-top:10px; border-radius:8px;">
       </div>
 
-      <!-- GALERÍA DE IMÁGENES EXTRA -->
+      <!-- GALERÍA ADICIONAL -->
       <div class="form-group">
-        <label>Galería Adicional (Selecciona varias fotos)</label>
-        <input type="file" id="pGallery" accept="image/*" multiple>
-        <p style="font-size:12px; color:var(--muted); margin-top:4px;">Si subes nuevas fotos, reemplazarán a las anteriores.</p>
+        <label>Galería Adicional (Fotos Extra)</label>
+        <div class="file-upload-box">
+          <input type="file" id="pGallery" accept="image/*" multiple>
+        </div>
+        <p style="font-size:12px; color:var(--muted); margin-top:4px;">Puedes seleccionar varias fotos a la vez. Reemplazarán a las anteriores.</p>
         <div id="galleryPreview" class="gallery-preview"></div>
       </div>
 
@@ -320,6 +339,8 @@ const tempSupabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 let currentUserId = null, currentUserRole = null;
 let allOrdersData = [], allProducts = [], allUsers = [], allInstallments = [];
+
+const fmtUSD = n => "$ " + Number(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
 const fmtBs = n => "Bs " + Number(n).toLocaleString('es-VE',{minimumFractionDigits:0,maximumFractionDigits:2});
 
 if ('serviceWorker' in navigator) {
@@ -379,8 +400,8 @@ function calculateKPIs() {
     }
   });
 
-  document.getElementById('kpiSalesBs').textContent = fmtBs(salesBs);
-  document.getElementById('kpiSalesUsdt').textContent = "≈ " + salesUsdt.toFixed(2) + " USDT";
+  document.getElementById('kpiSalesBs').textContent = fmtUSD(salesUsdt); // Pedido: Todo en $
+  document.getElementById('kpiSalesUsdt').textContent = "≈ " + fmtBs(salesBs);
   document.getElementById('kpiPendingOrders').textContent = pendingOrdersCount;
 
   let pendingPayments = 0;
@@ -445,8 +466,8 @@ async function loadOrders(){
       <tr>
         <td data-label="Pedido"><strong>#${String(o.id).slice(0,8).toUpperCase()}</strong><br><small>${new Date(o.created_at).toLocaleDateString()}</small></td>
         <td data-label="Cliente">${o.customer_name}</td>
-        <td data-label="Total">${fmtBs(o.total_bs)}</td>
-        <td data-label="Saldo" style="color:${saldoBs > 0 ? 'var(--danger)' : 'var(--success)'}; font-weight:600;">${saldoBs > 0 ? fmtBs(saldoBs) : 'Pagado'}</td>
+        <td data-label="Total">${fmtUSD(o.total_usdt)}</td>
+        <td data-label="Saldo" style="color:${saldoBs > 0 ? 'var(--danger)' : 'var(--success)'}; font-weight:600;">${saldoBs > 0 ? fmtUSD(saldoBs / (Number(o.total_bs)/Number(o.total_usdt))) : 'Pagado'}</td>
         <td data-label="Estado">
           <select class="status-select" onchange="updateOrderStatus('${o.id}', this.value)">
             ${statusOptions}
@@ -474,6 +495,8 @@ function viewOrderDetails(orderId) {
   
   let abonadoBs = 0; if(o.installments) o.installments.forEach(i => { if(i.status !== 'pendiente') abonadoBs += Number(i.amount_bs || 0); });
   const saldoBs = Math.max(0, Number(o.total_bs) - abonadoBs);
+  const ratio = Number(o.total_bs) / Number(o.total_usdt);
+  const saldoUsd = saldoBs / ratio;
 
   const itemsHtml = (o.order_items || []).map(item => `
     <div class="item-detail-row">
@@ -485,7 +508,7 @@ function viewOrderDetails(orderId) {
           ${item.custom_note ? `<span class="item-detail-note">Nota: "${item.custom_note}"</span>` : ''}
         </div>
       </div>
-      <div style="font-weight:600; white-space:nowrap;">${fmtBs(item.subtotal_bs)}</div>
+      <div style="font-weight:600; white-space:nowrap;">${fmtUSD(item.subtotal_usdt)}</div>
     </div>
   `).join('');
 
@@ -496,17 +519,17 @@ function viewOrderDetails(orderId) {
       planDetailsHtml = `
         <div style="background:var(--bg); padding:16px; border-radius:8px; margin-bottom:16px;">
           <h4 style="font-size:14px; margin-bottom:8px;">Detalles del Crédito</h4>
-          <p style="font-size:13px; margin-bottom:4px;">Cuota 1 (${fmtBs(d.cuota_monto)}): ${d.cuota1_pagada ? '✅ Pagada' : '⏳ Pendiente'}</p>
-          <p style="font-size:13px; margin-bottom:4px;">Cuota 2 (${fmtBs(d.cuota_monto)}): ${d.cuota2_pagada ? '✅ Pagada' : '⏳ Pendiente'}</p>
-          <p style="font-size:13px; margin-bottom:4px;">Cuota 3 (${fmtBs(d.cuota_monto)}): ${d.cuota3_pagada ? '✅ Pagada' : '⏳ Pendiente'}</p>
+          <p style="font-size:13px; margin-bottom:4px;">Cuota 1 (${fmtUSD(d.cuota_monto / ratio)}): ${d.cuota1_pagada ? '✅ Pagada' : '⏳ Pendiente'}</p>
+          <p style="font-size:13px; margin-bottom:4px;">Cuota 2 (${fmtUSD(d.cuota_monto / ratio)}): ${d.cuota2_pagada ? '✅ Pagada' : '⏳ Pendiente'}</p>
+          <p style="font-size:13px; margin-bottom:4px;">Cuota 3 (${fmtUSD(d.cuota_monto / ratio)}): ${d.cuota3_pagada ? '✅ Pagada' : '⏳ Pendiente'}</p>
         </div>
       `;
     } else if (o.payment_plan === 'apartado') {
       planDetailsHtml = `
         <div style="background:var(--bg); padding:16px; border-radius:8px; margin-bottom:16px;">
           <h4 style="font-size:14px; margin-bottom:8px;">Detalles del Apartado</h4>
-          <p style="font-size:13px; margin-bottom:4px;">Abono Inicial: ${fmtBs(d.abono_inicial)}</p>
-          <p style="font-size:13px;">Saldo Inicial Pendiente: <strong style="color:var(--danger);">${fmtBs(d.saldo_pendiente)}</strong></p>
+          <p style="font-size:13px; margin-bottom:4px;">Abono Inicial: ${fmtUSD(d.abono_inicial / ratio)}</p>
+          <p style="font-size:13px;">Saldo Inicial Pendiente: <strong style="color:var(--danger);">${fmtUSD(d.saldo_pendiente / ratio)}</strong></p>
         </div>
       `;
     }
@@ -526,8 +549,8 @@ function viewOrderDetails(orderId) {
     </div>
     ${planDetailsHtml}
     <div style="background:var(--bg); padding:16px; border-radius:8px; font-size:14px; margin-bottom:16px;">
-      <div style="display:flex; justify-content:space-between; margin-bottom:8px;"><span>Total del Pedido:</span><strong>${fmtBs(o.total_bs)}</strong></div>
-      <div style="display:flex; justify-content:space-between;"><span>Saldo Restante:</span><strong style="color:${saldoBs > 0 ? 'var(--danger)' : 'var(--success)'};">${saldoBs > 0 ? fmtBs(saldoBs) : 'Pagado'}</strong></div>
+      <div style="display:flex; justify-content:space-between; margin-bottom:8px;"><span>Total del Pedido:</span><strong>${fmtUSD(o.total_usdt)}</strong></div>
+      <div style="display:flex; justify-content:space-between;"><span>Saldo Restante:</span><strong style="color:${saldoBs > 0 ? 'var(--danger)' : 'var(--success)'};">${saldoUsd > 0 ? fmtUSD(saldoUsd) : 'Pagado'}</strong></div>
     </div>
     <div style="background:var(--bg); padding:16px; border-radius:8px; margin-bottom:16px;">
       <h4 style="font-size:14px; margin-bottom:8px;">Método de Pago Inicial</h4>
@@ -548,8 +571,8 @@ async function loadInstallments(){
   tbody.innerHTML = allInstallments.map(i => `
     <tr>
       <td data-label="Pedido">#${String(i.order_id).slice(0,8)}</td>
-      <td data-label="Monto Bs">${fmtBs(i.amount_bs)}</td>
-      <td data-label="Monto USDT">${Number(i.amount_usdt).toFixed(2)}</td>
+      <td data-label="Monto Bs">${fmtUSD(i.amount_usdt)}</td>
+      <td data-label="Monto USDT" style="font-size: 11px; color: var(--muted);">${fmtBs(i.amount_bs)}</td>
       <td data-label="Método">${i.method}</td>
       <td data-label="Referencia">${i.reference || '-'}</td>
       <td data-label="Fecha">${new Date(i.paid_at).toLocaleDateString()}</td>
@@ -611,11 +634,26 @@ async function loadProducts(){
     <tr>
       <td data-label="Producto"><strong>${p.name}</strong></td>
       <td data-label="Categoría">${p.category}</td>
-      <td data-label="Precios">${fmtBs(p.price_bs)}</td>
+      <td data-label="Precios">${fmtUSD(p.price_usdt)}<br><small style="color:var(--muted);">${fmtBs(p.price_bs)}</small></td>
       <td data-label="Stock">${p.stock}</td>
-      <td data-label="Acciones"><button class="btn-sm btn-view" onclick="editProduct('${p.id}')">Editar</button></td>
+      <td data-label="Acciones">
+        <button class="btn-sm btn-view" onclick="editProduct('${p.id}')">Editar</button>
+        <button class="btn-sm btn-delete" onclick="deleteProduct('${p.id}')">Eliminar</button>
+      </td>
     </tr>
   `).join('');
+}
+
+// NUEVA FUNCIÓN DE ELIMINAR
+async function deleteProduct(id) {
+  if(!confirm("¿Estás seguro de que deseas eliminar este producto permanentemente? Esta acción no se puede deshacer.")) return;
+  try {
+    const { error } = await supabaseClient.from('products').delete().eq('id', id);
+    if(error) throw error;
+    loadProducts();
+  } catch(err) {
+    alert("Error al eliminar: " + err.message);
+  }
 }
 
 function openProductForm(){ 
@@ -632,8 +670,8 @@ function editProduct(id){
   document.getElementById('pName').value=p.name; 
   document.getElementById('pCategory').value=p.category;
   document.getElementById('pSizes').value=(p.sizes||[]).join(', '); 
-  document.getElementById('pPriceBs').value=p.price_bs; 
-  document.getElementById('pPriceUsdt').value=p.price_usdt;
+  document.getElementById('pPriceUsdt').value=p.price_usdt; 
+  document.getElementById('pPriceBs').value=p.price_bs;
   document.getElementById('pStock').value=p.stock; 
   document.getElementById('pBadge').value=p.badge||''; 
   document.getElementById('pActive').checked=p.is_active;
@@ -642,7 +680,6 @@ function editProduct(id){
   if(p.image_url){ document.getElementById('imgPreview').src=p.image_url; document.getElementById('imgPreview').style.display='block'; } 
   else { document.getElementById('imgPreview').style.display='none'; }
 
-  // Cargar vista previa de la galería existente
   const galleryContainer = document.getElementById('galleryPreview');
   galleryContainer.innerHTML = '';
   if(p.gallery && p.gallery.length > 0) {
@@ -671,8 +708,8 @@ async function saveProduct(e){
   const name=document.getElementById('pName').value.trim();
   const category=document.getElementById('pCategory').value;
   const sizes=document.getElementById('pSizes').value.split(',').map(s=>s.trim());
-  const price_bs=parseFloat(document.getElementById('pPriceBs').value);
   const price_usdt=parseFloat(document.getElementById('pPriceUsdt').value);
+  const price_bs=parseFloat(document.getElementById('pPriceBs').value);
   const stock=parseInt(document.getElementById('pStock').value);
   const badge=document.getElementById('pBadge').value.trim();
   const description=document.getElementById('pDescription').value.trim();
@@ -706,20 +743,17 @@ async function saveProduct(e){
       }
     }
 
-    const productData = { name, category, sizes, price_bs, price_usdt, stock, badge, description, is_active };
+    const productData = { name, category, sizes, price_usdt, price_bs, stock, badge, description, is_active };
     
-    // Asignar imagen principal
     if(image_url) productData.image_url = image_url;
     else if(id) productData.image_url = allProducts.find(x=>x.id===id)?.image_url;
 
-    // Asignar galería (si se subieron nuevas, reemplazan a las anteriores)
     if(galleryUrls.length > 0) {
       productData.gallery = galleryUrls;
     } else if (id) {
-      // Si editamos y no subimos nuevas fotos, mantenemos las que tenía
       productData.gallery = allProducts.find(x=>x.id===id)?.gallery || [];
     } else {
-      productData.gallery = []; // Si es nuevo y no subió galería
+      productData.gallery = [];
     }
 
     if(id) await supabaseClient.from('products').update(productData).eq('id', id);
