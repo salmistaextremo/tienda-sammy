@@ -94,7 +94,6 @@
   .modal-wrap.open{ display:flex; } .modal{ background:var(--surface); border-radius:var(--radius-lg); max-width:900px; width:100%; max-height:92vh; overflow-y:auto; position:relative; }
   .modal-x{ position:absolute; top:20px; right:20px; z-index:2; width:36px; height:36px; border-radius:50%; background:var(--bg); display:grid; place-items:center; cursor:pointer; }
   
-  /* DISEÑO DEL MODAL DEL PRODUCTO CON CARRUSEL */
   .detail{ display:grid; grid-template-columns:1fr 1fr; } 
   .detail-img-wrap{ background:var(--bg); padding:32px; display: flex; flex-direction: column; justify-content: center; align-items: center;}
   
@@ -115,7 +114,6 @@
   .s-opt{ min-width:48px; padding:12px 16px; border-radius:8px; border:1px solid var(--border); cursor: pointer; transition: all 0.2s;} .s-opt.selected{ background:var(--text); color:#fff; }
   textarea.notes-input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); margin-bottom: 24px; resize: vertical; min-height: 60px; outline: none; }
   
-  /* CHECKOUT */
   .checkout{ max-width:600px; padding:40px; } .plans{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:24px; }
   .plan{ padding:16px; border-radius:var(--radius-md); border:1px solid var(--border); text-align:center; cursor:pointer; transition: all 0.2s;} .plan.selected{ border-color:var(--text); background:var(--bg); }
   .methods{ display:flex; flex-direction:column; gap:8px; margin-bottom:24px; } .method{ padding:16px; border-radius:var(--radius-md); border:1px solid var(--border); cursor:pointer; transition: all 0.2s;} .method.selected{ border-color:var(--text); background:var(--bg); }
@@ -127,14 +125,12 @@
   .file-upload-wrapper:hover { border-color: var(--text); }
   .auth-modal { max-width: 420px; padding: 40px; }
 
-  /* POPUP PROMOCIONAL */
   .promo-modal { max-width: 450px; padding: 0; overflow: hidden; text-align: center; border-radius: var(--radius-lg); }
   .promo-modal img { width: 100%; height: 250px; object-fit: cover; }
   .promo-content { padding: 32px; }
   .promo-title { font-size: 24px; font-weight: 800; margin-bottom: 8px; color: var(--text); line-height: 1.1; }
   .promo-text { font-size: 15px; color: var(--muted); margin-bottom: 24px; }
   
-  /* FOOTER */
   .footer{ background:var(--surface); border-top:1px solid var(--border); padding:64px 0 32px; } 
   .fgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 40px; margin-bottom: 48px; align-items: start; }
   .fgrid > div:first-child { grid-column: span 2; max-width: 300px; }
@@ -196,7 +192,6 @@
   </div>
 </header>
 
-<!-- HERO CARRUSEL -->
 <section class="hero">
   <div class="container">
     <div class="hero-carousel">
@@ -302,7 +297,6 @@
   <div class="drawer-foot" id="cartFoot"></div>
 </aside>
 
-<!-- MODALES -->
 <div class="modal-wrap" id="productModal" onclick="closeProduct(event)"><div class="modal" id="productModalInner"></div></div>
 <div class="modal-wrap" id="checkoutModal" onclick="closeCheckout(event)"><div class="modal checkout" id="checkoutModalInner"></div></div>
 
@@ -324,7 +318,6 @@
   </div>
 </div>
 
-<!-- NUEVO MODAL PROMOCIONAL DINÁMICO -->
 <div class="modal-wrap" id="promoModal" onclick="if(event.target.id==='promoModal') closePromoModal()">
   <div class="modal promo-modal">
     <button class="modal-x" onclick="closePromoModal()">✕</button>
@@ -350,6 +343,14 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 let PRODUCTS = [], cart = [], currentFilter = "todo", selectedSize = null, currentProduct = null, currentQty = 1, paymentPlan = "contado", paymentMethod = "bs_transfer";
 let isLoginMode = true;
 
+// FUNCIÓN DE SEGURIDAD XSS
+function escapeHTML(str) {
+  if (!str) return '';
+  return String(str).replace(/[&<>'"]/g, 
+    tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag])
+  );
+}
+
 const fmtUSD = n => "$ " + Number(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
 const fmtBs = n => "Bs " + Number(n).toLocaleString('es-VE',{minimumFractionDigits:0,maximumFractionDigits:2});
 
@@ -359,19 +360,6 @@ let heroInterval;
 
 const CATEGORIES = [{ key:"todo", label:"Todo" }, { key:"oversize", label:"Oversize" }, { key:"camisetas", label:"Camisetas" }, {key: "pantalones", label: "Pantalones"}];
 const getProduct = id => PRODUCTS.find(p => p.id === id);
-
- function escapeHTML(str) {
-  if (!str) return '';
-  return String(str).replace(/[&<>'"]/g, 
-    tag => ({
-      '&': '&amp;',
-      '<': '&lt;',
-      '>': '&gt;',
-      "'": '&#39;',
-      '"': '&quot;'
-    }[tag])
-  );
-}
 
 function goToSlide(index) {
   currentHeroSlide = index;
@@ -426,16 +414,13 @@ async function loadSiteConfig() {
   const { data, error } = await supabaseClient.from('site_config').select('*').eq('id', 1).single();
   if(error) { console.error("Error cargando config:", error); return; }
 
-  // 1. Actualizar imágenes del Hero
   if(data.hero_images && data.hero_images.length >= 3) {
     document.getElementById('heroImg1').src = data.hero_images[0] || '';
     document.getElementById('heroImg2').src = data.hero_images[1] || '';
     document.getElementById('heroImg3').src = data.hero_images[2] || '';
   }
 
-  // 2. Mostrar Popup de Promoción (si está activo)
   if (data.promo_active && data.promo_image) {
-    // Verificamos si el usuario ya cerró el popup en esta sesión
     if (!sessionStorage.getItem('promoShown')) {
       setTimeout(() => {
         document.getElementById('promoModalImg').src = data.promo_image;
@@ -445,14 +430,14 @@ async function loadSiteConfig() {
         const btn = document.getElementById('promoModalBtn');
         if(data.promo_link) {
           btn.style.display = 'inline-flex';
-          btn.setAttribute('onclick', `window.location.href='${data.promo_link}'`);
+          btn.setAttribute('onclick', `window.location.href='${escapeHTML(data.promo_link)}'`);
         } else {
           btn.style.display = 'none';
         }
 
         document.getElementById('promoModal').classList.add('open');
-        sessionStorage.setItem('promoShown', 'true'); // Evita que vuelva a salir si recargan la página
-      }, 1500); // Espera 1.5 segundos después de cargar
+        sessionStorage.setItem('promoShown', 'true');
+      }, 1500);
     }
   }
 }
@@ -488,13 +473,13 @@ function renderProducts(){
   document.getElementById('productGrid').innerHTML = list.map(p => `
     <div class="product-card" onclick="openProduct('${p.id}')">
       <div class="product-image">
-        <img src="${p.image_url || ''}" alt="${p.name}" loading="lazy">
-        ${p.badge ? `<span class="product-badge">${p.badge}</span>` : ''}
+        <img src="${p.image_url || ''}" alt="${escapeHTML(p.name)}" loading="lazy">
+        ${p.badge ? `<span class="product-badge">${escapeHTML(p.badge)}</span>` : ''}
         ${p.stock <= 0 ? `<div class="out-of-stock-badge">AGOTADO</div>` : ''}
       </div>
       <div class="product-info">
-        <div class="product-cat">${p.category}</div>
-        <div class="product-name">${p.name}</div>
+        <div class="product-cat">${escapeHTML(p.category)}</div>
+        <div class="product-name">${escapeHTML(p.name)}</div>
         <div class="product-prices">
           <div class="price-usd">${fmtUSD(p.price_usdt)}</div>
           <div class="price-bs">${fmtBs(p.price_bs)}</div>
@@ -539,8 +524,8 @@ function openProduct(id){
         </div>
       </div>
       <div class="detail-info">
-        <div class="pcat" style="text-transform: uppercase; font-size: 12px; letter-spacing: 1px; color: var(--muted); margin-bottom: 8px;">${p.category}</div>
-        <h3>${p.name}</h3>
+        <div class="pcat" style="text-transform: uppercase; font-size: 12px; letter-spacing: 1px; color: var(--muted); margin-bottom: 8px;">${escapeHTML(p.category)}</div>
+        <h3>${escapeHTML(p.name)}</h3>
         <div class="dprice">${fmtUSD(p.price_usdt)}</div>
         <div class="dusdt">≈ ${fmtBs(p.price_bs)}</div>
 
@@ -617,9 +602,9 @@ function renderCart(){
     <div class="cart-item">
       <img src="${it.image_url || ''}">
       <div class="ci-info">
-        <div class="ci-name">${it.name}</div>
+        <div class="ci-name">${escapeHTML(it.name)}</div>
         <div class="ci-meta">Talla: ${it.size}</div>
-        ${it.note ? `<div class="ci-note">📝 ${it.note}</div>` : ''}
+        ${it.note ? `<div class="ci-note">📝 ${escapeHTML(it.note)}</div>` : ''}
         <div class="ci-row">
           <div class="qty"><button onclick="changeQty(${idx},-1)">−</button><span>${it.qty}</span><button onclick="changeQty(${idx},1)">+</button></div>
           <div class="ci-price">${fmtUSD(it.price_usdt*it.qty)}</div>
@@ -716,7 +701,7 @@ function renderCheckout(prefName){
     <h3>Finalizar Pedido</h3><p class="sub">Confirma tus datos y elige cómo pagar.</p>
 
     <div class="dlabel">Datos de contacto</div>
-    <div class="field"><input id="fName" type="text" placeholder="Nombre completo" value="${prefName}" readonly style="background:#f0f0f0;"></div>
+    <div class="field"><input id="fName" type="text" placeholder="Nombre completo" value="${escapeHTML(prefName)}" readonly style="background:#f0f0f0;"></div>
     <div class="field"><input id="fPhone" type="text" placeholder="Teléfono / WhatsApp (para la entrega)"></div>
 
     <div class="dlabel" style="margin-top:24px;">Modalidad de pago</div>
@@ -873,7 +858,7 @@ async function submitOrder(){
     const { data: { session } } = await supabaseClient.auth.getSession();
     if (!session) throw new Error("Tu sesión ha expirado.");
     
-    let receipt_url = null;
+    let receipt_fileName = null;
     const fileInput = document.getElementById('fReceipt');
     if (fileInput && fileInput.files.length > 0) {
       btn.textContent = "Subiendo comprobante...";
@@ -882,17 +867,22 @@ async function submitOrder(){
       const compressedFile = await imageCompression(file, options);
       const ext = compressedFile.name.split('.').pop();
       const fileName = `receipt_${session.user.id}_${Date.now()}.${ext}`;
+      
       const { error: uploadError } = await supabaseClient.storage.from('receipts').upload(fileName, compressedFile);
       if (uploadError) throw new Error("Error al subir comprobante: " + uploadError.message);
-      receipt_url = supabaseClient.storage.from('receipts').getPublicUrl(fileName).data.publicUrl;
+      
+      // SEGURIDAD: Guardamos solo el nombre del archivo, NO la URL pública.
+      receipt_fileName = fileName; 
     }
 
     btn.textContent = "Guardando pedido...";
 
+    // NOTA: Aunque enviamos total_bs y total_usdt, el TRIGGER en la base de datos los ignorará
+    // y los recalculará de forma segura en el servidor.
     const { data: orderData, error: orderErr } = await supabaseClient.from('orders').insert({
       customer_name: name, customer_phone: phone, customer_email: session.user.email, user_id: session.user.id,
       payment_plan: paymentPlan, payment_method: paymentMethod, total_bs: totalBs, total_usdt: totalUsdt, 
-      status: 'pendiente', receipt_url: receipt_url,
+      status: 'pendiente', receipt_url: receipt_fileName,
       payment_plan_details: planDetails
     }).select().single();
     
@@ -937,7 +927,7 @@ document.addEventListener('DOMContentLoaded', () => {
   renderCart();
   suscribirseProductos();
   startHeroAutoplay(); 
-  loadSiteConfig(); // <-- LLAMAMOS A LA CONFIGURACIÓN AQUÍ
+  loadSiteConfig();
   supabaseClient.auth.getSession().then(({data: {session}}) => { if(session) document.getElementById('btnAccount').style.display = 'inline-block'; });
 });
 </script>
