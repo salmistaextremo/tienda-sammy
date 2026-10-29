@@ -14,16 +14,27 @@
 <link rel="icon" type="image/png" href="https://zxhufobqfxmbjpneyiam.supabase.co/storage/v1/object/public/brand-assets/icon-192.png">
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
-  :root{ --bg:#fcfbf8; --surface:#ffffff; --text:#111111; --muted:#767676; --border:#e8e5df; --accent:#ffea61; --danger:#ef4444; --success:#22c55e; --warning:#d97706; --radius-lg:24px; --radius-md:16px; --radius-sm:100px; }
-  html,body{ background:var(--bg); color:var(--text); font-family:'Outfit',sans-serif; min-height: 100vh; display: flex; flex-direction: column; }
-  button{ font-family:inherit; cursor:pointer; border:none; background:none; color:inherit; } a{ color:inherit; text-decoration:none; }
+  :root{ 
+    --bg:#fcfbf8; --surface:#ffffff; --text:#111111; --muted:#767676; --border:#e8e5df; 
+    --accent:#ffea61; --danger:#ef4444; --success:#22c55e; --warning:#d97706; 
+    --radius-lg:24px; --radius-md:16px; --radius-sm:100px; 
+  }
+  html,body{ 
+    background:var(--bg); color:var(--text); font-family:'Outfit',sans-serif; 
+    min-height: 100vh; display: flex; flex-direction: column; 
+    padding-bottom: 80px; /* Espacio para el menú inferior */
+  }
+  button{ font-family:inherit; cursor:pointer; border:none; background:none; color:inherit; } 
+  a{ color:inherit; text-decoration:none; }
   .container{ max-width:900px; margin:0 auto; padding:0 24px; width: 100%; }
   
-  .header{ border-bottom:1px solid var(--border); padding: 20px 0; } 
+  /* HEADER */
+  .header{ border-bottom:1px solid var(--border); padding: 20px 0; background: var(--surface); } 
   .header-inner{ display:flex; align-items:center; justify-content:space-between; }
   .logo img { height: 40px; width: auto; object-fit: contain; }
   .btn-back { font-size: 14px; font-weight: 600; color: var(--muted); } .btn-back:hover { color: var(--text); }
   
+  /* LOGIN */
   .auth-screen { flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px 20px; }
   .auth-card { background: var(--surface); padding: 48px; border-radius: var(--radius-lg); width: 100%; max-width: 420px; box-shadow: 0 10px 40px rgba(0,0,0,0.03); border: 1px solid var(--border); }
   .auth-card h2 { font-size: 24px; font-weight: 700; margin-bottom: 8px; text-align: center; } .auth-card p { font-size: 14px; color: var(--muted); text-align: center; margin-bottom: 32px; }
@@ -34,15 +45,16 @@
   .auth-switch { text-align: center; margin-top: 24px; font-size: 14px; color: var(--muted); } .auth-switch button { color: var(--text); font-weight: 600; text-decoration: underline; }
   .err { color: var(--danger); font-size: 13px; margin-top: 12px; text-align: center; }
 
-  .dashboard { flex: 1; padding: 40px 0 80px; display: none; }
-  .dash-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 32px; }
-  .dash-header h1 { font-size: 32px; font-weight: 700; } .dash-header p { font-size: 15px; color: var(--muted); }
-  .btn-logout { font-size: 14px; font-weight: 600; color: var(--danger); border: 1px solid var(--border); padding: 10px 20px; border-radius: var(--radius-sm); cursor:pointer; }
+  /* DASHBOARD */
+  .dashboard { flex: 1; padding: 32px 0 40px; display: none; }
+  .dash-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 24px; }
+  .dash-header h1 { font-size: 28px; font-weight: 700; } .dash-header p { font-size: 15px; color: var(--muted); }
+  .btn-logout { font-size: 13px; font-weight: 600; color: var(--danger); border: 1px solid var(--border); padding: 8px 16px; border-radius: var(--radius-sm); cursor:pointer; }
   
-  .order-card { background: var(--surface); border-radius: var(--radius-lg); border: 1px solid var(--border); padding: 24px; margin-bottom: 20px; }
-  .order-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 16px; }
+  .order-card { background: var(--surface); border-radius: var(--radius-lg); border: 1px solid var(--border); padding: 24px; margin-bottom: 16px; }
+  .order-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 16px; }
   .order-id { font-size: 18px; font-weight: 700; } .order-date { font-size: 13px; color: var(--muted); margin-top: 4px; }
-  .order-status { padding: 6px 14px; border-radius: var(--radius-sm); font-size: 12px; font-weight: 600; text-transform: uppercase; }
+  .order-status { padding: 6px 12px; border-radius: var(--radius-sm); font-size: 11px; font-weight: 700; text-transform: uppercase; }
   
   .status-pendiente { background: #fef3c7; color: #92400e; } 
   .status-verificado { background: #dcfce7; color: #166534; } 
@@ -51,21 +63,20 @@
   .status-cuota1_confirmada, .status-cuota2_confirmada, .status-cuota3_confirmada { background: #e0e7ff; color: #3730a3; }
   .status-registro_pago { background: #fef3c7; color: #92400e; }
 
-  .order-items { margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px dashed var(--border); }
-  
-  .item-row { display: flex; gap: 16px; align-items: flex-start; font-size: 14px; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
+  .order-items { margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px dashed var(--border); }
+  .item-row { display: flex; gap: 16px; align-items: flex-start; font-size: 14px; margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
   .item-row:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
-  .item-img { width: 70px; height: 85px; object-fit: cover; border-radius: 8px; background: var(--bg); flex-shrink: 0; border: 1px solid var(--border); }
+  .item-img { width: 60px; height: 75px; object-fit: cover; border-radius: 8px; background: var(--bg); flex-shrink: 0; border: 1px solid var(--border); }
   .item-details { flex: 1; display: flex; flex-direction: column; gap: 4px; }
-  .item-title { font-weight: 600; font-size: 16px; color: var(--text); }
-  .item-variant { font-size: 13px; color: var(--muted); font-weight: 500; }
-  .item-desc { font-size: 13px; color: #444; background: var(--bg); padding: 8px 12px; border-radius: 6px; margin-top: 6px; line-height: 1.4; border-left: 3px solid var(--border); }
-  .item-note { font-size: 12px; color: #b45309; background: #fffbeb; padding: 6px 10px; border-radius: 6px; display: inline-block; margin-top: 6px; border: 1px solid #fcd34d; }
-  .item-price { font-weight: 700; font-size: 15px; white-space: nowrap; }
+  .item-title { font-weight: 600; font-size: 15px; color: var(--text); }
+  .item-variant { font-size: 12px; color: var(--muted); font-weight: 500; }
+  .item-desc { font-size: 12px; color: #444; background: var(--bg); padding: 6px 10px; border-radius: 6px; margin-top: 4px; line-height: 1.4; border-left: 3px solid var(--border); }
+  .item-note { font-size: 11px; color: #b45309; background: #fffbeb; padding: 4px 8px; border-radius: 6px; display: inline-block; margin-top: 4px; border: 1px solid #fcd34d; }
+  .item-price { font-weight: 700; font-size: 14px; white-space: nowrap; }
   
-  .order-details { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
-  .detail-item { display: flex; flex-direction: column; gap: 4px; }
-  .detail-label { font-size: 12px; color: var(--muted); text-transform: uppercase; font-weight: 600; }
+  .order-details { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .detail-item { display: flex; flex-direction: column; gap: 2px; }
+  .detail-label { font-size: 11px; color: var(--muted); text-transform: uppercase; font-weight: 600; }
   .detail-value { font-size: 16px; font-weight: 600; } .detail-sub { font-size: 12px; color: var(--muted); }
   .text-danger { color: var(--danger); } .text-success { color: var(--success); }
   .text-warning { color: var(--warning); }
@@ -76,24 +87,70 @@
   .view-receipt-btn:hover { background: #16a34a; }
   
   .plan-details-box { background: var(--bg); padding: 16px; border-radius: var(--radius-md); margin-bottom: 16px; font-size: 14px; }
-  .loyalty-banner { background: #ecfdf5; border: 1px solid #10b981; padding: 20px; border-radius: var(--radius-md); margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; }
+  .loyalty-banner { background: #ecfdf5; border: 1px solid #10b981; padding: 16px; border-radius: var(--radius-md); margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;}
   .loyalty-banner p { color: #065f46; font-weight: 500; font-size: 14px; margin: 0; }
-  .btn-loyalty { background: #10b981; color: #fff; padding: 10px 20px; border-radius: var(--radius-sm); font-weight: 600; font-size: 14px; cursor:pointer; }
+  .btn-loyalty { background: #10b981; color: #fff; padding: 8px 16px; border-radius: var(--radius-sm); font-weight: 600; font-size: 13px; cursor:pointer; }
   .btn-loyalty:disabled { background: #d1fae5; color: #065f46; cursor: not-allowed; }
 
-  .modal-wrap{ position:fixed; inset:0; z-index:200; display:none; align-items:center; justify-content:center; padding:20px; background:rgba(0,0,0,0.5); backdrop-filter:blur(5px); overflow-y:auto; }
+  /* NAVEGACIÓN INFERIOR (ESTILO APP) */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    height: 70px;
+    z-index: 1000;
+    padding-bottom: env(safe-area-inset-bottom); /* Soporte para iPhone */
+  }
+  .nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 600;
+    transition: all 0.2s;
+    flex: 1;
+    height: 100%;
+    justify-content: center;
+  }
+  .nav-item .icon {
+    font-size: 20px;
+    transition: transform 0.2s;
+  }
+  .nav-item.active {
+    color: var(--text);
+  }
+  .nav-item.active .icon {
+    transform: translateY(-2px) scale(1.1);
+  }
+  .nav-item.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    width: 40%;
+    height: 3px;
+    background: var(--accent);
+    border-radius: 3px 3px 0 0;
+  }
+
+  /* MODALES */
+  .modal-wrap{ position:fixed; inset:0; z-index:2000; display:none; align-items:center; justify-content:center; padding:20px; background:rgba(0,0,0,0.5); backdrop-filter:blur(5px); overflow-y:auto; }
   .modal-wrap.open{ display:flex; }
-  .modal{ background:var(--surface); border-radius:var(--radius-lg); max-width:500px; width:100%; max-height:92vh; overflow-y:auto; position:relative; padding:40px; }
-  .modal-x{ position:absolute; top:20px; right:20px; width:36px; height:36px; border-radius:50%; background:var(--bg); display:grid; place-items:center; cursor:pointer; }
+  .modal{ background:var(--surface); border-radius:var(--radius-lg); max-width:500px; width:100%; max-height:92vh; overflow-y:auto; position:relative; padding:32px; }
+  .modal-x{ position:absolute; top:16px; right:16px; width:32px; height:32px; border-radius:50%; background:var(--bg); display:grid; place-items:center; cursor:pointer; }
   
   @media(max-width: 600px) { 
-    .dash-header { flex-direction: column; align-items: flex-start; gap: 16px; } 
-    .order-details { grid-template-columns: 1fr; } 
+    .dash-header { flex-direction: column; align-items: flex-start; gap: 12px; } 
+    .order-details { grid-template-columns: 1fr; gap: 12px; } 
     .btn-logout { width: 100%; text-align: center; } 
-    .loyalty-banner { flex-direction: column; gap: 16px; text-align: center; } 
-    .item-row { flex-direction: column; gap: 12px; } 
-    .item-img { width: 100%; height: 200px; } 
-    .item-price { align-self: flex-end; }
+    .item-row { flex-direction: row; gap: 12px; } 
+    .item-price { align-self: flex-start; }
+    .bottom-nav { height: 65px; }
   }
 </style>
 </head>
@@ -127,14 +184,33 @@
       <div><h1>Mis Pedidos</h1><p>Hola, <span id="userNameDisplay" style="font-weight:600; color:var(--text);"></span>.</p></div>
       <button class="btn-logout" onclick="handleLogout()">Cerrar Sesión</button>
     </div>
+    
     <div id="loyaltyBanner" class="loyalty-banner" style="display: none;">
       <p>🎉 ¡Felicidades! Por tu volumen de compras, calificas para ser <strong>Vendedor Mayorista</strong>.</p>
       <button class="btn-loyalty" id="btnRequestUpgrade" onclick="requestUpgrade()">Solicitar Ascenso</button>
     </div>
+
     <div class="orders-list" id="ordersList"></div>
   </div>
 </div>
 
+<!-- BARRA DE NAVEGACIÓN INFERIOR (ESTILO APP) -->
+<div class="bottom-nav" id="bottomNav" style="display: none;">
+  <button class="nav-item" onclick="switchPortalTab('pendientes', this)">
+    <span class="icon">⏳</span>
+    Pendientes
+  </button>
+  <button class="nav-item active" onclick="switchPortalTab('todos', this)">
+    <span class="icon">📦</span>
+    Mis Pedidos
+  </button>
+  <button class="nav-item" onclick="switchPortalTab('finalizados', this)">
+    <span class="icon">✅</span>
+    Finalizados
+  </button>
+</div>
+
+<!-- MODAL DE PAGO -->
 <div class="modal-wrap" id="paymentModal" onclick="if(event.target.id==='paymentModal') closePaymentModal()">
   <div class="modal">
     <button class="modal-x" onclick="closePaymentModal()">✕</button>
@@ -172,13 +248,14 @@
 const SUPABASE_URL = "https://zxhufobqfxmbjpneyiam.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4aHVmb2JxZnhtYmpwbmV5aWFtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMxNjk2OTEsImV4cCI6MjEwODc0NTY5MX0.EUS-QUdhuhtSk9rgLB11wz-GYF9m01JqhXfT6yT9_Vs";
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
 const fmtUSD = n => "$ " + Number(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
 const fmtBs = n => "Bs " + Number(n).toLocaleString('es-VE',{minimumFractionDigits:0,maximumFractionDigits:2});
 
 let isLoginMode = true;
 let currentUserId = null;
 let currentUserEmail = null;
+let myOrdersData = []; // Almacén local de pedidos
+let currentTab = 'todos'; // Pestaña actual
 
 const statusLabels = {
   'pendiente': 'Pendiente',
@@ -234,14 +311,19 @@ async function checkSession() {
   if (session) {
     currentUserId = session.user.id;
     currentUserEmail = session.user.email;
-    document.getElementById('authScreen').style.display = 'none'; document.getElementById('dashboardScreen').style.display = 'block';
+    document.getElementById('authScreen').style.display = 'none'; 
+    document.getElementById('dashboardScreen').style.display = 'block';
+    document.getElementById('bottomNav').style.display = 'flex'; // Mostrar barra inferior
+    
     const { data: profile } = await supabaseClient.from('profiles').select('full_name').eq('id', session.user.id).single();
     document.getElementById('userNameDisplay').textContent = profile?.full_name || session.user.user_metadata?.full_name || session.user.email;
+    
     loadMyOrders(currentUserId, currentUserEmail);
     suscribirseCambiosCliente();
   } else { 
     document.getElementById('authScreen').style.display = 'flex'; 
     document.getElementById('dashboardScreen').style.display = 'none'; 
+    document.getElementById('bottomNav').style.display = 'none'; 
   }
 }
 
@@ -271,108 +353,141 @@ async function loadMyOrders(userId, userEmail) {
     if (error) throw error;
 
     checkLoyaltyStatus(orders, userId);
+    myOrdersData = orders || [];
+    
+    renderFilteredOrders(); // Renderizar según la pestaña actual
 
-    if (!orders || orders.length === 0) { list.innerHTML = `<div class="empty-state"><h3>Aún no tienes pedidos</h3><p>Cuando compres, aparecerá aquí.</p><a href="/" class="btn-primary" style="display:inline-block; width:auto;">Ir a la tienda</a></div>`; return; }
-
-    list.innerHTML = orders.map(o => {
-      const shortId = String(o.id).slice(0,8).toUpperCase();
-      const date = new Date(o.created_at).toLocaleDateString('es-VE', { day: '2-digit', month: 'long', year: 'numeric' });
-      
-      let abonadoBs = 0;
-      let pendienteBs = 0;
-      
-      if (o.installments) {
-        o.installments.forEach(i => {
-          if (i.status === 'pendiente') {
-            pendienteBs += Number(i.amount_bs || 0);
-          } else {
-            abonadoBs += Number(i.amount_bs || 0);
-          }
-        });
-      }
-      
-      const totalBs = Number(o.total_bs);
-      const totalUsdt = Number(o.total_usdt);
-      const ratio = totalBs / totalUsdt;
-      const saldoBs = Math.max(0, totalBs - abonadoBs);
-      const saldoUsdt = saldoBs / ratio;
-      
-      const isPaid = saldoBs <= 0.1;
-      const statusClass = `status-${o.status}`;
-      const statusText = statusLabels[o.status] || o.status;
-
-      const itemsHtml = (o.order_items || []).map(item => `
-        <div class="item-row">
-          ${item.products?.image_url ? `<img src="${item.products.image_url}" class="item-img">` : `<div class="item-img"></div>`}
-          <div class="item-details">
-            <div class="item-title">${item.product_name}</div>
-            <div class="item-variant">Talla: ${item.size} | Cant: ${item.quantity}</div>
-            ${item.products?.description ? `<div class="item-desc">${item.products.description}</div>` : ''}
-            ${item.custom_note ? `<div class="item-note">📝 Nota: "${item.custom_note}"</div>` : ''}
-          </div>
-          <div class="item-price">${fmtUSD(item.subtotal_usdt)}</div>
-        </div>
-      `).join('');
-
-      let planDetailsHtml = "";
-      if(o.payment_plan_details) {
-        const d = o.payment_plan_details;
-        if(o.payment_plan === 'credito') {
-          planDetailsHtml = `
-            <div class="plan-details-box">
-              <strong>Plan de Crédito (3 cuotas de ${fmtUSD(d.cuota_monto / ratio)}):</strong><br>
-              Cuota 1: ${d.cuota1_pagada ? '✅ Pagada' : '⏳ Pendiente'}<br>
-              Cuota 2: ${d.cuota2_pagada ? '✅ Pagada' : '⏳ Pendiente'}<br>
-              Cuota 3: ${d.cuota3_pagada ? '✅ Pagada' : '⏳ Pendiente'}
-            </div>
-          `;
-        } else if (o.payment_plan === 'apartado') {
-          planDetailsHtml = `
-            <div class="plan-details-box">
-              <strong>Plan de Apartado:</strong><br>
-              Abono Inicial: ${fmtUSD(d.abono_inicial / ratio)}<br>
-              Saldo Pendiente inicial: <strong style="color:var(--danger);">${fmtUSD(d.saldo_pendiente / ratio)}</strong>
-            </div>
-          `;
-        }
-      }
-
-      const canPay = saldoBs > 0.1 && (o.payment_plan === 'credito' || o.payment_plan === 'apartado');
-      const payButtonHtml = canPay ? `
-        <div style="margin-top:16px;">
-          <button class="btn-primary" style="background:var(--text); color:#fff;" onclick="openPaymentModal('${o.id}', ${saldoBs})">💸 Realizar Pago / Abono</button>
-          ${pendienteBs > 0 ? `<p style="color:var(--warning); font-size:13px; margin-top:8px; text-align:center;">⏳ Tienes un pago de ${fmtUSD(pendienteBs/ratio)} pendiente por verificar.</p>` : ''}
-        </div>
-      ` : '';
-
-      const mainReceiptHtml = o.receipt_url 
-        ? `<a href="${o.receipt_url}" target="_blank" class="upload-receipt-btn view-receipt-btn">👁️ Ver Comprobante Inicial</a>`
-        : '';
-
-      return `
-        <div class="order-card">
-          <div class="order-top">
-            <div><div class="order-id">Pedido #${shortId}</div><div class="order-date">${date}</div></div>
-            <div class="order-status ${statusClass}">${statusText}</div>
-          </div>
-          
-          <div class="order-items">${itemsHtml}</div>
-
-          ${planDetailsHtml}
-
-          <div class="order-details">
-            <div class="detail-item"><span class="detail-label">Total</span><span class="detail-value">${fmtUSD(totalUsdt)}</span><span class="detail-sub">≈ ${fmtBs(totalBs)}</span></div>
-            <div class="detail-item"><span class="detail-label">Saldo Pendiente</span>${isPaid ? `<span class="detail-value text-success">Pagado</span>` : `<span class="detail-value text-danger">${fmtUSD(saldoUsdt)}</span><span class="detail-sub text-danger">≈ ${fmtBs(saldoBs)}</span>`}</div>
-          </div>
-          
-          <div style="margin-top:16px; padding-top:16px; border-top:1px dashed var(--border);">
-            ${payButtonHtml}
-            ${mainReceiptHtml}
-          </div>
-        </div>
-      `;
-    }).join('');
   } catch (err) { list.innerHTML = `<div class="empty-state"><p style="color:var(--danger)">Error: ${err.message}</p></div>`; }
+}
+
+function switchPortalTab(tabName, btnElement) {
+  currentTab = tabName;
+  
+  // Actualizar clases activas
+  document.querySelectorAll('.bottom-nav .nav-item').forEach(btn => btn.classList.remove('active'));
+  if(btnElement) btnElement.classList.add('active');
+
+  renderFilteredOrders();
+}
+
+function renderFilteredOrders() {
+  const list = document.getElementById('ordersList');
+  
+  // Filtrar pedidos
+  let filtered = myOrdersData;
+  
+  if (currentTab === 'pendientes') {
+    filtered = myOrdersData.filter(o => !['enviado', 'cancelado', 'entregado'].includes(o.status));
+  } else if (currentTab === 'finalizados') {
+    filtered = myOrdersData.filter(o => ['enviado', 'entregado', 'cancelado'].includes(o.status));
+  }
+
+  if (filtered.length === 0) {
+    list.innerHTML = `<div class="empty-state" style="text-align:center; padding:40px; color:var(--muted);">
+      <h3 style="margin-bottom:8px;">No hay pedidos aquí</h3>
+      <p>Cuando tengas pedidos en esta categoría, aparecerán aquí.</p>
+    </div>`;
+    return;
+  }
+
+  list.innerHTML = filtered.map(o => {
+    const shortId = String(o.id).slice(0,8).toUpperCase();
+    const date = new Date(o.created_at).toLocaleDateString('es-VE', { day: '2-digit', month: 'long', year: 'numeric' });
+    
+    let abonadoBs = 0;
+    let pendienteBs = 0;
+    
+    if (o.installments) {
+      o.installments.forEach(i => {
+        if (i.status === 'pendiente') {
+          pendienteBs += Number(i.amount_bs || 0);
+        } else {
+          abonadoBs += Number(i.amount_bs || 0);
+        }
+      });
+    }
+    
+    const totalBs = Number(o.total_bs);
+    const totalUsdt = Number(o.total_usdt);
+    const ratio = totalBs / totalUsdt;
+    const saldoBs = Math.max(0, totalBs - abonadoBs);
+    const saldoUsdt = saldoBs / ratio;
+    
+    const isPaid = saldoBs <= 0.1;
+    const statusClass = `status-${o.status}`;
+    const statusText = statusLabels[o.status] || o.status;
+
+    const itemsHtml = (o.order_items || []).map(item => `
+      <div class="item-row">
+        ${item.products?.image_url ? `<img src="${item.products.image_url}" class="item-img">` : `<div class="item-img"></div>`}
+        <div class="item-details">
+          <div class="item-title">${item.product_name}</div>
+          <div class="item-variant">Talla: ${item.size} | Cant: ${item.quantity}</div>
+          ${item.products?.description ? `<div class="item-desc">${item.products.description}</div>` : ''}
+          ${item.custom_note ? `<div class="item-note">📝 Nota: "${item.custom_note}"</div>` : ''}
+        </div>
+        <div class="item-price">${fmtUSD(item.subtotal_usdt)}</div>
+      </div>
+    `).join('');
+
+    let planDetailsHtml = "";
+    if(o.payment_plan_details) {
+      const d = o.payment_plan_details;
+      if(o.payment_plan === 'credito') {
+        planDetailsHtml = `
+          <div class="plan-details-box">
+            <strong>Plan de Crédito (3 cuotas de ${fmtUSD(d.cuota_monto / ratio)}):</strong><br>
+            Cuota 1: ${d.cuota1_pagada ? '✅ Pagada' : '⏳ Pendiente'}<br>
+            Cuota 2: ${d.cuota2_pagada ? '✅ Pagada' : '⏳ Pendiente'}<br>
+            Cuota 3: ${d.cuota3_pagada ? '✅ Pagada' : '⏳ Pendiente'}
+          </div>
+        `;
+      } else if (o.payment_plan === 'apartado') {
+        planDetailsHtml = `
+          <div class="plan-details-box">
+            <strong>Plan de Apartado:</strong><br>
+            Abono Inicial: ${fmtUSD(d.abono_inicial / ratio)}<br>
+            Saldo Pendiente inicial: <strong style="color:var(--danger);">${fmtUSD(d.saldo_pendiente / ratio)}</strong>
+          </div>
+        `;
+      }
+    }
+
+    const canPay = saldoBs > 0.1 && (o.payment_plan === 'credito' || o.payment_plan === 'apartado');
+    const payButtonHtml = canPay ? `
+      <div style="margin-top:16px;">
+        <button class="btn-primary" style="background:var(--text); color:#fff; width:100%;" onclick="openPaymentModal('${o.id}', ${saldoBs})">💸 Realizar Pago / Abono</button>
+        ${pendienteBs > 0 ? `<p style="color:var(--warning); font-size:13px; margin-top:8px; text-align:center;">⏳ Tienes un pago de ${fmtUSD(pendienteBs/ratio)} pendiente por verificar.</p>` : ''}
+      </div>
+    ` : '';
+
+    const mainReceiptHtml = o.receipt_url 
+      ? `<a href="${o.receipt_url}" target="_blank" class="upload-receipt-btn view-receipt-btn">👁️ Ver Comprobante Inicial</a>`
+      : '';
+
+    return `
+      <div class="order-card">
+        <div class="order-top">
+          <div><div class="order-id">Pedido #${shortId}</div><div class="order-date">${date}</div></div>
+          <div class="order-status ${statusClass}">${statusText}</div>
+        </div>
+        
+        <div class="order-items">${itemsHtml}</div>
+
+        ${planDetailsHtml}
+
+        <div class="order-details">
+          <div class="detail-item"><span class="detail-label">Total</span><span class="detail-value">${fmtUSD(totalUsdt)}</span><span class="detail-sub">≈ ${fmtBs(totalBs)}</span></div>
+          <div class="detail-item"><span class="detail-label">Saldo Pendiente</span>${isPaid ? `<span class="detail-value text-success">Pagado</span>` : `<span class="detail-value text-danger">${fmtUSD(saldoUsdt)}</span><span class="detail-sub text-danger">≈ ${fmtBs(saldoBs)}</span>`}</div>
+        </div>
+        
+        <div style="margin-top:16px; padding-top:16px; border-top:1px dashed var(--border);">
+          ${payButtonHtml}
+          ${mainReceiptHtml}
+        </div>
+      </div>
+    `;
+  }).join('');
 }
 
 async function checkLoyaltyStatus(orders, userId) {
