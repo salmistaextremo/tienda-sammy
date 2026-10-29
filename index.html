@@ -43,65 +43,29 @@
   .cart-btn{ display:flex; align-items:center; gap:10px; background:var(--text); color:#fff; padding:12px 22px; border-radius:var(--radius-sm); font-weight:600; font-size:14px; }
   .cart-count{ background:var(--accent); color:#111; min-width:22px; height:22px; border-radius:11px; display:grid; place-items:center; font-size:11px; font-weight:700; padding:0 7px; }
   
-  /* =========================================
-     NUEVO HERO CARRUSEL CON TEXTO SUPERPUESTO
-     ========================================= */
+  /* HERO CARRUSEL */
   .hero { padding: 40px 0 60px; }
   .hero-carousel { position: relative; overflow: hidden; border-radius: var(--radius-lg); background: var(--text); box-shadow: 0 20px 40px rgba(0,0,0,0.15); }
   .hero-track { display: flex; transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1); }
-  
-  /* La diapositiva ahora ocupa un alto fijo y maneja el fondo */
-  .hero-slide { 
-    min-width: 100%; 
-    height: 550px; 
-    position: relative; 
-    display: flex; 
-    align-items: center; 
-    padding: 0 80px; 
-  }
-  
-  /* Imagen de fondo */
-  .hero-bg {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    z-index: 0;
-  }
-
-  /* Degradado oscuro para que el texto resalte */
-  .hero-gradient {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(to right, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 60%, transparent 100%);
-    z-index: 1;
-  }
-  
-  /* Contenido del texto */
-  .hero-content { 
-    position: relative;
-    z-index: 2;
-    max-width: 520px; 
-    color: #fff;
-  } 
-  
+  .hero-slide { min-width: 100%; height: 550px; position: relative; display: flex; align-items: center; padding: 0 80px; }
+  .hero-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; }
+  .hero-gradient { position: absolute; inset: 0; background: linear-gradient(to right, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 60%, transparent 100%); z-index: 1; }
+  .hero-content { position: relative; z-index: 2; max-width: 520px; color: #fff; } 
   .hero-badge{ display:inline-block; background:var(--accent); color:#111; font-size:11px; font-weight:700; padding:8px 16px; border-radius:var(--radius-sm); margin-bottom:24px; letter-spacing: 0.5px; }
   .hero h1{ font-size:56px; margin-bottom:20px; color: #fff; } 
   .hero p{ font-size:17px; color: rgba(255,255,255,0.8); margin-bottom:32px; }
-  .btn-primary{ background:var(--accent); color:#111; padding:16px 36px; border-radius:var(--radius-sm); font-weight:700; font-size:16px; display:inline-flex; justify-content:center; transition: all 0.2s; width: auto; }
+  .btn-primary{ background:var(--accent); color:#111; padding:16px 36px; border-radius:var(--radius-sm); font-weight:700; font-size:16px; display:inline-flex; justify-content:center; transition: all 0.2s; width: auto; cursor: pointer; }
   .btn-primary:hover { background: #fff; transform: translateY(-2px); }
-  
   .hero-dots { display: flex; justify-content: center; gap: 10px; margin-top: 20px; }
   .hero-dot { width: 10px; height: 10px; border-radius: 50%; background: #ccc; cursor: pointer; transition: background 0.2s; }
   .hero-dot.active { background: var(--text); transform: scale(1.2); }
 
+  /* CATALOGO */
   .catalog{ padding:40px 0 100px; } .section-head{ display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:40px; border-bottom: 1px solid var(--border); padding-bottom: 24px; }
   .section-head h2{ font-size:32px; } .filters{ display:flex; gap:8px; flex-wrap:wrap; }
   .filter{ padding:10px 20px; border-radius:var(--radius-sm); font-size:13px; color:var(--muted); border:1px solid transparent; transition: all 0.2s;}
   .filter:hover { color: var(--text); }
   .filter.active{ background:var(--text); color:#fff; }
-  
   .product-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:40px 24px; }
   .product-card{ cursor:pointer; } .product-image{ aspect-ratio:4/5; border-radius:var(--radius-md); overflow:hidden; background:#f0f0f0; margin-bottom:16px; position: relative;}
   .product-image img{ width:100%; height:100%; object-fit:cover; transition:transform .7s; }
@@ -110,8 +74,11 @@
   .out-of-stock-badge { position: absolute; inset: 0; background: rgba(255,255,255,0.7); display: grid; place-items: center; font-weight: 700; font-size: 18px; color: var(--text); backdrop-filter: blur(2px); }
   .product-cat{ font-size:12px; color:var(--muted); margin-bottom:4px; text-transform: capitalize; }
   .product-name{ font-size:17px; font-weight:600; margin-bottom:8px; }
-  .product-prices{ display:flex; align-items:center; gap:12px; } .price-bs{ font-size:16px; font-weight:600; } .price-usdt{ font-size:13px; color:var(--muted); }
+  .product-prices{ display:flex; align-items:baseline; gap:12px; } 
+  .price-usd{ font-size:18px; font-weight:700; color: var(--text); } 
+  .price-bs{ font-size:13px; color:var(--muted); font-weight: 500;}
   
+  /* MODALES */
   .overlay{ position:fixed; inset:0; background:rgba(0,0,0,0.3); backdrop-filter:blur(4px); opacity:0; pointer-events:none; z-index:90; transition: opacity .3s; } .overlay.open{ opacity:1; pointer-events:auto; }
   .drawer{ position:fixed; top:0; right:0; width:420px; max-width:100vw; height:100vh; background:var(--surface); z-index:100; transform:translateX(100%); transition:transform .4s; display:flex; flex-direction:column; }
   .drawer.open{ transform:translateX(0); }
@@ -127,23 +94,53 @@
   .modal-wrap.open{ display:flex; } .modal{ background:var(--surface); border-radius:var(--radius-lg); max-width:900px; width:100%; max-height:92vh; overflow-y:auto; position:relative; }
   .modal-x{ position:absolute; top:20px; right:20px; z-index:2; width:36px; height:36px; border-radius:50%; background:var(--bg); display:grid; place-items:center; cursor:pointer; }
   
+  /* DISEÑO DEL MODAL DEL PRODUCTO CON GALERÍA (ESTILO CAPTURA) */
   .detail{ display:grid; grid-template-columns:1fr 1fr; } 
   .detail-img-wrap{ background:var(--bg); padding:32px; display: flex; flex-direction: column; justify-content: center; }
   
-  .gallery-main { aspect-ratio:4/5; object-fit:cover; width:100%; border-radius:var(--radius-md); margin-bottom: 16px; background: #fff;}
-  .gallery-thumbs { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 8px; }
+  .gallery-main { 
+    aspect-ratio: 1/1; 
+    object-fit: cover; 
+    width:100%; 
+    border-radius: var(--radius-md); 
+    margin-bottom: 12px; 
+    background: #fff;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+  }
+  
+  .gallery-thumbs { 
+    display: flex; 
+    gap: 10px; 
+    overflow-x: auto; 
+    padding-bottom: 8px; 
+  }
   .gallery-thumbs::-webkit-scrollbar { height: 4px; }
-  .gallery-thumb { width: 60px; height: 75px; object-fit: cover; border-radius: 6px; cursor: pointer; opacity: 0.6; transition: opacity 0.2s, border 0.2s; border: 2px solid transparent; }
-  .gallery-thumb.active { opacity: 1; border-color: var(--text); }
+  
+  .gallery-thumb { 
+    width: 65px; 
+    height: 65px; 
+    object-fit: cover; 
+    border-radius: 8px; 
+    cursor: pointer; 
+    opacity: 0.6; 
+    transition: all 0.2s; 
+    border: 2px solid transparent; 
+  }
+  .gallery-thumb.active { 
+    opacity: 1; 
+    border-color: var(--text); 
+    transform: scale(1.05);
+  }
   .gallery-thumb:hover { opacity: 1; }
 
   .detail-info{ padding:48px; display:flex; flex-direction:column; justify-content:center; } 
   .detail-info h3{ font-size:28px; margin-bottom:12px; }
-  .dprice{ font-size:28px; font-weight:700; } .dusdt{ font-size:14px; color:var(--muted); margin-bottom:32px; }
+  .dprice{ font-size:32px; font-weight:700; } .dusdt{ font-size:15px; color:var(--muted); margin-bottom:32px; font-weight: 500;}
   .dlabel{ font-size:13px; font-weight:600; margin-bottom:12px; } .sizes{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:24px; }
   .s-opt{ min-width:48px; padding:12px 16px; border-radius:8px; border:1px solid var(--border); cursor: pointer; transition: all 0.2s;} .s-opt.selected{ background:var(--text); color:#fff; }
   textarea.notes-input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); margin-bottom: 24px; resize: vertical; min-height: 60px; outline: none; }
   
+  /* CHECKOUT */
   .checkout{ max-width:600px; padding:40px; } .plans{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:24px; }
   .plan{ padding:16px; border-radius:var(--radius-md); border:1px solid var(--border); text-align:center; cursor:pointer; transition: all 0.2s;} .plan.selected{ border-color:var(--text); background:var(--bg); }
   .methods{ display:flex; flex-direction:column; gap:8px; margin-bottom:24px; } .method{ padding:16px; border-radius:var(--radius-md); border:1px solid var(--border); cursor:pointer; transition: all 0.2s;} .method.selected{ border-color:var(--text); background:var(--bg); }
@@ -155,6 +152,7 @@
   .file-upload-wrapper:hover { border-color: var(--text); }
   .auth-modal { max-width: 420px; padding: 40px; }
   
+  /* FOOTER */
   .footer{ background:var(--surface); border-top:1px solid var(--border); padding:64px 0 32px; } 
   .fgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 40px; margin-bottom: 48px; align-items: start; }
   .fgrid > div:first-child { grid-column: span 2; max-width: 300px; }
@@ -187,7 +185,8 @@
     .btn-account { display: none !important; } 
     .fgrid { grid-template-columns: 1fr; }
     .fgrid > div:first-child { grid-column: span 1; }
-    .gallery-main { height: 300px; object-fit: contain; background: transparent; }
+    .detail-info { padding: 24px; }
+    .gallery-main { height: 250px; }
   }
 </style>
 </head>
@@ -214,13 +213,12 @@
   </div>
 </header>
 
-<!-- HERO CARRUSEL CON TEXTO SUPERPUESTO -->
+<!-- HERO CARRUSEL -->
 <section class="hero">
   <div class="container">
     <div class="hero-carousel">
       <div class="hero-track" id="heroTrack">
         
-        <!-- Slide 1 -->
         <div class="hero-slide">
           <img class="hero-bg" src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1500&auto=format&fit=crop" alt="Oversize">
           <div class="hero-gradient"></div>
@@ -232,7 +230,6 @@
           </div>
         </div>
 
-        <!-- Slide 2 -->
         <div class="hero-slide">
           <img class="hero-bg" src="https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?q=80&w=1500&auto=format&fit=crop" alt="Camisetas">
           <div class="hero-gradient"></div>
@@ -244,7 +241,6 @@
           </div>
         </div>
 
-        <!-- Slide 3 -->
         <div class="hero-slide">
           <img class="hero-bg" src="https://images.unsplash.com/photo-1517423568366-8b83523034fd?q=80&w=1500&auto=format&fit=crop" alt="Pantalones">
           <div class="hero-gradient"></div>
@@ -335,7 +331,7 @@
       <div class="field" id="nameField" style="display:none;"><label style="font-size:13px;font-weight:600;margin-bottom:8px;display:block;">Nombre Completo</label><input type="text" id="authName" style="border:1px solid var(--border);"></div>
       <div class="field"><label style="font-size:13px;font-weight:600;margin-bottom:8px;display:block;">Correo Electrónico</label><input type="email" id="authEmail" required style="border:1px solid var(--border);"></div>
       <div class="field"><label style="font-size:13px;font-weight:600;margin-bottom:8px;display:block;">Contraseña</label><input type="password" id="authPassword" required style="border:1px solid var(--border);"></div>
-      <button type="submit" class="btn-primary" id="btnAuthSubmit">Entrar y Continuar</button>
+      <button type="submit" class="btn-primary" id="btnAuthSubmit" style="width:100%;">Entrar y Continuar</button>
       <div id="authError" class="err" style="margin-top:12px;"></div>
     </form>
     <div style="text-align:center; margin-top:24px; font-size:14px; color:var(--muted);">
@@ -357,13 +353,15 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 let PRODUCTS = [], cart = [], currentFilter = "todo", selectedSize = null, currentProduct = null, currentQty = 1, paymentPlan = "contado", paymentMethod = "bs_transfer";
 let isLoginMode = true;
 
+// FORMATOS DE MONEDA
+const fmtUSD = n => "$ " + Number(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+const fmtBs = n => "Bs " + Number(n).toLocaleString('es-VE',{minimumFractionDigits:0,maximumFractionDigits:2});
+
 let currentHeroSlide = 0;
 const totalHeroSlides = 3;
 let heroInterval;
 
 const CATEGORIES = [{ key:"todo", label:"Todo" }, { key:"oversize", label:"Oversize" }, { key:"camisetas", label:"Camisetas" }, {key: "pantalones", label: "Pantalones"}];
-const fmtBs = n => "Bs " + Number(n).toLocaleString('es-VE');
-const fmtUsdt = n => Number(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) + " USDT";
 const getProduct = id => PRODUCTS.find(p => p.id === id);
 
 function goToSlide(index) {
@@ -449,7 +447,10 @@ function renderProducts(){
       <div class="product-info">
         <div class="product-cat">${p.category}</div>
         <div class="product-name">${p.name}</div>
-        <div class="product-prices"><div class="price-bs">${fmtBs(p.price_bs)}</div><div class="price-usdt">${fmtUsdt(p.price_usdt)}</div></div>
+        <div class="product-prices">
+          <div class="price-usd">${fmtUSD(p.price_usdt)}</div>
+          <div class="price-bs">${fmtBs(p.price_bs)}</div>
+        </div>
       </div>
     </div>
   `).join('');
@@ -486,10 +487,10 @@ function openProduct(id){
         ${thumbsHtml}
       </div>
       <div class="detail-info">
-        <div class="pcat">${p.category}</div>
+        <div class="pcat" style="text-transform: uppercase; font-size: 12px; letter-spacing: 1px; color: var(--muted); margin-bottom: 8px;">${p.category}</div>
         <h3>${p.name}</h3>
-        <div class="dprice">${fmtBs(p.price_bs)}</div>
-        <div class="dusdt">≈ ${fmtUsdt(p.price_usdt)}</div>
+        <div class="dprice">${fmtUSD(p.price_usdt)}</div>
+        <div class="dusdt">≈ ${fmtBs(p.price_bs)}</div>
 
         <div class="dlabel">Selecciona Talla</div>
         <div class="sizes" id="sizesBox">
@@ -504,7 +505,7 @@ function openProduct(id){
         <div class="dlabel">Instrucciones Especiales (Opcional)</div>
         <textarea id="modalNote" class="notes-input" placeholder="Ej: Color negro, estampado personalizado, etc..." ${isOutOfStock ? 'disabled' : ''}></textarea>
 
-        <button class="btn-primary" onclick="addFromModal()" ${isOutOfStock ? 'disabled style="background:#ccc; cursor:not-allowed;"' : ''}>
+        <button class="btn-primary" onclick="addFromModal()" ${isOutOfStock ? 'disabled style="background:#ccc; cursor:not-allowed; width:100%;"' : 'style="width:100%;"'}>
           ${isOutOfStock ? 'Producto Agotado' : 'Añadir al Carrito'}
         </button>
       </div>
@@ -555,18 +556,18 @@ function renderCart(){
         ${it.note ? `<div class="ci-note">📝 ${it.note}</div>` : ''}
         <div class="ci-row">
           <div class="qty"><button onclick="changeQty(${idx},-1)">−</button><span>${it.qty}</span><button onclick="changeQty(${idx},1)">+</button></div>
-          <div class="ci-price">${fmtBs(it.price_bs*it.qty)}</div>
+          <div class="ci-price">${fmtUSD(it.price_usdt*it.qty)}</div>
         </div>
         <button class="ci-remove" onclick="removeItem(${idx})">Eliminar</button>
       </div>
     </div>
   `).join('');
 
-  const totalBs = cart.reduce((s,i)=>s + i.price_bs*i.qty, 0);
+  const totalUsd = cart.reduce((s,i)=>s + i.price_usdt*i.qty, 0);
   foot.innerHTML = `
-    <div class="tot-row"><span>Subtotal</span><span>${fmtBs(totalBs)}</span></div>
-    <div class="tot-row total"><span>Total</span><span>${fmtBs(totalBs)}</span></div>
-    <button class="btn-primary" onclick="openCheckout()">Finalizar Compra</button>
+    <div class="tot-row"><span>Subtotal</span><span>${fmtUSD(totalUsd)}</span></div>
+    <div class="tot-row total"><span>Total</span><span>${fmtUSD(totalUsd)}</span></div>
+    <button class="btn-primary" style="width:100%;" onclick="openCheckout()">Finalizar Compra</button>
   `;
 }
 function changeQty(idx,d){ cart[idx].qty += d; if(cart[idx].qty < 1) cart.splice(idx,1); renderCart(); }
@@ -661,13 +662,13 @@ function renderCheckout(prefName){
 
     <div id="creditFields" style="display:${paymentPlan==='credito'?'block':'none'}; margin-bottom:24px; background:var(--bg); padding:16px; border-radius:12px; border:1px solid var(--border);">
       <p style="font-size:13px; color:var(--text); margin-bottom:12px; font-weight:600;">Cuotas (selecciona las que pagarás ahora):</p>
-      <label style="display:flex; align-items:center; gap:8px; margin-bottom:8px; font-size:14px; cursor:pointer;"><input type="checkbox" id="cuota1" checked onchange="updateCheckoutTotal()" style="width:18px; height:18px; accent-color:var(--text);"> Cuota 01 (${fmtBs(cuotaBs)})</label>
-      <label style="display:flex; align-items:center; gap:8px; margin-bottom:8px; font-size:14px; cursor:pointer;"><input type="checkbox" id="cuota2" onchange="updateCheckoutTotal()" style="width:18px; height:18px; accent-color:var(--text);"> Cuota 02 (${fmtBs(cuotaBs)})</label>
-      <label style="display:flex; align-items:center; gap:8px; font-size:14px; cursor:pointer;"><input type="checkbox" id="cuota3" onchange="updateCheckoutTotal()" style="width:18px; height:18px; accent-color:var(--text);"> Cuota 03 (${fmtBs(totalBs - (cuotaBs*2))})</label>
+      <label style="display:flex; align-items:center; gap:8px; margin-bottom:8px; font-size:14px; cursor:pointer;"><input type="checkbox" id="cuota1" checked onchange="updateCheckoutTotal()" style="width:18px; height:18px; accent-color:var(--text);"> Cuota 01 (${fmtUSD(totalUsdt/3)})</label>
+      <label style="display:flex; align-items:center; gap:8px; margin-bottom:8px; font-size:14px; cursor:pointer;"><input type="checkbox" id="cuota2" onchange="updateCheckoutTotal()" style="width:18px; height:18px; accent-color:var(--text);"> Cuota 02 (${fmtUSD(totalUsdt/3)})</label>
+      <label style="display:flex; align-items:center; gap:8px; font-size:14px; cursor:pointer;"><input type="checkbox" id="cuota3" onchange="updateCheckoutTotal()" style="width:18px; height:18px; accent-color:var(--text);"> Cuota 03 (${fmtUSD(totalUsdt - (totalUsdt/3*2))})</label>
     </div>
 
     <div id="layawayFields" style="display:${paymentPlan==='apartado'?'block':'none'}; margin-bottom:24px; background:var(--bg); padding:16px; border-radius:12px; border:1px solid var(--border);">
-      <p style="font-size:13px; color:var(--text); margin-bottom:12px; font-weight:600;">¿Cuánto deseas abonar hoy?</p>
+      <p style="font-size:13px; color:var(--text); margin-bottom:12px; font-weight:600;">¿Cuánto deseas abonar hoy? (en Bs)</p>
       <input type="number" id="abonoAmount" class="field" style="width:100%; margin-bottom:8px; padding:12px; border-radius:8px; border:1px solid var(--border); font-family:inherit;" oninput="updateCheckoutTotal()" placeholder="Ej: 1000" max="${totalBs}">
       <p style="font-size:13px; color:var(--text);">Saldo pendiente: <strong id="remainingBalance" style="color:var(--danger);">${fmtBs(totalBs)}</strong></p>
     </div>
@@ -688,11 +689,11 @@ function renderCheckout(prefName){
     </label>
 
     <div class="summary">
-      <div class="row"><span>Total del pedido</span><span>${fmtBs(totalBs)}</span></div>
-      <div class="row total" style="margin-bottom: 8px;"><span>A pagar ahora</span><span id="amountToPay">${fmtBs(paymentPlan==='contado'?totalBs:(paymentPlan==='credito'?cuotaBs:0))}</span></div>
+      <div class="row"><span>Total del pedido</span><span>${fmtUSD(totalUsdt)}</span></div>
+      <div class="row total" style="margin-bottom: 8px;"><span>A pagar ahora</span><span id="amountToPay">${fmtUSD(paymentPlan==='contado'?totalUsdt:(paymentPlan==='credito'?totalUsdt/3:0))}</span></div>
     </div>
 
-    <button class="btn-primary" onclick="submitOrder()">Confirmar Pedido</button>
+    <button class="btn-primary" style="width:100%;" onclick="submitOrder()">Confirmar Pedido</button>
     <div id="checkoutError" class="err"></div>
   `;
   
@@ -727,22 +728,25 @@ function selMethod(m, el){
 
 function updateCheckoutTotal() {
   const totalBs = cart.reduce((s,i)=>s + i.price_bs*i.qty, 0);
-  const cuotaBs = totalBs / 3;
-  let amountToPay = totalBs;
+  const totalUsdt = cart.reduce((s,i)=>s + i.price_usdt*i.qty, 0);
+  let amountToPay = totalUsdt;
 
   if (paymentPlan === 'credito') {
     amountToPay = 0;
-    if (document.getElementById('cuota1')?.checked) amountToPay += cuotaBs;
-    if (document.getElementById('cuota2')?.checked) amountToPay += cuotaBs;
-    if (document.getElementById('cuota3')?.checked) amountToPay += totalBs - (cuotaBs*2);
+    if (document.getElementById('cuota1')?.checked) amountToPay += totalUsdt/3;
+    if (document.getElementById('cuota2')?.checked) amountToPay += totalUsdt/3;
+    if (document.getElementById('cuota3')?.checked) amountToPay += totalUsdt - (totalUsdt/3*2);
   } else if (paymentPlan === 'apartado') {
-    const abonoInput = parseFloat(document.getElementById('abonoAmount')?.value || 0);
-    amountToPay = isNaN(abonoInput) ? 0 : abonoInput;
-    const remaining = Math.max(0, totalBs - amountToPay);
+    const abonoInputBs = parseFloat(document.getElementById('abonoAmount')?.value || 0);
+    // Convertir el abono ingresado en Bs a USD para mostrarlo en el resumen
+    const ratio = totalBs / totalUsdt;
+    amountToPay = isNaN(abonoInputBs) ? 0 : (abonoInputBs / ratio);
+    
+    const remaining = Math.max(0, totalBs - abonoInputBs);
     if(document.getElementById('remainingBalance')) document.getElementById('remainingBalance').textContent = fmtBs(remaining);
   }
 
-  if(document.getElementById('amountToPay')) document.getElementById('amountToPay').textContent = fmtBs(amountToPay);
+  if(document.getElementById('amountToPay')) document.getElementById('amountToPay').textContent = fmtUSD(amountToPay);
 }
 
 async function submitOrder(){
@@ -854,7 +858,7 @@ async function submitOrder(){
         <h3>¡Pedido Registrado!</h3>
         <p class="sub">Número de pedido: <strong>#${shortId}</strong></p>
         <a href="/portal.html" class="btn-primary" style="display:inline-block; width:auto; margin-bottom:12px;">Ver en Mis Pedidos</a>
-        <button class="btn-primary" onclick="closeCheckout()" style="background:#e5e7eb; color:#111;">Seguir Comprando</button>
+        <button class="btn-primary" onclick="closeCheckout()" style="background:#e5e7eb; color:#111; width:100%; margin-top:10px;">Seguir Comprando</button>
       </div>
     `;
     cart = []; renderCart();
