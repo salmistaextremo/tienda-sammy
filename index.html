@@ -178,10 +178,8 @@
     <a href="/" class="logo">
       <img src="https://zxhufobqfxmbjpneyiam.supabase.co/storage/v1/object/public/brand-assets/logo.png" alt="Tiendas Sam's">
     </a>
-    <nav class="nav">
-      <button onclick="setFilter('todo')">Catálogo</button>
-      <button onclick="setFilter('oversize')">Oversize</button>
-      <button onclick="setFilter('camisetas')">Camisetas</button>
+    <nav class="nav" id="dynamicNav">
+      <!-- Se llena con JS -->
     </nav>
     <div class="header-actions">
       <a href="/portal.html" id="btnAccount" class="btn-account">Mi Cuenta</a>
@@ -342,6 +340,7 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 let PRODUCTS = [], cart = [], currentFilter = "todo", selectedSize = null, currentProduct = null, currentQty = 1, paymentPlan = "contado", paymentMethod = "bs_transfer";
 let isLoginMode = true;
+let DYNAMIC_CATEGORIES = [];
 
 // FUNCIÓN DE SEGURIDAD XSS
 function escapeHTML(str) {
@@ -358,7 +357,6 @@ let currentHeroSlide = 0;
 const totalHeroSlides = 3;
 let heroInterval;
 
-const CATEGORIES = [{ key:"todo", label:"Todo" }, { key:"oversize", label:"Oversize" }, { key:"camisetas", label:"Camisetas" }, {key: "pantalones", label: "Pantalones"}];
 const getProduct = id => PRODUCTS.find(p => p.id === id);
 
 function goToSlide(index) {
@@ -410,9 +408,25 @@ supabaseClient.auth.onAuthStateChange((event, session) => {
   document.getElementById('btnAccount').style.display = session ? 'inline-block' : 'none';
 });
 
+// CARGAR CATEGORÍAS DINÁMICAS
+async function loadCategories() {
+  const { data, error } = await supabaseClient.from('categories').select('*').order('name');
+  if(!error && data) {
+    DYNAMIC_CATEGORIES = [{ slug: 'todo', name: 'Todo' }, ...data];
+    renderFilters();
+    renderNav();
+  }
+}
+
+function renderNav() {
+  document.getElementById('dynamicNav').innerHTML = DYNAMIC_CATEGORIES.slice(1, 5).map(c => 
+    `<button onclick="setFilter('${c.slug}')">${escapeHTML(c.name)}</button>`
+  ).join('');
+}
+
 async function loadSiteConfig() {
   const { data, error } = await supabaseClient.from('site_config').select('*').eq('id', 1).single();
-  if(error) { console.error("Error cargando config:", error); return; }
+  if(error) return;
 
   if(data.hero_images && data.hero_images.length >= 3) {
     document.getElementById('heroImg1').src = data.hero_images[0] || '';
@@ -448,7 +462,7 @@ function closePromoModal() {
 
 async function loadProducts(){
   const { data, error } = await supabaseClient.from('products').select('*').eq('is_active', true).order('created_at', { ascending: true });
-  if(!error) { PRODUCTS = data || []; renderFilters(); renderProducts(); }
+  if(!error) { PRODUCTS = data || []; renderProducts(); }
 }
 
 function suscribirseProductos() {
@@ -459,8 +473,11 @@ function suscribirseProductos() {
 }
 
 function renderFilters(){
-  document.getElementById('filters').innerHTML = CATEGORIES.map(c => `<button class="filter ${c.key===currentFilter?'active':''}" onclick="setFilter('${c.key}')">${c.label}</button>`).join('');
+  document.getElementById('filters').innerHTML = DYNAMIC_CATEGORIES.map(c => 
+    `<button class="filter ${c.slug===currentFilter?'active':''}" onclick="setFilter('${c.slug}')">${escapeHTML(c.name)}</button>`
+  ).join('');
 }
+
 function setFilter(key){ 
   currentFilter = key; 
   renderFilters(); 
@@ -871,14 +888,11 @@ async function submitOrder(){
       const { error: uploadError } = await supabaseClient.storage.from('receipts').upload(fileName, compressedFile);
       if (uploadError) throw new Error("Error al subir comprobante: " + uploadError.message);
       
-      // SEGURIDAD: Guardamos solo el nombre del archivo, NO la URL pública.
       receipt_fileName = fileName; 
     }
 
     btn.textContent = "Guardando pedido...";
 
-    // NOTA: Aunque enviamos total_bs y total_usdt, el TRIGGER en la base de datos los ignorará
-    // y los recalculará de forma segura en el servidor.
     const { data: orderData, error: orderErr } = await supabaseClient.from('orders').insert({
       customer_name: name, customer_phone: phone, customer_email: session.user.email, user_id: session.user.id,
       payment_plan: paymentPlan, payment_method: paymentMethod, total_bs: totalBs, total_usdt: totalUsdt, 
@@ -923,6 +937,7 @@ async function submitOrder(){
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  loadCategories();
   loadProducts(); 
   renderCart();
   suscribirseProductos();
