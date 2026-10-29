@@ -855,4 +855,36 @@ async function saveHeroImages(e) {
 
 async function savePromoConfig(e) {
   e.preventDefault();
-  const btn =
+  const btn = document.getElementById('btnSavePromo');
+  btn.disabled = true; btn.textContent = "Guardando...";
+
+  const active = document.getElementById('promoActive').checked;
+  const title = document.getElementById('promoTitle').value.trim();
+  const text = document.getElementById('promoText').value.trim();
+  const link = document.getElementById('promoLink').value.trim();
+  const imgFile = document.getElementById('promoImage').files[0];
+
+  try {
+    let image_url = currentSiteConfig.promo_image;
+
+    if (imgFile) {
+      btn.textContent = "Subiendo imagen...";
+      const fileToUpload = await imageCompression(imgFile, { maxSizeMB: 0.5, maxWidthOrHeight: 800, useWebWorker: true });
+      const fileName = `promo_${Date.now()}.${fileToUpload.name.split('.').pop()}`;
+      const { error: uploadError } = await supabaseClient.storage.from('brand-assets').upload(fileName, fileToUpload);
+      if (uploadError) throw uploadError;
+      image_url = supabaseClient.storage.from('brand-assets').getPublicUrl(fileName).data.publicUrl;
+    }
+
+    const { error } = await supabaseClient.from('site_config').update({
+      promo_active: active, promo_image: image_url, promo_title: title, promo_text: text, promo_link: link
+    }).eq('id', 1);
+
+    if(error) throw error;
+    alert("Ventana emergente guardada con éxito.");
+    loadSiteConfig();
+  } catch(err) { alert("Error al guardar: " + err.message); } finally { btn.disabled = false; btn.textContent = "Guardar Promoción"; }
+}
+</script>
+</body>
+</html>
