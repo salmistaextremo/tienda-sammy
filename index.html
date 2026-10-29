@@ -11,7 +11,7 @@
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#111111">
 <link rel="apple-touch-icon" href="https://zxhufobqfxmbjpneyiam.supabase.co/storage/v1/object/public/brand-assets/logo.png">
-<!-- FAVICON (Soluciona el error de la consola) -->
+<!-- FAVICON -->
 <link rel="icon" type="image/png" href="https://zxhufobqfxmbjpneyiam.supabase.co/storage/v1/object/public/brand-assets/icon-192.png">
 
 <style>
@@ -101,20 +101,27 @@
   .auth-modal { max-width: 420px; padding: 40px; }
   
   /* =========================================
-     FOOTER CORREGIDO (Espaciado perfecto)
+     FOOTER CORREGIDO CON AUTO-FIT (Inteligente)
      ========================================= */
   .footer{ background:var(--surface); border-top:1px solid var(--border); padding:64px 0 32px; } 
   
-  .fgrid{ 
+  .fgrid { 
     display: grid; 
-    grid-template-columns: 2fr 1fr 1fr 1fr 1.5fr; /* 5 columnas distribuidas */
+    /* Esto ajusta las columnas automáticamente. Mínimo 160px por columna. */
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); 
     gap: 40px; 
     margin-bottom: 48px; 
-    align-items: start; /* Alinea todo hacia arriba */
+    align-items: start;
+  }
+
+  /* Hacemos que la primera columna (Logo) ocupe más espacio si hay oportunidad */
+  .fgrid > div:first-child {
+    grid-column: span 2;
+    max-width: 300px;
   }
   
   .footer-logo img {
-    max-width: 150px; /* Evita que el logo se desborde */
+    max-width: 150px;
     height: auto;
     object-fit: contain;
     margin-bottom: 16px;
@@ -149,27 +156,21 @@
     color:var(--muted); 
   }
   
-  /* RESPONSIVE (Móviles y Tablets) */
-  @media(max-width:1024px){ 
-    .fgrid{ grid-template-columns: 1fr 1fr 1fr; gap: 32px; } 
-  }
-  @media(max-width:900px){ 
-    .nav{ display:none; } 
-    .hero-banner{ grid-template-columns:1fr; gap:40px; } 
-    .hero h1{ font-size:48px; } 
-    .detail{ grid-template-columns:1fr; } 
-    .fgrid{ grid-template-columns:1fr 1fr; } 
-    .plans{ grid-template-columns:1fr; } 
+  /* RESPONSIVE PARA CELULARES (Solo se apila si es muy pequeño) */
+  @media(max-width:768px){ 
+    .fgrid { grid-template-columns: 1fr 1fr; gap: 32px; }
+    .fgrid > div:first-child { grid-column: span 2; max-width: 100%; margin-bottom: 16px;}
   }
   @media(max-width:600px){ 
     .product-grid{ grid-template-columns:1fr 1fr; gap:20px 12px; } 
     .product-name{ font-size: 14px; } 
     .checkout{ padding:32px 20px; } 
-    .fgrid{ grid-template-columns:1fr; } 
     .section-head{ flex-direction: column; align-items: flex-start; } 
     .hero h1{ font-size:36px; } 
     .fbot { flex-direction: column; gap: 12px; text-align: center; } 
     .btn-account { display: none !important; } 
+    .fgrid { grid-template-columns: 1fr; }
+    .fgrid > div:first-child { grid-column: span 1; }
   }
 </style>
 </head>
@@ -220,7 +221,7 @@
 <footer class="footer">
   <div class="container">
     <div class="fgrid">
-      <!-- Columna 1: Logo -->
+      <!-- Columna 1: Logo (Ocupa 2 espacios) -->
       <div>
         <a href="/" class="footer-logo">
           <img src="https://zxhufobqfxmbjpneyiam.supabase.co/storage/v1/object/public/brand-assets/logo.png" alt="Tiendas Sam's">
