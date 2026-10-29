@@ -93,6 +93,54 @@
   
   @media(max-width:900px){ .nav{ display:none; } .hero-banner{ grid-template-columns:1fr; gap:40px; } .hero h1{ font-size:48px; } .detail{ grid-template-columns:1fr; } .fgrid{ grid-template-columns:1fr 1fr; } .plans{ grid-template-columns:1fr; } }
   @media(max-width:600px){ .product-grid{ grid-template-columns:1fr 1fr; gap:20px 12px; } .product-name{ font-size: 14px; } .checkout{ padding:32px 20px; } .fgrid{ grid-template-columns:1fr; } .section-head{ flex-direction: column; align-items: flex-start; } .hero h1{ font-size:36px; } .fbot { flex-direction: column; gap: 12px; text-align: center; } .btn-account { display: none !important; } }
+
+  /* =========================================
+     TOQUES ESTÉTICOS PREMIUM
+     ========================================= */
+  
+  /* 1. Selección de texto (Cuando el usuario selecciona con el mouse) */
+  ::selection {
+    background: var(--accent);
+    color: var(--text);
+  }
+
+  /* 2. Barra de desplazamiento personalizada (Scrollbar) */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--bg);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #d4d4d4;
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #a3a3a3;
+  }
+
+  /* 3. Transiciones suaves para botones y enlaces */
+  button, a, input, select {
+    transition: all 0.2s ease-in-out;
+  }
+
+  /* 4. Efecto de foco en los inputs (cuando el usuario hace clic para escribir) */
+  input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--text) !important;
+    box-shadow: 0 0 0 3px rgba(17, 17, 17, 0.1);
+  }
+
+  /* 5. Efecto de carga al hacer clic en los botones (Ripple) */
+  button:active {
+    transform: scale(0.98);
+  }
+
+  /* 6. Imágenes que no cargan (Ej: productos borrados) */
+  img {
+    background-color: var(--bg);
+  }
 </style>
 </head>
 <body>
