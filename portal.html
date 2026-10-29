@@ -33,15 +33,46 @@
   .logo img { height: 40px; width: auto; object-fit: contain; }
   .btn-back { font-size: 14px; font-weight: 600; color: var(--muted); } .btn-back:hover { color: var(--text); }
   
-  .auth-screen { flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px 20px; }
-  .auth-card { background: var(--surface); padding: 48px; border-radius: var(--radius-lg); width: 100%; max-width: 420px; box-shadow: 0 10px 40px rgba(0,0,0,0.03); border: 1px solid var(--border); }
-  .auth-card h2 { font-size: 24px; font-weight: 700; margin-bottom: 8px; text-align: center; } .auth-card p { font-size: 14px; color: var(--muted); text-align: center; margin-bottom: 32px; }
+  /* PANTALLA DE AUTH CON FONDO */
+  .auth-screen { 
+    flex: 1; display: flex; align-items: center; justify-content: center; 
+    padding: 40px 20px; 
+    background-image: url('https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=1500&auto=format&fit=crop');
+    background-size: cover;
+    background-position: center;
+    position: relative;
+  }
+  .auth-screen::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--bg);
+    opacity: 0.85; /* Filtro fundido sobre la imagen de fondo */
+    z-index: 1;
+  }
+  .auth-card { 
+    position: relative; z-index: 2;
+    background: var(--surface); padding: 48px; border-radius: var(--radius-lg); 
+    width: 100%; max-width: 420px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); 
+    border: 1px solid var(--border); 
+  }
+  .auth-card h2 { font-size: 24px; font-weight: 700; margin-bottom: 8px; text-align: center; } 
+  .auth-card p { font-size: 14px; color: var(--muted); text-align: center; margin-bottom: 32px; }
   .field { margin-bottom: 16px; } .field label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 8px; }
   .field input { width: 100%; padding: 16px; border-radius: var(--radius-md); background: var(--bg); border: 1px solid var(--border); font-family: inherit; font-size: 15px; }
   .field input:focus { outline: none; border-color: var(--text); background: #fff; }
   .btn-primary { width: 100%; padding: 16px; border-radius: var(--radius-md); background: var(--text); color: #fff; font-weight: 600; display: flex; justify-content: center; margin-top: 8px; }
   .auth-switch { text-align: center; margin-top: 24px; font-size: 14px; color: var(--muted); } .auth-switch button { color: var(--text); font-weight: 600; text-decoration: underline; }
   .err { color: var(--danger); font-size: 13px; margin-top: 12px; text-align: center; }
+
+  /* PASSWORD OJO */
+  .password-container { position: relative; display: flex; align-items: center; }
+  .password-container input { padding-right: 48px; }
+  .toggle-password {
+    position: absolute; right: 12px; background: none; border: none;
+    cursor: pointer; color: var(--muted); display: flex; align-items: center; justify-content: center; padding: 5px;
+  }
+  .toggle-password:hover { color: var(--text); }
 
   .dashboard { flex: 1; padding: 32px 0 40px; display: none; }
   .dash-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 24px; }
@@ -131,7 +162,25 @@
     <form id="authForm" onsubmit="handleAuth(event)">
       <div class="field" id="nameField" style="display:none;"><label>Nombre Completo</label><input type="text" id="authName"></div>
       <div class="field"><label>Correo Electrónico</label><input type="email" id="authEmail" required></div>
-      <div class="field"><label>Contraseña</label><input type="password" id="authPassword" required></div>
+      
+      <!-- CAMPO CON OJO -->
+      <div class="field">
+        <label>Contraseña</label>
+        <div class="password-container">
+          <input type="password" id="authPassword" required>
+          <button type="button" class="toggle-password" onclick="togglePassword('authPassword', this)">
+            <svg class="eye-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+            <svg class="eye-off-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" style="display:none;">
+              <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+              <line x1="1" y1="1" x2="23" y2="23"></line>
+            </svg>
+          </button>
+        </div>
+      </div>
+
       <button type="submit" class="btn-primary" id="btnAuthSubmit">Entrar</button><div id="authError" class="err"></div>
     </form>
     <div class="auth-switch"><span id="switchText">¿No tienes cuenta?</span> <button onclick="toggleAuthMode()" id="switchBtn">Regístrate aquí</button></div>
@@ -221,6 +270,12 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const fmtUSD = n => "$ " + Number(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
 const fmtBs = n => "Bs " + Number(n).toLocaleString('es-VE',{minimumFractionDigits:0,maximumFractionDigits:2});
 
+let isLoginMode = true;
+let currentUserId = null;
+let currentUserEmail = null;
+let myOrdersData = []; 
+let currentTab = 'todos'; 
+
 // FUNCIÓN DE SEGURIDAD XSS
 function escapeHTML(str) {
   if (!str) return '';
@@ -229,11 +284,22 @@ function escapeHTML(str) {
   );
 }
 
-let isLoginMode = true;
-let currentUserId = null;
-let currentUserEmail = null;
-let myOrdersData = []; 
-let currentTab = 'todos'; 
+// FUNCIÓN PARA MOSTRAR/OCULTAR CONTRASEÑA
+function togglePassword(inputId, btn) {
+  const input = document.getElementById(inputId);
+  const eyeIcon = btn.querySelector('.eye-icon');
+  const eyeOffIcon = btn.querySelector('.eye-off-icon');
+
+  if (input.type === 'password') {
+    input.type = 'text';
+    eyeIcon.style.display = 'none';
+    eyeOffIcon.style.display = 'block';
+  } else {
+    input.type = 'password';
+    eyeIcon.style.display = 'block';
+    eyeOffIcon.style.display = 'none';
+  }
+}
 
 const statusLabels = {
   'pendiente': 'Pendiente',
@@ -285,7 +351,6 @@ async function handleAuth(e) {
 async function handleLogout() { await supabaseClient.auth.signOut(); location.reload(); }
 
 async function checkSession() {
-  // SEGURIDAD: Usamos getUser() para validar la sesión contra el servidor de Supabase
   const { data: { user }, error } = await supabaseClient.auth.getUser();
   
   if (user && !error) {
@@ -347,16 +412,12 @@ function switchPortalTab(tabName, btnElement) {
   renderFilteredOrders();
 }
 
-// FUNCIÓN PARA VER COMPROBANTES CON URL FIRMADA
 async function viewReceipt(fileName) {
   if(!fileName) return alert("No hay comprobante.");
-  // Si es una URL antigua, la abrimos directo
   if(fileName.startsWith('http')) {
     window.open(fileName, '_blank');
     return;
   }
-  
-  // Generar URL firmada válida por 60 minutos (3600 seg)
   const { data, error } = await supabaseClient.storage.from('receipts').createSignedUrl(fileName, 3600);
   if(error) return alert("Error al cargar comprobante: " + error.message);
   window.open(data.signedUrl, '_blank');
@@ -412,7 +473,7 @@ function renderFilteredOrders() {
         ${item.products?.image_url ? `<img src="${item.products.image_url}" class="item-img">` : `<div class="item-img"></div>`}
         <div class="item-details">
           <div class="item-title">${escapeHTML(item.product_name)}</div>
-          <div class="item-variant">Talla: ${item.size} | Cant: ${item.quantity}</div>
+          <div class="item-variant">Talla: ${escapeHTML(item.size)} | Cant: ${item.quantity}</div>
           ${item.products?.description ? `<div class="item-desc">${escapeHTML(item.products.description)}</div>` : ''}
           ${item.custom_note ? `<div class="item-note">📝 Nota: "${escapeHTML(item.custom_note)}"</div>` : ''}
         </div>
@@ -569,7 +630,6 @@ async function submitPayment() {
     const { error: uploadError } = await supabaseClient.storage.from('receipts').upload(fileName, compressedFile);
     if (uploadError) throw new Error("Error al subir comprobante: " + uploadError.message);
     
-    // SEGURIDAD: Guardamos solo el nombre del archivo
     const receipt_fileName = fileName;
     
     const { data: order } = await supabaseClient.from('orders').select('total_bs, total_usdt').eq('id', currentPayOrderId).single();
