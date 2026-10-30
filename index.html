@@ -15,7 +15,7 @@
 
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
-  :root{ --bg:#fcfbf8; --surface:#ffffff; --text:#111111; --muted:#767676; --border:#e8e5df; --accent:#ffea61; --radius-lg:24px; --radius-md:16px; --radius-sm:100px; }
+  :root{ --bg:#fcfbf8; --surface:#ffffff; --text:#111111; --muted:#767676; --border:#e8e5df; --accent:#ffea61; --radius-lg:24px; --radius-md:16px; --radius-sm:100px; --success:#22c55e; }
   html,body{ background:var(--bg); color:var(--text); font-family:'Outfit',sans-serif; line-height:1.5; scroll-behavior: smooth; }
   button{ font-family:inherit; cursor:pointer; border:none; background:none; color:inherit; }
   img{ display:block; max-width:100%; } a{ color:inherit; text-decoration:none; }
@@ -138,6 +138,11 @@
   .promo-content { padding: 32px; }
   .promo-title { font-size: 24px; font-weight: 800; margin-bottom: 8px; color: var(--text); line-height: 1.1; }
   .promo-text { font-size: 15px; color: var(--muted); margin-bottom: 24px; }
+
+  /* RESEÑAS */
+  .reviews-section { padding: 60px 0; background: var(--surface); }
+  .reviews-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; }
+  .review-card { background: var(--bg); padding: 24px; border-radius: var(--radius-md); border: 1px solid var(--border); }
   
   .footer{ background:var(--surface); border-top:1px solid var(--border); padding:64px 0 32px; } 
   .fgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 40px; margin-bottom: 48px; align-items: start; }
@@ -200,43 +205,36 @@
   <div class="container">
     <div class="hero-carousel">
       <div class="hero-track" id="heroTrack">
-        
-        <!-- SLIDE 1 -->
         <div class="hero-slide">
-          <img class="hero-bg" id="heroImg1" src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1500&auto=format&fit=crop" alt="Oversize">
+          <img class="hero-bg" id="heroImg1" src="" alt="Hero 1">
           <div class="hero-gradient"></div>
           <div class="hero-content">
-            <span class="hero-badge" id="heroBadge1">NUEVA COLECCIÓN 2025</span>
-            <h1 class="display" id="heroTitle1">Oversize<br>Sin Límites.</h1>
-            <p id="heroDesc1">Descubre nuestra nueva colección con envío a todo el país. Paga en Bs o USDT, de contado, a crédito o apartado.</p>
+            <span class="hero-badge" id="heroBadge1"></span>
+            <h1 class="display" id="heroTitle1"></h1>
+            <p id="heroDesc1"></p>
             <button class="btn-primary" id="heroBtn1" onclick="setFilter('todo')">Ver Colección</button>
           </div>
         </div>
-
-        <!-- SLIDE 2 -->
         <div class="hero-slide">
-          <img class="hero-bg" id="heroImg2" src="https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?q=80&w=1500&auto=format&fit=crop" alt="Camisetas">
+          <img class="hero-bg" id="heroImg2" src="" alt="Hero 2">
           <div class="hero-gradient"></div>
           <div class="hero-content">
-            <span class="hero-badge" id="heroBadge2" style="background:#ff5b1f; color:#fff;">TENDENCIA URBANA</span>
-            <h1 class="display" id="heroTitle2">Camisetas<br>que Destacan.</h1>
-            <p id="heroDesc2">Estampados únicos y cortes perfectos para tu día a día. Diseños exclusivos que no encontrarás en otro lugar.</p>
+            <span class="hero-badge" id="heroBadge2" style="background:#ff5b1f; color:#fff;"></span>
+            <h1 class="display" id="heroTitle2"></h1>
+            <p id="heroDesc2"></p>
             <button class="btn-primary" id="heroBtn2" onclick="setFilter('todo')">Ver Camisetas</button>
           </div>
         </div>
-
-        <!-- SLIDE 3 -->
         <div class="hero-slide">
-          <img class="hero-bg" id="heroImg3" src="https://images.unsplash.com/photo-1517423568366-8b83523034fd?q=80&w=1500&auto=format&fit=crop" alt="Pantalones">
+          <img class="hero-bg" id="heroImg3" src="" alt="Hero 3">
           <div class="hero-gradient"></div>
           <div class="hero-content">
-            <span class="hero-badge" id="heroBadge3" style="background:#3b82f6; color:#fff;">COMODIDAD PREMIUM</span>
-            <h1 class="display" id="heroTitle3">Pantalones<br>Wide Leg.</h1>
-            <p id="heroDesc3">La comodidad se encuentra con el estilo. Nuestros pantalones cargo y wide leg son la pieza clave de tu outfit.</p>
+            <span class="hero-badge" id="heroBadge3" style="background:#3b82f6; color:#fff;"></span>
+            <h1 class="display" id="heroTitle3"></h1>
+            <p id="heroDesc3"></p>
             <button class="btn-primary" id="heroBtn3" onclick="setFilter('todo')">Ver Pantalones</button>
           </div>
         </div>
-
       </div>
     </div>
     <div class="hero-dots" id="heroDots">
@@ -251,6 +249,17 @@
   <div class="container">
     <div class="section-head"><h2 class="display">Explorar</h2><div class="filters" id="filters"></div></div>
     <div class="product-grid" id="productGrid"><div style="padding:80px; text-align:center;">Cargando...</div></div>
+  </div>
+</section>
+
+<!-- NUEVA SECCIÓN DE RESEÑAS -->
+<section class="reviews-section">
+  <div class="container">
+    <div style="text-align:center; margin-bottom:40px;">
+      <h2 class="display" style="font-size:36px;">Lo que dicen de nosotros</h2>
+      <p style="color:var(--muted); margin-top:8px;">Opiniones reales de nuestros clientes.</p>
+    </div>
+    <div id="reviewsContainer" class="reviews-grid"></div>
   </div>
 </section>
 
@@ -358,6 +367,8 @@ let PRODUCTS = [], cart = [], currentFilter = "todo", selectedSize = null, curre
 let isLoginMode = true;
 let DYNAMIC_CATEGORIES = [];
 let currentSiteConfig = {};
+let currentDiscount = 0;
+let appliedCouponCode = null;
 
 function escapeHTML(str) {
   if (!str) return '';
@@ -411,10 +422,7 @@ async function loadCategories() {
 
 function renderNav() {
   document.getElementById('dynamicNav').innerHTML = DYNAMIC_CATEGORIES.slice(1, 5).map(c => `<button onclick="setFilter('${c.slug}')">${escapeHTML(c.name)}</button>`).join('');
-  
-  document.getElementById('footerNavLinks').innerHTML = DYNAMIC_CATEGORIES.slice(1, 4).map(c => 
-    `<a href="#catalog" onclick="setFilter('${c.slug}')">${escapeHTML(c.name)}</a>`
-  ).join('');
+  document.getElementById('footerNavLinks').innerHTML = DYNAMIC_CATEGORIES.slice(1, 4).map(c => `<a href="#catalog" onclick="setFilter('${c.slug}')">${escapeHTML(c.name)}</a>`).join('');
 }
 
 function updateHeroButtons() {
@@ -425,7 +433,6 @@ function updateHeroButtons() {
     const btn = document.getElementById(`heroBtn${i+1}`);
     if (btn) {
       const customBtnText = customDetails[i] ? customDetails[i].btn_text : null;
-      
       if (availableCats[i]) {
         const cat = availableCats[i];
         if (!customBtnText) btn.textContent = `Ver ${cat.name}`;
@@ -472,12 +479,8 @@ async function loadSiteConfig() {
         document.getElementById('promoModalTitle').textContent = data.promo_title || '¡Oferta Especial!';
         document.getElementById('promoModalText').textContent = data.promo_text || '';
         const btn = document.getElementById('promoModalBtn');
-        if(data.promo_link) { 
-          btn.style.display = 'inline-flex'; 
-          btn.setAttribute('onclick', `window.location.href='${escapeHTML(data.promo_link)}'`); 
-        } else { 
-          btn.style.display = 'none'; 
-        }
+        if(data.promo_link) { btn.style.display = 'inline-flex'; btn.setAttribute('onclick', `window.location.href='${escapeHTML(data.promo_link)}'`); } 
+        else { btn.style.display = 'none'; }
         document.getElementById('promoModal').classList.add('open');
         sessionStorage.setItem('promoShown', 'true');
       }, 1500);
@@ -486,6 +489,23 @@ async function loadSiteConfig() {
 }
 
 function closePromoModal() { document.getElementById('promoModal').classList.remove('open'); }
+
+async function loadReviews() {
+  const container = document.getElementById('reviewsContainer');
+  const { data } = await supabaseClient.from('reviews').select('*').eq('is_approved', true).order('created_at', { ascending: false }).limit(6);
+  
+  if(!data || data.length === 0) {
+    container.innerHTML = `<p style="text-align:center; grid-column: 1/-1; color:var(--muted);">Aún no hay reseñas.</p>`;
+    return;
+  }
+  container.innerHTML = data.map(r => `
+    <div class="review-card">
+      <div style="color: #f59e0b; font-size:18px; margin-bottom:8px;">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</div>
+      <p style="font-size:14px; font-style:italic; color:var(--text); margin-bottom:16px;">"${escapeHTML(r.comment || 'Excelente servicio')}"</p>
+      <div style="font-weight:600; font-size:14px;">- ${escapeHTML(r.customer_name)}</div>
+    </div>
+  `).join('');
+}
 
 async function loadProducts(){
   const { data, error } = await supabaseClient.from('products').select('*').eq('is_active', true).order('created_at', { ascending: true });
@@ -657,7 +677,7 @@ async function openCheckout(){
   if(cart.length === 0) return;
   const { data: { session } } = await supabaseClient.auth.getSession();
   if (!session) { closeCart(); openAuthModal(); return; }
-  closeCart(); paymentPlan = "contado"; paymentMethod = "bs_transfer";
+  closeCart(); paymentPlan = "contado"; paymentMethod = "bs_transfer"; currentDiscount = 0; appliedCouponCode = null;
   
   const { data: profile } = await supabaseClient.from('profiles').select('full_name, phone, address').eq('id', session.user.id).single();
   renderCheckout(profile || {});
@@ -719,6 +739,12 @@ function renderCheckout(profile){
       <input type="file" id="fReceipt" accept="image/*" onchange="document.getElementById('fileNameDisplay').textContent = this.files[0].name" style="display:none;">
     </label>
 
+    <div class="dlabel" style="margin-top:24px;">Cupón de Descuento</div>
+    <div style="display:flex; gap:8px; margin-bottom:24px;">
+      <input type="text" id="couponInput" placeholder="Ej: SAM10" style="flex:1; padding:12px; border-radius:8px; border:1px solid var(--border); text-transform:uppercase;">
+      <button type="button" onclick="applyCoupon()" style="background:var(--text); color:#fff; padding:0 20px; border-radius:8px; font-weight:600;">Aplicar</button>
+    </div>
+
     <div class="summary">
       <div class="row"><span>Total del pedido</span><span>${fmtUSD(totalUsdt)}</span></div>
       <div class="row total" style="margin-bottom: 8px;"><span>A pagar ahora</span><span id="amountToPay">${fmtUSD(paymentPlan==='contado'?totalUsdt:(paymentPlan==='credito'?totalUsdt/3:0))}</span></div>
@@ -728,6 +754,23 @@ function renderCheckout(profile){
     <div id="checkoutError" class="err"></div>
   `;
   setTimeout(updateCheckoutTotal, 50);
+}
+
+async function applyCoupon() {
+  const code = document.getElementById('couponInput').value.trim().toUpperCase();
+  if(!code) return;
+  const { data, error } = await supabaseClient.from('coupons').select('*').eq('code', code).eq('is_active', true).single();
+  if (error || !data) {
+    alert("Cupón inválido o expirado.");
+    currentDiscount = 0;
+    appliedCouponCode = null;
+    updateCheckoutTotal();
+    return;
+  }
+  currentDiscount = data.discount_percent;
+  appliedCouponCode = data.code;
+  alert(`¡Cupón aplicado! Tienes un ${currentDiscount}% de descuento.`);
+  updateCheckoutTotal();
 }
 
 function selPlan(p, el){ 
@@ -744,10 +787,16 @@ function selMethod(m, el){
 }
 
 function updateCheckoutTotal() {
-  const totalBs = cart.reduce((s,i)=>s + i.price_bs*i.qty, 0);
-  const totalUsdt = cart.reduce((s,i)=>s + i.price_usdt*i.qty, 0);
-  let amountToPay = totalUsdt;
+  let totalBs = cart.reduce((s,i)=>s + i.price_bs*i.qty, 0);
+  let totalUsdt = cart.reduce((s,i)=>s + i.price_usdt*i.qty, 0);
+  
+  // Aplicar descuento si existe
+  if (currentDiscount > 0) {
+    totalBs = totalBs - (totalBs * (currentDiscount / 100));
+    totalUsdt = totalUsdt - (totalUsdt * (currentDiscount / 100));
+  }
 
+  let amountToPay = totalUsdt;
   if (paymentPlan === 'credito') {
     amountToPay = 0;
     if (document.getElementById('cuota1')?.checked) amountToPay += totalUsdt/3;
@@ -760,7 +809,12 @@ function updateCheckoutTotal() {
     const remaining = Math.max(0, totalBs - abonoInputBs);
     if(document.getElementById('remainingBalance')) document.getElementById('remainingBalance').textContent = fmtBs(remaining);
   }
-  if(document.getElementById('amountToPay')) document.getElementById('amountToPay').textContent = fmtUSD(amountToPay);
+  
+  if(document.getElementById('amountToPay')) {
+    let html = fmtUSD(amountToPay);
+    if (currentDiscount > 0) html += ` <span style="font-size:12px; color:var(--success);">(-${currentDiscount}%)</span>`;
+    document.getElementById('amountToPay').innerHTML = html;
+  }
 }
 
 async function submitOrder(){
@@ -819,6 +873,7 @@ async function submitOrder(){
     btn.textContent = "Registrando pedido...";
     const itemsPayload = cart.map(i => ({ product_id: i.productId, size: i.size, quantity: i.qty, custom_note: i.note || null }));
 
+    // Enviamos al RPC con los datos del cupón
     const { data, error } = await supabaseClient.rpc('create_order', {
       p_customer_name: name,
       p_customer_phone: phone,
@@ -828,14 +883,15 @@ async function submitOrder(){
       p_receipt_url: receipt_fileName,
       p_items: itemsPayload,
       p_payment_plan_details: planDetails,
-      p_installments: installmentsRecords.map(r => ({ amount_bs: r.amount_bs, reference: r.reference }))
+      p_installments: installmentsRecords.map(r => ({ amount_bs: r.amount_bs, reference: r.reference })),
+      p_discount_percent: currentDiscount,
+      p_coupon_code: appliedCouponCode
     });
 
     if (error) throw error;
     
     const shortId = String(data.order_id).slice(0,8).toUpperCase();
     
-    // --- CREACIÓN DEL MENSAJE DE WHATSAPP ---
     const telefonoAdmin = "584243351245"; 
     let planText = paymentPlan.toUpperCase();
     if (paymentPlan === 'credito') planText = 'CRÉDITO (3 Cuotas)';
@@ -847,11 +903,11 @@ async function submitOrder(){
     msj += `*Cédula/Teléfono:* ${phone}%0A`;
     msj += `*Dirección:* ${address}%0A`;
     msj += `*Modalidad:* ${planText}%0A`;
-    msj += `*Total:* ${fmtUSD(totalUsdt)} (${fmtBs(totalBs)})%0A%0A`;
-    msj += `Acabo de subir mi comprobante de pago a la plataforma. Por favor, verifíquenlo para procesar mi envío. ¡Gracias!`;
+    msj += `*Total:* ${fmtUSD(data.total_usdt)} (${fmtBs(data.total_bs)})%0A`;
+    if (currentDiscount > 0) msj += `*Cupón Aplicado:* ${appliedCouponCode} (-${currentDiscount}%)%0A`;
+    msj += `%0AAcabo de subir mi comprobante de pago a la plataforma. Por favor, verifíquenlo para procesar mi envío. ¡Gracias!`;
 
     const whatsappLink = `https://wa.me/${telefonoAdmin}?text=${msj}`;
-    // ----------------------------------------
 
     document.getElementById('checkoutModalInner').innerHTML = `
       <button class="modal-x" onclick="closeCheckout()">✕</button>
@@ -870,19 +926,18 @@ async function submitOrder(){
         </a>
 
         <a href="/portal.html" class="btn-primary" style="background:#e5e7eb; color:#111; width:100%; margin-top:10px; text-decoration:none;">Ir a Mis Pedidos</a>
-        
         <button class="btn-primary" onclick="closeCheckout()" style="background:transparent; color:var(--text); border:1px solid var(--border); width:100%; margin-top:12px;">Seguir Comprando</button>
       </div>
     `;
-    cart = [];
-    renderCart();
+    cart = []; renderCart();
+    currentDiscount = 0; appliedCouponCode = null;
   } catch (err) {
     errBox.textContent = "Error: " + err.message; btn.disabled = false; btn.textContent = "Confirmar Pedido";
   }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  loadCategories(); loadProducts(); renderCart(); suscribirseProductos(); startHeroAutoplay(); loadSiteConfig();
+  loadCategories(); loadProducts(); loadReviews(); renderCart(); suscribirseProductos(); startHeroAutoplay(); loadSiteConfig();
   supabaseClient.auth.getSession().then(({data: {session}}) => { if(session) document.getElementById('btnAccount').style.display = 'inline-block'; });
 });
 </script>
