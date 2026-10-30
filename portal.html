@@ -461,10 +461,12 @@ function renderFilteredOrders() {
     const totalBs = Number(o.total_bs);
     const totalUsdt = Number(o.total_usdt);
     const ratio = totalBs / totalUsdt;
-    const saldoBs = Math.max(0, totalBs - abonadoBs);
+    
+    // El saldo real es el total menos lo ya verificado Y lo que está pendiente por verificar
+    const saldoBs = Math.max(0, totalBs - abonadoBs - pendienteBs);
     const saldoUsdt = saldoBs / ratio;
     
-    const isPaid = saldoBs <= 0.1;
+    const isPaid = (totalBs - abonadoBs - pendienteBs) <= 0.1;
     const statusClass = `status-${o.status}`;
     const statusText = statusLabels[o.status] || o.status;
 
@@ -529,7 +531,7 @@ function renderFilteredOrders() {
 
         <div class="order-details">
           <div class="detail-item"><span class="detail-label">Total</span><span class="detail-value">${fmtUSD(totalUsdt)}</span><span class="detail-sub">≈ ${fmtBs(totalBs)}</span></div>
-          <div class="detail-item"><span class="detail-label">Saldo Pendiente</span>${isPaid ? `<span class="detail-value text-success">Pagado</span>` : `<span class="detail-value text-danger">${fmtUSD(saldoUsdt)}</span><span class="detail-sub text-danger">≈ ${fmtBs(saldoBs)}</span>`}</div>
+          <div class="detail-item"><span class="detail-label">Saldo Restante (Real)</span>${isPaid ? `<span class="detail-value text-success">Pagado</span>` : `<span class="detail-value text-danger">${fmtUSD(saldoUsdt)}</span><span class="detail-sub text-danger">≈ ${fmtBs(saldoBs)}</span>`}</div>
         </div>
         
         <div style="margin-top:16px; padding-top:16px; border-top:1px dashed var(--border);">
@@ -589,7 +591,7 @@ let currentPaySaldoBs = 0;
 function openPaymentModal(orderId, saldoBs) {
   currentPayOrderId = orderId;
   currentPaySaldoBs = saldoBs;
-  document.getElementById('payAmount').value = saldoBs;
+  document.getElementById('payAmount').value = saldoBs.toFixed(2);
   document.getElementById('payMethod').value = 'bs_pago_movil';
   updatePayDetails();
   document.getElementById('payReceipt').value = "";
@@ -614,18 +616,23 @@ async function submitPayment() {
   const fileInput = document.getElementById('payReceipt');
   
   if (isNaN(amount) || amount <= 0) { errBox.textContent = "Ingresa un monto válido."; return; }
-  if (amount > currentPaySaldoBs + 0.1) { errBox.textContent = "El monto no puede superar el saldo pendiente."; return; }
+  if (amount > currentPaySaldoBs + 0.1) { errBox.textContent = "El monto no puede superar el saldo pendiente real."; return; }
   if (fileInput.files.length === 0) { errBox.textContent = "Debes subir un comprobante."; return; }
   
   const btn = document.querySelector('#paymentModal .btn-primary');
   btn.disabled = true; btn.textContent = "Enviando...";
   
   try {
+    const { data: { user } } = await supabaseClient.auth.getUser();
+    if (!user) throw new Error("Sesión expirada.");
+
     const file = fileInput.files[0];
     const options = { maxSizeMB: 0.5, maxWidthOrHeight: 1000, useWebWorker: true };
     const compressedFile = await imageCompression(file, options);
     const ext = compressedFile.name.split('.').pop();
-    const fileName = `receipt_${currentPayOrderId}_${Date.now()}.${ext}`;
+    
+    // RUTA SEGURA: userId/nombre_archivo
+    const fileName = `${user.id}/receipt_${currentPayOrderId}_${Date.now()}.${ext}`;
     
     const { error: uploadError } = await supabaseClient.storage.from('receipts').upload(fileName, compressedFile);
     if (uploadError) throw new Error("Error al subir comprobante: " + uploadError.message);
