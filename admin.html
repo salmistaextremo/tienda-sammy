@@ -366,6 +366,7 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 let currentUserId = null, currentUserRole = null;
 let allOrdersData = [], allProducts = [], allUsers = [], allInstallments = [], allCategories = [];
 let currentSiteConfig = {};
+let isRealTimeSubscribed = false; // Para evitar múltiples suscripciones
 
 const fmtUSD = n => "$ " + Number(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
 const fmtBs = n => "Bs " + Number(n).toLocaleString('es-VE',{minimumFractionDigits:0,maximumFractionDigits:2});
@@ -388,20 +389,47 @@ async function handleLogin(){
   const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
   if(error) { document.getElementById('loginError').textContent = error.message; return; }
   
-  const { data: { user } } = await supabaseClient.auth.getUser();
-  if(!user) { document.getElementById('loginError').textContent = "Error de autenticación."; return; }
-  
-  const { data: profile } = await supabaseClient.from('profiles').select('role, is_active').eq('id', user.id).single();
-  if(!profile || !['super_admin','admin','vendedor'].includes(profile.role)) { await supabaseClient.auth.signOut(); return alert("Sin permisos."); }
-  if(profile.is_active === false) { await supabaseClient.auth.signOut(); return alert("Cuenta deshabilitada."); }
-  
-  currentUserId = user.id; currentUserRole = profile.role;
-  document.getElementById('loginView').style.display = 'none'; document.getElementById('adminPanel').style.display = 'block';
-  loadAllData();
-  suscribirseCambios();
+  await checkAdminSession();
 }
 
-async function handleLogout() { await supabaseClient.auth.signOut(); location.reload(); }
+async function handleLogout() { 
+  await supabaseClient.auth.signOut(); 
+  location.reload(); 
+}
+
+// NUEVA FUNCIÓN: Verifica si hay sesión activa al cargar la página
+async function checkAdminSession() {
+  const { data: { session }, error } = await supabaseClient.auth.getSession();
+  
+  if (session) {
+    const { data: profile } = await supabaseClient.from('profiles').select('role, is_active').eq('id', session.user.id).single();
+    
+    // Validar que sea admin o vendedor y esté activo
+    if(profile && ['super_admin','admin','vendedor'].includes(profile.role) && profile.is_active !== false) {
+      currentUserId = session.user.id; 
+      currentUserRole = profile.role;
+      
+      document.getElementById('loginView').style.display = 'none'; 
+      document.getElementById('adminPanel').style.display = 'block';
+      
+      loadAllData();
+      
+      if (!isRealTimeSubscribed) {
+        suscribirseCambios();
+        isRealTimeSubscribed = true;
+      }
+    } else {
+      // Si está logueado pero no es admin o está inactivo
+      await supabaseClient.auth.signOut();
+      document.getElementById('loginView').style.display = 'flex'; 
+      document.getElementById('adminPanel').style.display = 'none';
+    }
+  } else {
+    // No hay sesión
+    document.getElementById('loginView').style.display = 'flex'; 
+    document.getElementById('adminPanel').style.display = 'none';
+  }
+}
 
 function loadAllData() { 
   loadOrders(); loadInstallments(); loadProducts(); loadCategoriesAdmin(); loadUsers(); loadRequests(); loadSiteConfig();
@@ -460,6 +488,9 @@ async function loadOrders(){
     const saldoBs = Math.max(0, Number(o.total_bs) - abonadoBs);
     const saldoUsd = saldoBs / (Number(o.total_bs)/Number(o.total_usdt));
     
+    // REGLA: Solo muestra "Pagado" si el saldo es menor a 0.1 (cubierto)
+    const isPaid = saldoBs <= 0.1;
+    
     let statusOptions = "";
     if (o.payment_plan === 'contado') {
       statusOptions = `<option value="pendiente" ${o.status==='pendiente'?'selected':''}>Pendiente</option><option value="verificado" ${o.status==='verificado'?'selected':''}>Verificado</option><option value="enviado" ${o.status==='enviado'?'selected':''}>Enviado</option><option value="cancelado" ${o.status==='cancelado'?'selected':''}>Cancelado</option>`;
@@ -474,7 +505,7 @@ async function loadOrders(){
         <td data-label="Pedido"><strong>#${String(o.id).slice(0,8).toUpperCase()}</strong><br><small>${new Date(o.created_at).toLocaleDateString()}</small></td>
         <td data-label="Cliente">${escapeHTML(o.customer_name)}</td>
         <td data-label="Total">${fmtUSD(o.total_usdt)}</td>
-        <td data-label="Saldo" style="color:${saldoBs > 0 ? 'var(--danger)' : 'var(--success)'}; font-weight:600;">${saldoBs > 0 ? fmtUSD(saldoUsd) : 'Pagado'}</td>
+        <td data-label="Saldo" style="color:${isPaid ? 'var(--success)' : 'var(--danger)'}; font-weight:600;">${isPaid ? 'Pagado' : fmtUSD(saldoUsd)}</td>
         <td data-label="Estado"><select class="status-select" onchange="updateOrderStatus('${o.id}', this.value)">${statusOptions}</select></td>
         <td data-label="Acciones"><button class="btn-sm btn-view" onclick="viewOrderDetails('${o.id}')">Ver Detalles</button></td>
       </tr>
@@ -486,9 +517,12 @@ async function updateOrderStatus(orderId, newStatus){
   try {
     const { error } = await supabaseClient.from('orders').update({ status: newStatus }).eq('id', orderId);
     if(error) throw error;
+    
     const index = allOrdersData.findIndex(o => o.id === orderId);
     if(index > -1) allOrdersData[index].status = newStatus;
+    
     calculateKPIs();
+    loadOrders(); 
   } catch(err) { alert("Error al actualizar: " + err.message); loadOrders(); }
 }
 
@@ -500,6 +534,8 @@ function viewOrderDetails(orderId) {
   const saldoBs = Math.max(0, Number(o.total_bs) - abonadoBs);
   const ratio = Number(o.total_bs) / Number(o.total_usdt);
   const saldoUsd = saldoBs / ratio;
+  
+  const isPaid = saldoBs <= 0.1;
 
   const itemsHtml = (o.order_items || []).map(item => `
     <div class="item-detail-row">
@@ -536,7 +572,7 @@ function viewOrderDetails(orderId) {
     ${planDetailsHtml}
     <div style="background:var(--bg); padding:16px; border-radius:8px; font-size:14px; margin-bottom:16px;">
       <div style="display:flex; justify-content:space-between; margin-bottom:8px;"><span>Total del Pedido:</span><strong>${fmtUSD(o.total_usdt)}</strong></div>
-      <div style="display:flex; justify-content:space-between;"><span>Saldo Restante:</span><strong style="color:${saldoBs > 0 ? 'var(--danger)' : 'var(--success)'};">${saldoUsd > 0 ? fmtUSD(saldoUsd) : 'Pagado'}</strong></div>
+      <div style="display:flex; justify-content:space-between;"><span>Saldo Restante:</span><strong style="color:${isPaid ? 'var(--success)' : 'var(--danger)'};">${isPaid ? 'Pagado' : fmtUSD(saldoUsd)}</strong></div>
     </div>
     <div style="background:var(--bg); padding:16px; border-radius:8px; margin-bottom:16px;"><h4 style="font-size:14px; margin-bottom:8px;">Método de Pago Inicial</h4><p style="font-size:14px; font-weight:600; text-transform:capitalize;">${o.payment_method.replace('_', ' ')}</p></div>
     ${receiptHtml}
@@ -902,6 +938,11 @@ async function savePromoConfig(e) {
     loadSiteConfig();
   } catch(err) { alert("Error al guardar: " + err.message); } finally { btn.disabled = false; btn.textContent = "Guardar Promoción"; }
 }
+
+// INICIALIZACIÓN: Ejecuta la validación de sesión ni bien carga la página
+document.addEventListener('DOMContentLoaded', () => {
+  checkAdminSession();
+});
 </script>
 </body>
 </html>
