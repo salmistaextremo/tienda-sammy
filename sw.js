@@ -1,4 +1,5 @@
-const CACHE_NAME = 'tiendas-sams-v1';
+// Cambiamos a v2 para forzar la actualización en todos los dispositivos
+const CACHE_NAME = 'tiendas-sams-v2';
 const ASSETS = [
   '/',
   '/index.html',
@@ -20,14 +21,14 @@ self.addEventListener('install', event => {
   self.skipWaiting();
 });
 
-// Activar y limpiar cachés antiguos
+// Activar y limpiar cachés antiguos (ej. la v1)
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(cacheNames => {
       return Promise.all(
         cacheNames.map(cache => {
           if (cache !== CACHE_NAME) {
-            return caches.delete(cache);
+            return caches.delete(cache); // Borra la memoria vieja
           }
         })
       );
@@ -36,11 +37,26 @@ self.addEventListener('activate', event => {
   self.clients.claim();
 });
 
-// Interceptar peticiones: devolver caché o ir a la red
+// NUEVA LÓGICA: Buscar en la red primero para el HTML, luego en caché
 self.addEventListener('fetch', event => {
-  event.respondWith(
-    caches.match(event.request).then(response => {
-      return response || fetch(event.request);
-    })
-  );
+  // Si es una página HTML, buscar primero la versión nueva en internet
+  if (event.request.mode === 'navigate' || (event.request.method === 'GET' && event.request.headers.get('accept').includes('text/html'))) {
+    event.respondWith(
+      fetch(event.request).then(response => {
+        return caches.open(CACHE_NAME).then(cache => {
+          cache.put(event.request, response.clone());
+          return response;
+        });
+      }).catch(() => {
+        return caches.match(event.request);
+      })
+    );
+  } else {
+    // Para imágenes, fuentes y scripts, usar la memoria caché para que cargue rápido
+    event.respondWith(
+      caches.match(event.request).then(response => {
+        return response || fetch(event.request);
+      })
+    );
+  }
 });
