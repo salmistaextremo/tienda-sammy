@@ -268,12 +268,32 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const fmtUSD = n => "$ " + Number(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
 const fmtBs = n => "Bs " + Number(n).toLocaleString('es-VE',{minimumFractionDigits:0,maximumFractionDigits:2});
 
+// --- CONFIGURACIÓN DE TASA BCV ---
+let bcvRate = 40.00; // Tasa de respaldo
+
+async function fetchBCVRate() {
+  try {
+    // Intentar usar la API pública de respaldo para la tasa del BCV
+    const res = await fetch('https://ve.dolarapi.com/v1/dolares/oficial');
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.promedio) {
+        bcvRate = data.promedio;
+        console.log("Tasa BCV cargada en Portal:", bcvRate);
+      }
+    }
+  } catch (e) {
+    console.warn("Usando tasa de respaldo en Portal:", bcvRate);
+  }
+}
+// ------------------------------------------
+
 let isLoginMode = true;
 let currentUserId = null;
 let currentUserEmail = null;
 let myOrdersData = []; 
 let currentTab = 'todos'; 
-let portalSiteConfig = {}; // Guardar datos de config
+let portalSiteConfig = {}; 
 
 function escapeHTML(str) {
   if (!str) return '';
@@ -305,7 +325,6 @@ const statusLabels = { 'pendiente': 'Pendiente', 'verificado': 'Verificado', 'en
 
 if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW error:', err)); }); }
 
-// --- RECUPERAR CONTRASEÑA ---
 async function recoverPassword() {
   const email = document.getElementById('authEmail').value.trim();
   if (!email) return showToast("Escribe tu correo arriba para enviarte el enlace.", 'error');
@@ -351,6 +370,9 @@ async function handleAuth(e) {
 async function handleLogout() { await supabaseClient.auth.signOut(); location.reload(); }
 
 async function checkSession() {
+  // Obtener la tasa del BCV ANTES de cargar cualquier dato
+  await fetchBCVRate(); 
+  
   const { data: { user }, error } = await supabaseClient.auth.getUser();
   if (user && !error) {
     currentUserId = user.id; currentUserEmail = user.email;
@@ -361,7 +383,6 @@ async function checkSession() {
     const { data: profile } = await supabaseClient.from('profiles').select('full_name').eq('id', user.id).single();
     document.getElementById('userNameDisplay').textContent = profile?.full_name || user.user_metadata?.full_name || user.email;
     
-    // Cargar configuración de la tienda (para datos de pago)
     const { data: config } = await supabaseClient.from('site_config').select('*').eq('id', 1).single();
     if(config) portalSiteConfig = config;
 
@@ -432,13 +453,21 @@ function renderFilteredOrders() {
   list.innerHTML = filtered.map(o => {
     const shortId = String(o.id).slice(0,8).toUpperCase();
     const date = new Date(o.created_at).toLocaleDateString('es-VE', { day: '2-digit', month: 'long', year: 'numeric' });
-    let abonadoBs = 0, pendienteBs = 0;
     
-    if (o.installments) { o.installments.forEach(i => { if (i.status === 'pendiente') { pendienteBs += Number(i.amount_bs || 0); } else { abonadoBs += Number(i.amount_bs || 0); } }); }
+    // NUEVA LÓGICA: Todo se calcula en base al USD original, y se multiplica por la tasa actual
+    const totalUsdt = Number(o.total_usdt);
+    let abonadoUsdt = 0, pendienteUsdt = 0;
     
-    const totalBs = Number(o.total_bs), totalUsdt = Number(o.total_usdt), ratio = totalBs / totalUsdt;
-    const saldoBs = Math.max(0, totalBs - abonadoBs - pendienteBs), saldoUsdt = saldoBs / ratio;
-    const isPaid = (totalBs - abonadoBs - pendienteBs) <= 0.1;
+    if (o.installments) { 
+      o.installments.forEach(i => { 
+        if (i.status === 'pendiente') { pendienteUsdt += Number(i.amount_usdt || 0); } 
+        else { abonadoUsdt += Number(i.amount_usdt || 0); } 
+      }); 
+    }
+    
+    const saldoUsdt = Math.max(0, totalUsdt - abonadoUsdt - pendienteUsdt);
+    const saldoBs = saldoUsdt * bcvRate; // Saldo real en Bs a la tasa de HOY
+    const isPaid = saldoUsdt <= 0.1;
     const statusClass = `status-${o.status}`, statusText = statusLabels[o.status] || o.status;
 
     const itemsHtml = (o.order_items || []).map(item => `
@@ -458,14 +487,15 @@ function renderFilteredOrders() {
     if(o.payment_plan_details) {
       const d = o.payment_plan_details;
       if(o.payment_plan === 'credito') {
-        planDetailsHtml = `<div class="plan-details-box"><strong>Plan de Crédito (3 cuotas de ${fmtUSD(d.cuota_monto / ratio)}):</strong><br>Cuota 1: ${d.cuota1_pagada ? '✅ Pagada' : '⏳ Pendiente'}<br>Cuota 2: ${d.cuota2_pagada ? '✅ Pagada' : '⏳ Pendiente'}<br>Cuota 3: ${d.cuota3_pagada ? '✅ Pagada' : '⏳ Pendiente'}</div>`;
+        // Usar la cuota original en Bs para no confundir, o calcularla en base a USD
+        planDetailsHtml = `<div class="plan-details-box"><strong>Plan de Crédito:</strong><br>Cuota 1: ${d.cuota1_pagada ? '✅ Pagada' : '⏳ Pendiente'}<br>Cuota 2: ${d.cuota2_pagada ? '✅ Pagada' : '⏳ Pendiente'}<br>Cuota 3: ${d.cuota3_pagada ? '✅ Pagada' : '⏳ Pendiente'}</div>`;
       } else if (o.payment_plan === 'apartado') {
-        planDetailsHtml = `<div class="plan-details-box"><strong>Plan de Apartado:</strong><br>Abono Inicial: ${fmtUSD(d.abono_inicial / ratio)}<br>Saldo Pendiente inicial: <strong style="color:var(--danger);">${fmtUSD(d.saldo_pendiente / ratio)}</strong></div>`;
+        planDetailsHtml = `<div class="plan-details-box"><strong>Plan de Apartado:</strong><br>Abono Inicial: ${fmtUSD(d.abono_inicial / (Number(o.total_bs) / totalUsdt))}<br>Saldo Pendiente inicial: <strong style="color:var(--danger);">${fmtUSD(d.saldo_pendiente / (Number(o.total_bs) / totalUsdt))}</strong></div>`;
       }
     }
 
-    const canPay = saldoBs > 0.1 && (o.payment_plan === 'credito' || o.payment_plan === 'apartado');
-    const payButtonHtml = canPay ? `<div style="margin-top:16px;"><button class="btn-primary" style="background:var(--text); color:#fff; width:100%;" onclick="openPaymentModal('${o.id}', ${saldoBs})">💸 Realizar Pago / Abono</button>${pendienteBs > 0 ? `<p style="color:var(--warning); font-size:13px; margin-top:8px; text-align:center;">⏳ Tienes un pago de ${fmtUSD(pendienteBs/ratio)} pendiente por verificar.</p>` : ''}</div>` : '';
+    const canPay = saldoUsdt > 0.1 && (o.payment_plan === 'credito' || o.payment_plan === 'apartado');
+    const payButtonHtml = canPay ? `<div style="margin-top:16px;"><button class="btn-primary" style="background:var(--text); color:#fff; width:100%;" onclick="openPaymentModal('${o.id}', ${saldoBs})">💸 Realizar Pago / Abono</button>${pendienteUsdt > 0 ? `<p style="color:var(--warning); font-size:13px; margin-top:8px; text-align:center;">⏳ Tienes un pago de ${fmtUSD(pendienteUsdt)} pendiente por verificar.</p>` : ''}</div>` : '';
     const mainReceiptHtml = o.receipt_url ? `<button onclick="viewReceipt('${o.receipt_url}')" class="upload-receipt-btn view-receipt-btn">👁️ Ver Comprobante Inicial</button>` : '';
 
     return `
@@ -477,7 +507,7 @@ function renderFilteredOrders() {
         <div class="order-items">${itemsHtml}</div>
         ${planDetailsHtml}
         <div class="order-details">
-          <div class="detail-item"><span class="detail-label">Total</span><span class="detail-value">${fmtUSD(totalUsdt)}</span><span class="detail-sub">≈ ${fmtBs(totalBs)}</span></div>
+          <div class="detail-item"><span class="detail-label">Total</span><span class="detail-value">${fmtUSD(totalUsdt)}</span><span class="detail-sub">≈ ${fmtBs(totalUsdt * bcvRate)}</span></div>
           <div class="detail-item"><span class="detail-label">Saldo Restante</span>${isPaid ? `<span class="detail-value text-success">Pagado</span>` : `<span class="detail-value text-danger">${fmtUSD(saldoUsdt)}</span><span class="detail-sub text-danger">≈ ${fmtBs(saldoBs)}</span>`}</div>
         </div>
         <div style="margin-top:16px; padding-top:16px; border-top:1px dashed var(--border);">${payButtonHtml}${mainReceiptHtml}</div>
@@ -658,13 +688,14 @@ async function submitPayment() {
     const { error: uploadError } = await supabaseClient.storage.from('receipts').upload(fileName, compressedFile);
     if (uploadError) throw new Error("Error al subir comprobante: " + uploadError.message);
     
-    const { data: order } = await supabaseClient.from('orders').select('total_bs, total_usdt').eq('id', currentPayOrderId).single();
-    const ratio = Number(order.total_bs) / Number(order.total_usdt);
-    const amountUsdt = amount / ratio;
+    // Usar la tasa del día de HOY para calcular cuántos dólares está abonando
+    const amountUsdt = amount / bcvRate; 
     
     const { error: instError } = await supabaseClient.from('installments').insert({
       order_id: currentPayOrderId,
-      amount_bs: amount, amount_usdt: amountUsdt, method: method,
+      amount_bs: amount, 
+      amount_usdt: amountUsdt, 
+      method: method,
       reference: "Pago desde Portal", receipt_url: fileName,
       notes: "Pendiente de verificación", status: "pendiente"
     });
@@ -681,9 +712,9 @@ async function checkReviewStatus(userId) {
   const { data: reviews } = await supabaseClient.from('reviews').select('id').eq('user_id', userId).limit(1);
   
   if (reviews && reviews.length > 0) {
-    banner.style.display = 'none'; // Ya tiene reseña, ocultar
+    banner.style.display = 'none'; 
   } else {
-    banner.style.display = 'flex'; // No tiene reseña, mostrar invitación
+    banner.style.display = 'flex'; 
   }
 }
 
@@ -718,7 +749,7 @@ async function submitReview() {
     if(error) throw error;
     showToast("¡Gracias por tu reseña!");
     closeReviewModal();
-    document.getElementById('reviewBanner').style.display = 'none'; // Ocultar banner al enviar
+    document.getElementById('reviewBanner').style.display = 'none'; 
   } catch(err) {
     errBox.textContent = err.message;
   } finally {
