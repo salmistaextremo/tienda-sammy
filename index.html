@@ -109,21 +109,8 @@
   .modal-wrap{ position:fixed; inset:0; z-index:2000; display:none; align-items:center; justify-content:center; padding:20px; background:rgba(0,0,0,0.4); backdrop-filter:blur(4px); overflow-y:auto; overflow-x:hidden; }
   .modal-wrap.open{ display:flex; } 
   
-  .modal{ 
-    background:var(--surface); 
-    border-radius:var(--radius-lg); 
-    max-width:900px; 
-    width:100%; 
-    max-height:92vh; 
-    overflow-y:auto; 
-    overflow-x:hidden; 
-    position:relative; 
-    -ms-overflow-style: none;  
-    scrollbar-width: none;     
-  }
-  .modal::-webkit-scrollbar { 
-    display: none;             
-  }
+  .modal{ background:var(--surface); border-radius:var(--radius-lg); max-width:900px; width:100%; max-height:92vh; overflow-y:auto; overflow-x:hidden; position:relative; -ms-overflow-style: none; scrollbar-width: none; }
+  .modal::-webkit-scrollbar { display: none; }
   
   .modal-x{ position:absolute; top:20px; right:20px; z-index:2; width:36px; height:36px; border-radius:50%; background:var(--bg); display:grid; place-items:center; cursor:pointer; }
   
@@ -318,11 +305,9 @@
     
     <div class="reviews-carousel-wrap" id="reviewsWrap" style="display:none;">
       <button class="review-arrow left" onclick="moveReview(-1)">❮</button>
-      
       <div class="reviews-carousel">
         <div class="reviews-track" id="reviewsContainer"></div>
       </div>
-      
       <button class="review-arrow right" onclick="moveReview(1)">❯</button>
     </div>
     
@@ -437,7 +422,7 @@ const SUPABASE_URL = "https://zxhufobqfxmbjpneyiam.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4aHVmb2JxZnhtYmpwbmV5aWFtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMxNjk2OTEsImV4cCI6MjEwODc0NTY5MX0.EUS-QUdhuhtSk9rgLB11wz-GYF9m01JqhXfT6yT9_Vs";
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// --- CONFIGURACIÓN DE TASA BCV (COTIZAVE) ---
+// --- CONFIGURACIÓN DE TASA BCV ---
 // Si tienes una API Key de Cotizave, colócala aquí. 
 // Si la dejas vacía, el sistema usará la API pública de respaldo.
 const COTIZAVE_API_KEY = ""; 
@@ -447,19 +432,16 @@ async function fetchBCVRate() {
   try {
     let rate = null;
     
-    // 1. Intentar con Cotizave (si hay API Key)
     if (COTIZAVE_API_KEY) {
       const res = await fetch('https://api.cotizave.com/v1/fx/rates/reference', {
         headers: { 'Authorization': `Bearer ${COTIZAVE_API_KEY}` }
       });
       if (res.ok) {
         const data = await res.json();
-        // Cotizave devuelve la tasa en data.rate según su documentación
         if (data && data.rate) rate = data.rate;
       }
     }
     
-    // 2. Si Cotizave falla o no hay Key, usar API pública de respaldo
     if (!rate) {
       console.warn("Usando API de respaldo para la tasa BCV...");
       const res = await fetch('https://ve.dolarapi.com/v1/dolares/oficial');
@@ -469,7 +451,6 @@ async function fetchBCVRate() {
       }
     }
     
-    // 3. Asignar la tasa final
     if (rate) {
       bcvRate = rate;
       console.log("Tasa BCV cargada exitosamente:", bcvRate);
@@ -972,8 +953,19 @@ function renderCheckout(profile){
     </div>
 
     <div class="summary">
-      <div class="row"><span>Total del pedido</span><span>${fmtUSD(totalUsdt)}</span></div>
-      <div class="row total" style="margin-bottom: 8px;"><span>A pagar ahora</span><span id="amountToPay">${fmtUSD(paymentPlan==='contado'?totalUsdt:(paymentPlan==='credito'?totalUsdt/3:0))}</span></div>
+      <div class="row" style="margin-bottom: 8px;"><span>Total del pedido (USD)</span><span>${fmtUSD(totalUsdt)}</span></div>
+      <div class="row" style="margin-bottom: 16px; border-bottom: 1px dashed var(--border); padding-bottom: 12px;">
+        <span>Total en Bolívares (Tasa BCV)</span>
+        <span style="color: var(--muted);">${fmtBs(totalUsdt * bcvRate)}</span>
+      </div>
+      
+      <div class="row total" style="display:flex; justify-content: space-between; align-items: flex-start;">
+        <span style="margin-top: 4px;">A pagar ahora</span>
+        <div style="text-align: right;">
+          <span id="amountToPay" style="display:block; font-size: 20px; color: var(--text);">${fmtUSD(paymentPlan==='contado'?totalUsdt:(paymentPlan==='credito'?totalUsdt/3:0))}</span>
+          <span id="amountToPayBs" style="display:block; font-size: 14px; color: var(--muted); font-weight: 500; margin-top: 4px;">${fmtBs((paymentPlan==='contado'?totalUsdt:(paymentPlan==='credito'?totalUsdt/3:0)) * bcvRate)}</span>
+        </div>
+      </div>
     </div>
 
     <button class="btn-primary" style="width:100%;" onclick="submitOrder()">Confirmar Pedido</button>
@@ -1036,6 +1028,10 @@ function updateCheckoutTotal() {
     let html = fmtUSD(amountToPay);
     if (currentDiscount > 0) html += ` <span style="font-size:12px; color:var(--success);">(-${currentDiscount}%)</span>`;
     document.getElementById('amountToPay').innerHTML = html;
+    
+    if(document.getElementById('amountToPayBs')) {
+      document.getElementById('amountToPayBs').textContent = fmtBs(amountToPay * bcvRate);
+    }
   }
 }
 
@@ -1112,7 +1108,7 @@ async function submitOrder(){
       p_payment_plan_details: planDetails,
       p_installments: installmentsRecords.map(r => ({ amount_bs: r.amount_bs, reference: r.reference })),
       p_discount_percent: currentDiscount,
-      p_coupon_code: appliedCouponCode
+      p_coupon_code: appliedCouponCode || null
     });
 
     if (error) throw error;
@@ -1164,7 +1160,7 @@ async function submitOrder(){
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-  await fetchBCVRate(); // <--- Cargar tasa BCV primero
+  await fetchBCVRate(); 
   loadCategories(); loadProducts(); loadReviews(); renderCart(); suscribirseProductos(); startHeroAutoplay(); loadSiteConfig();
   supabaseClient.auth.getSession().then(({data: {session}}) => { if(session) document.getElementById('btnAccount').style.display = 'inline-block'; });
 });
