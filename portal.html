@@ -151,6 +151,12 @@
       <button class="btn-logout" onclick="handleLogout()">Cerrar Sesión</button>
     </div>
     
+    <!-- NUEVA SECCIÓN: INVITACIÓN A DEJAR RESEÑA -->
+    <div style="background:#fffbeb; border:1px solid #fcd34d; padding:16px; border-radius:16px; margin-bottom:24px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+      <p style="color:#b45309; font-weight:500; font-size:14px; margin:0;">¿Te gustó tu compra? ¡Déjanos una reseña!</p>
+      <button onclick="openReviewModal()" style="background:#f59e0b; color:#fff; padding:8px 16px; border-radius:100px; font-weight:600; font-size:13px; cursor:pointer;">Escribir Reseña</button>
+    </div>
+
     <div id="loyaltyBanner" class="loyalty-banner" style="display: none;">
       <p>🎉 ¡Felicidades! Por tu volumen de compras, calificas para ser <strong>Vendedor Mayorista</strong>.</p>
       <button class="btn-loyalty" id="btnRequestUpgrade" onclick="requestUpgrade()">Solicitar Ascenso</button>
@@ -179,6 +185,7 @@
   </button>
 </div>
 
+<!-- MODAL DE PAGO -->
 <div class="modal-wrap" id="paymentModal" onclick="if(event.target.id==='paymentModal') closePaymentModal()">
   <div class="modal">
     <button class="modal-x" onclick="closePaymentModal()">✕</button>
@@ -208,6 +215,34 @@
     
     <button class="btn-primary" onclick="submitPayment()">Enviar Pago</button>
     <div id="payError" class="err"></div>
+  </div>
+</div>
+
+<!-- MODAL DE RESEÑA -->
+<div class="modal-wrap" id="reviewModal" onclick="if(event.target.id==='reviewModal') closeReviewModal()">
+  <div class="modal">
+    <button class="modal-x" onclick="closeReviewModal()">✕</button>
+    <h3 style="font-size:24px; margin-bottom:8px;">Deja tu Reseña</h3>
+    <p style="font-size:14px; color:var(--muted); margin-bottom:24px;">Tu opinión nos ayuda a mejorar.</p>
+    
+    <div class="field">
+      <label>Calificación (1 a 5 estrellas) *</label>
+      <select id="reviewRating" style="width:100%; padding:16px; border-radius:16px; border:1px solid var(--border); font-family:inherit;">
+        <option value="5">⭐⭐⭐⭐⭐ (Excelente)</option>
+        <option value="4">⭐⭐⭐⭐ (Muy bueno)</option>
+        <option value="3">⭐⭐⭐ (Bueno)</option>
+        <option value="2">⭐⭐ (Regular)</option>
+        <option value="1">⭐ (Malo)</option>
+      </select>
+    </div>
+    
+    <div class="field">
+      <label>Comentario (Opcional)</label>
+      <textarea id="reviewComment" rows="3" placeholder="¿Qué tal la calidad de la ropa?" style="width:100%; padding:16px; border-radius:16px; border:1px solid var(--border);"></textarea>
+    </div>
+    
+    <button class="btn-primary" onclick="submitReview()">Enviar Reseña</button>
+    <div id="reviewError" class="err"></div>
   </div>
 </div>
 
@@ -467,15 +502,9 @@ async function updateProfile() {
   try {
     if (!name || !phone || !address) throw new Error("Nombre, teléfono y dirección son obligatorios.");
     
-    // 1. Actualizar perfil en la tabla
-    const { error: profileError } = await supabaseClient.from('profiles').update({
-      full_name: name,
-      phone: phone,
-      address: address
-    }).eq('id', currentUserId);
+    const { error: profileError } = await supabaseClient.from('profiles').update({ full_name: name, phone: phone, address: address }).eq('id', currentUserId);
     if (profileError) throw profileError;
 
-    // 2. Actualizar contraseña si se proporcionó una nueva
     if (newPassword) {
       if (newPassword.length < 6) throw new Error("La contraseña debe tener al menos 6 caracteres.");
       const { error: authError } = await supabaseClient.auth.updateUser({ password: newPassword });
@@ -527,6 +556,7 @@ async function requestUpgrade() {
   if (!error) btn.textContent = 'Solicitud enviada con éxito'; else { alert("Error: " + error.message); btn.disabled = false; btn.textContent = 'Solicitar Ascenso'; }
 }
 
+// --- SISTEMA DE PAGOS ---
 let currentPayOrderId = null, currentPaySaldoBs = 0;
 
 function openPaymentModal(orderId, saldoBs) {
@@ -591,7 +621,34 @@ async function submitPayment() {
   } catch(err) { errBox.textContent = err.message; } finally { btn.disabled = false; btn.textContent = "Enviar Pago"; }
 }
 
-checkSession();
-</script>
-</body>
-</html>
+// --- SISTEMA DE RESEÑAS ---
+function openReviewModal() {
+  document.getElementById('reviewModal').classList.add('open');
+  document.getElementById('reviewError').textContent = "";
+}
+function closeReviewModal() {
+  document.getElementById('reviewModal').classList.remove('open');
+}
+
+async function submitReview() {
+  const rating = document.getElementById('reviewRating').value;
+  const comment = document.getElementById('reviewComment').value.trim();
+  const errBox = document.getElementById('reviewError');
+  const btn = document.querySelector('#reviewModal .btn-primary');
+  
+  btn.disabled = true; btn.textContent = "Enviando...";
+  
+  try {
+    const { data: { user } } = await supabaseClient.auth.getUser();
+    if(!user) throw new Error("Debes iniciar sesión.");
+    
+    const { error } = await supabaseClient.from('reviews').insert({
+      user_id: user.id,
+      customer_name: document.getElementById('userNameDisplay').textContent,
+      rating: parseInt(rating),
+      comment: comment
+    });
+    
+    if(error) throw error;
+    alert("¡Gracias por tu reseña!");
+    closeReviewModal
