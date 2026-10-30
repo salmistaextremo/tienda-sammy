@@ -515,15 +515,50 @@ async function loadOrders(){
 
 async function updateOrderStatus(orderId, newStatus){
   try {
-    const { error } = await supabaseClient.from('orders').update({ status: newStatus }).eq('id', orderId);
+    // 1. Buscamos el pedido en la memoria local para obtener su plan de pago
+    const orderIndex = allOrdersData.findIndex(o => o.id === orderId);
+    if (orderIndex === -1) return;
+
+    const currentOrder = allOrdersData[orderIndex];
+    let updatedPlanDetails = currentOrder.payment_plan_details || {};
+
+    // 2. Si es un pedido a crédito, actualizamos los checks de las cuotas
+    if (currentOrder.payment_plan === 'credito') {
+      if (newStatus === 'cuota1_confirmada') {
+        updatedPlanDetails.cuota1_pagada = true;
+      } else if (newStatus === 'cuota2_confirmada') {
+        updatedPlanDetails.cuota1_pagada = true;
+        updatedPlanDetails.cuota2_pagada = true;
+      } else if (newStatus === 'cuota3_confirmada') {
+        updatedPlanDetails.cuota1_pagada = true;
+        updatedPlanDetails.cuota2_pagada = true;
+        updatedPlanDetails.cuota3_pagada = true;
+      } else if (newStatus === 'pendiente' || newStatus === 'cancelado') {
+        // Si se revierte a pendiente o se cancela, reiniciamos los checks
+        updatedPlanDetails.cuota1_pagada = false;
+        updatedPlanDetails.cuota2_pagada = false;
+        updatedPlanDetails.cuota3_pagada = false;
+      }
+    }
+
+    // 3. Actualizamos la base de datos con el nuevo estado Y el nuevo JSON del plan
+    const { error } = await supabaseClient.from('orders').update({ 
+      status: newStatus,
+      payment_plan_details: updatedPlanDetails
+    }).eq('id', orderId);
+    
     if(error) throw error;
-    
-    const index = allOrdersData.findIndex(o => o.id === orderId);
-    if(index > -1) allOrdersData[index].status = newStatus;
-    
+
+    // 4. Actualizamos la memoria local y recargamos la tabla
+    allOrdersData[orderIndex].status = newStatus;
+    allOrdersData[orderIndex].payment_plan_details = updatedPlanDetails;
+
     calculateKPIs();
     loadOrders(); 
-  } catch(err) { alert("Error al actualizar: " + err.message); loadOrders(); }
+  } catch(err) { 
+    alert("Error al actualizar: " + err.message); 
+    loadOrders(); 
+  }
 }
 
 function viewOrderDetails(orderId) {
