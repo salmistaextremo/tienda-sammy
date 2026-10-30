@@ -732,6 +732,16 @@ function viewOrderDetails(orderId) {
     }
   }
 
+  // --- NUEVO: MOSTRAR CUPÓN APLICADO ---
+  let couponHtml = "";
+  if (o.coupon_code) {
+    couponHtml = `<div style="background:var(--bg); padding:16px; border-radius:8px; margin-bottom:16px; border: 1px dashed var(--success);">
+                    <h4 style="font-size:14px; margin-bottom:8px; color:var(--success);">🎟️ Cupón Aplicado</h4>
+                    <p style="font-size:14px; font-weight:700; text-transform:uppercase;">${escapeHTML(o.coupon_code)}</p>
+                  </div>`;
+  }
+  // -------------------------------------
+
   const receiptHtml = o.receipt_url ? `<div style="margin-top:16px;"><label style="font-size:12px; color:var(--muted); font-weight:600;">Comprobante:</label><br><button class="btn-primary" style="margin-top:8px; padding:10px 20px; width:auto;" onclick="viewReceipt('${o.receipt_url}')">Ver Comprobante</button></div>` : `<div style="margin-top:16px; color:var(--muted); font-size:13px;">Sin comprobante inicial.</div>`;
 
   document.getElementById('orderDetailContent').innerHTML = `
@@ -742,6 +752,7 @@ function viewOrderDetails(orderId) {
     </div>
     <div style="margin-bottom:20px;"><h4 style="font-size:14px; margin-bottom:8px;">Productos Comprados</h4>${itemsHtml}</div>
     ${planDetailsHtml}
+    ${couponHtml} <!-- AQUÍ SE INYECTA EL CUPÓN -->
     <div style="background:var(--bg); padding:16px; border-radius:8px; font-size:14px; margin-bottom:16px;">
       <div style="display:flex; justify-content:space-between; margin-bottom:8px;"><span>Total del Pedido:</span><strong>${fmtUSD(o.total_usdt)}</strong></div>
       <div style="display:flex; justify-content:space-between;"><span>Saldo Restante:</span><strong style="color:${isPaid ? 'var(--success)' : 'var(--danger)'};">${isPaid ? 'Pagado' : fmtUSD(saldoUsd)}</strong></div>
