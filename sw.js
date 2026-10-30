@@ -1,4 +1,4 @@
-// Cambiamos a v2 para forzar la actualización en todos los dispositivos
+// Versión 2 del caché. Si haces cambios grandes en el futuro, cámbialo a v3, v4, etc.
 const CACHE_NAME = 'tiendas-sams-v2';
 const ASSETS = [
   '/',
@@ -11,24 +11,25 @@ const ASSETS = [
   'https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js'
 ];
 
-// Instalar el Service Worker y guardar los archivos en caché
+// 1. INSTALACIÓN: Guarda los archivos estáticos en la memoria
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => {
       return cache.addAll(ASSETS);
     })
   );
-  self.skipWaiting();
+  self.skipWaiting(); // Fuerza a la nueva versión a activarse de inmediato
 });
 
-// Activar y limpiar cachés antiguos (ej. la v1)
+// 2. ACTIVACIÓN: Borra las versiones viejas de la memoria (como la v1)
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(cacheNames => {
       return Promise.all(
         cacheNames.map(cache => {
           if (cache !== CACHE_NAME) {
-            return caches.delete(cache); // Borra la memoria vieja
+            console.log('Borrando caché antiguo:', cache);
+            return caches.delete(cache); 
           }
         })
       );
@@ -37,22 +38,26 @@ self.addEventListener('activate', event => {
   self.clients.claim();
 });
 
-// NUEVA LÓGICA: Buscar en la red primero para el HTML, luego en caché
+// 3. INTERCEPTOR DE RED (La Magia)
 self.addEventListener('fetch', event => {
-  // Si es una página HTML, buscar primero la versión nueva en internet
-  if (event.request.mode === 'navigate' || (event.request.method === 'GET' && event.request.headers.get('accept').includes('text/html'))) {
+  // Si el cliente está pidiendo una página HTML (navegando)
+  if (event.request.mode === 'navigate' || (event.request.method === 'GET' && event.request.headers.get('accept') && event.request.headers.get('accept').includes('text/html'))) {
     event.respondWith(
-      fetch(event.request).then(response => {
-        return caches.open(CACHE_NAME).then(cache => {
-          cache.put(event.request, response.clone());
-          return response;
-        });
-      }).catch(() => {
-        return caches.match(event.request);
-      })
+      fetch(event.request) // Intenta buscar en internet primero (Network First)
+        .then(response => {
+          // Si hay internet, guarda una copia nueva y muestra la página actualizada
+          return caches.open(CACHE_NAME).then(cache => {
+            cache.put(event.request, response.clone());
+            return response;
+          });
+        })
+        .catch(() => {
+          // Si no hay internet (offline), muestra la copia guardada
+          return caches.match(event.request);
+        })
     );
   } else {
-    // Para imágenes, fuentes y scripts, usar la memoria caché para que cargue rápido
+    // Para imágenes, fuentes, etc. Busca en caché primero (Cache First)
     event.respondWith(
       caches.match(event.request).then(response => {
         return response || fetch(event.request);
