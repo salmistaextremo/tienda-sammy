@@ -384,10 +384,12 @@
       <div class="form-group"><label>Nombre *</label><input type="text" id="pName" required></div>
       <div class="form-group"><label>Categoría *</label><select id="pCategory" required></select></div>
       <div class="form-group"><label>Tallas (coma separada) *</label><input type="text" id="pSizes" required placeholder="S, M, L"></div>
+      
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
-        <div class="form-group"><label>Precio en $ (USD) *</label><input type="number" step="0.01" id="pPriceUsdt" required></div>
-        <div class="form-group"><label>Precio en Bs *</label><input type="number" step="0.01" id="pPriceBs" required></div>
+        <div class="form-group"><label>Precio en $ (USD) *</label><input type="number" step="0.01" id="pPriceUsdt" required oninput="calcBsPrice()"></div>
+        <div class="form-group"><label>Precio en Bs (Calculado) *</label><input type="number" step="0.01" id="pPriceBs" required readonly style="background:#eee; cursor:not-allowed;"></div>
       </div>
+      
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
         <div class="form-group"><label>Stock *</label><input type="number" id="pStock" required></div>
         <div class="form-group"><label>Etiqueta</label><input type="text" id="pBadge"></div>
@@ -463,6 +465,24 @@ let currentUserId = null, currentUserRole = null;
 let allOrdersData = [], allProducts = [], allUsers = [], allInstallments = [], allCategories = [];
 let currentSiteConfig = {};
 let isRealTimeSubscribed = false;
+
+// --- CONFIGURACIÓN DE TASA BCV ---
+let bcvRate = 40.00; // Tasa de respaldo
+
+async function fetchBCVRate() {
+  try {
+    const res = await fetch('https://ve.dolarapi.com/v1/dolares/oficial');
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.promedio) {
+        bcvRate = data.promedio;
+        console.log("Tasa BCV cargada en Admin:", bcvRate);
+      }
+    }
+  } catch (e) {
+    console.warn("Usando tasa de respaldo en Admin:", bcvRate);
+  }
+}
 
 const fmtUSD = n => "$ " + Number(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
 const fmtBs = n => "Bs " + Number(n).toLocaleString('es-VE',{minimumFractionDigits:0,maximumFractionDigits:2});
@@ -732,7 +752,6 @@ function viewOrderDetails(orderId) {
     }
   }
 
-  // --- NUEVO: MOSTRAR CUPÓN APLICADO ---
   let couponHtml = "";
   if (o.coupon_code) {
     couponHtml = `<div style="background:var(--bg); padding:16px; border-radius:8px; margin-bottom:16px; border: 1px dashed var(--success);">
@@ -740,7 +759,6 @@ function viewOrderDetails(orderId) {
                     <p style="font-size:14px; font-weight:700; text-transform:uppercase;">${escapeHTML(o.coupon_code)}</p>
                   </div>`;
   }
-  // -------------------------------------
 
   const receiptHtml = o.receipt_url ? `<div style="margin-top:16px;"><label style="font-size:12px; color:var(--muted); font-weight:600;">Comprobante:</label><br><button class="btn-primary" style="margin-top:8px; padding:10px 20px; width:auto;" onclick="viewReceipt('${o.receipt_url}')">Ver Comprobante</button></div>` : `<div style="margin-top:16px; color:var(--muted); font-size:13px;">Sin comprobante inicial.</div>`;
 
@@ -752,7 +770,7 @@ function viewOrderDetails(orderId) {
     </div>
     <div style="margin-bottom:20px;"><h4 style="font-size:14px; margin-bottom:8px;">Productos Comprados</h4>${itemsHtml}</div>
     ${planDetailsHtml}
-    ${couponHtml} <!-- AQUÍ SE INYECTA EL CUPÓN -->
+    ${couponHtml}
     <div style="background:var(--bg); padding:16px; border-radius:8px; font-size:14px; margin-bottom:16px;">
       <div style="display:flex; justify-content:space-between; margin-bottom:8px;"><span>Total del Pedido:</span><strong>${fmtUSD(o.total_usdt)}</strong></div>
       <div style="display:flex; justify-content:space-between;"><span>Saldo Restante:</span><strong style="color:${isPaid ? 'var(--success)' : 'var(--danger)'};">${isPaid ? 'Pagado' : fmtUSD(saldoUsd)}</strong></div>
@@ -921,10 +939,17 @@ function openProductForm(){
   document.getElementById('productModal').classList.add('open'); 
 }
 
+// CALCULAR PRECIO EN BS
+function calcBsPrice() {
+  const usdt = parseFloat(document.getElementById('pPriceUsdt').value) || 0;
+  document.getElementById('pPriceBs').value = (usdt * bcvRate).toFixed(2);
+}
+
 function editProduct(id){
   const p = allProducts.find(x => x.id === id); if(!p) return;
   document.getElementById('pId').value=p.id; document.getElementById('pName').value=p.name; document.getElementById('pCategory').value=p.category;
-  document.getElementById('pSizes').value=(p.sizes||[]).join(', '); document.getElementById('pPriceUsdt').value=p.price_usdt; document.getElementById('pPriceBs').value=p.price_bs;
+  document.getElementById('pSizes').value=(p.sizes||[]).join(', '); document.getElementById('pPriceUsdt').value=p.price_usdt; 
+  calcBsPrice(); // Llamamos a la función para calcular el valor actual
   document.getElementById('pStock').value=p.stock; document.getElementById('pBadge').value=p.badge||''; document.getElementById('pActive').checked=p.is_active;
   document.getElementById('pDescription').value=p.description || '';
   
@@ -1135,7 +1160,6 @@ async function loadSiteConfig() {
     data.hero_images.forEach(url => { if(url) heroPreview.innerHTML += `<img src="${url}">`; });
   }
 
-  // Cargar datos de pago
   const p = data.payment_details || {};
   document.getElementById('payBank').value = p.bank || '';
   document.getElementById('payCedula').value = p.cedula || '';
@@ -1248,7 +1272,8 @@ async function savePromoConfig(e) {
   } catch(err) { showToast("Error al guardar: " + err.message, 'error'); } finally { btn.disabled = false; btn.textContent = "Guardar Promoción"; }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  await fetchBCVRate(); // Cargar tasa BCV primero
   checkAdminSession();
 });
 </script>
