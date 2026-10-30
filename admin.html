@@ -561,18 +561,23 @@ function suscribirseCambios() {
 
 function calculateKPIs() {
   const now = new Date();
-  let salesBs = 0; let salesUsdt = 0; let pendingOrdersCount = 0;
+  let salesUsdt = 0; 
+  let pendingOrdersCount = 0;
 
   allOrdersData.forEach(o => {
     const d = new Date(o.created_at);
+    // Sumamos solo los dólares de las ventas de este mes que no estén canceladas
     if (d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear() && o.status !== 'cancelado') {
-      salesBs += Number(o.total_bs); salesUsdt += Number(o.total_usdt);
+      salesUsdt += Number(o.total_usdt); 
     }
     if (!['enviado', 'cancelado', 'entregado'].includes(o.status)) pendingOrdersCount++;
   });
 
+  // Calculamos el equivalente en Bs usando la tasa ACTUAL del BCV (la que se cargó al inicio)
+  const currentSalesBs = salesUsdt * bcvRate;
+
   document.getElementById('kpiSalesBs').textContent = fmtUSD(salesUsdt);
-  document.getElementById('kpiSalesUsdt').textContent = "≈ " + fmtBs(salesBs);
+  document.getElementById('kpiSalesUsdt').textContent = "≈ " + fmtBs(currentSalesBs);
   document.getElementById('kpiPendingOrders').textContent = pendingOrdersCount;
 
   let pendingPayments = 0;
