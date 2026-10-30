@@ -93,9 +93,16 @@
   .file-upload-box input[type="file"] { width: 100%; font-size: 13px; color: var(--muted); cursor: pointer; }
   .gallery-preview { display: flex; gap: 8px; margin-top: 10px; overflow-x: auto; padding-bottom: 8px; }
   .gallery-preview img { width: 60px; height: 75px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border); }
-
   .hero-preview { display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
   .hero-preview img { width: 100px; height: 60px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border); }
+
+  /* TOASTS */
+  #toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
+  .toast { background: #333; color: #fff; padding: 16px 24px; border-radius: 12px; font-size: 14px; font-weight: 500; box-shadow: 0 10px 30px rgba(0,0,0,0.2); animation: slideIn 0.3s forwards; display: flex; align-items: center; gap: 10px; }
+  .toast.success { background: var(--success); }
+  .toast.error { background: var(--danger); }
+  @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+  @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
 
   @media(max-width:800px){ 
     .admin-header{ padding:0 20px; height: 64px; } .admin-header .logo img { height: 32px; }
@@ -162,8 +169,8 @@
     <div class="panel active" id="panel-pedidos">
       <div style="display:flex; justify-content:flex-end; margin-bottom: 16px;">
         <button class="btn-new" onclick="openExportModal()" style="background:var(--success); color:#fff;">📊 Descargar Reporte</button>
-</div>    
-     <div class="data-table-wrap">
+      </div>
+      <div class="data-table-wrap">
         <table class="data-table">
           <thead><tr><th>Pedido</th><th>Cliente</th><th>Total</th><th>Saldo</th><th>Estado</th><th>Acciones</th></tr></thead>
           <tbody id="ordersTableBody"><tr><td colspan="6" style="text-align:center;">Cargando...</td></tr></tbody>
@@ -282,10 +289,9 @@
     <div class="panel" id="panel-config">
       <div style="display: grid; grid-template-columns: 1fr; gap: 24px;">
         
+        <!-- CARRUSEL -->
         <div style="background: var(--surface); padding: 24px; border-radius: var(--radius-lg); border: 1px solid var(--border);">
           <h3 style="margin-bottom: 16px;">Carrusel de Inicio (3 fotos)</h3>
-          <p style="font-size: 13px; color: var(--muted); margin-bottom: 16px;">Sube 3 imágenes horizontales (ej. 1200x600px) para el carrusel principal.</p>
-          
           <form id="heroForm" onsubmit="saveHeroImages(event); return false;">
             <div style="background:var(--bg); padding:16px; border-radius:12px; margin-bottom:16px; border:1px solid var(--border);">
               <h4 style="margin-bottom:12px; font-size:14px;">Slide 1</h4>
@@ -318,27 +324,43 @@
           </form>
         </div>
 
+        <!-- PROMOCIÓN -->
         <div style="background: var(--surface); padding: 24px; border-radius: var(--radius-lg); border: 1px solid var(--border);">
           <h3 style="margin-bottom: 16px;">Ventana Emergente (Promoción)</h3>
-          <p style="font-size: 13px; color: var(--muted); margin-bottom: 16px;">Esta ventana aparecerá cuando los clientes entren a la tienda.</p>
-          
           <form id="promoForm" onsubmit="savePromoConfig(event); return false;">
             <div class="form-group" style="display:flex; align-items:center; gap:8px;">
               <input type="checkbox" id="promoActive" style="width:auto; accent-color:var(--accent);">
               <label style="margin:0; cursor:pointer;" for="promoActive">Activar ventana emergente</label>
             </div>
-            
             <div class="form-group">
               <label>Imagen del Popup</label>
               <div class="file-upload-box"><input type="file" id="promoImage" accept="image/*"></div>
               <img id="promoPreview" style="display:none; height: 100px; border-radius: 8px; margin-top: 8px; object-fit: cover;">
             </div>
-            
             <div class="form-group"><label>Título de la Promoción</label><input type="text" id="promoTitle" placeholder="Ej: ¡Nuevo Drop Disponible!"></div>
             <div class="form-group"><label>Texto o Descripción</label><textarea id="promoText" rows="2" placeholder="Ej: Descuento del 20% en toda la colección..."></textarea></div>
             <div class="form-group"><label>Enlace del Botón (Opcional)</label><input type="text" id="promoLink" placeholder="Ej: #catalog"></div>
-            
             <button type="button" onclick="savePromoConfig(event)" class="btn-primary" style="margin-top: 16px;" id="btnSavePromo">Guardar Promoción</button>
+          </form>
+        </div>
+
+        <!-- DATOS DE PAGO -->
+        <div style="background: var(--surface); padding: 24px; border-radius: var(--radius-lg); border: 1px solid var(--border);">
+          <h3 style="margin-bottom: 16px;">Datos para Pagos (Checkout)</h3>
+          <p style="font-size:13px; color:var(--muted); margin-bottom:16px;">Estos datos se mostrarán al cliente cuando vaya a pagar.</p>
+          <form id="paymentForm" onsubmit="savePaymentConfig(event); return false;">
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+              <div class="form-group"><label>Banco</label><input type="text" id="payBank" placeholder="Ej: 0134 Banesco"></div>
+              <div class="form-group"><label>Cédula / RIF</label><input type="text" id="payCedula" placeholder="Ej: 26464322"></div>
+              <div class="form-group"><label>Teléfono (Pago Móvil)</label><input type="text" id="payPhone" placeholder="Ej: 04243351245"></div>
+              <div class="form-group"><label>Titular</label><input type="text" id="payTitular" placeholder="Ej: Tiendas Sam's"></div>
+            </div>
+            <h4 style="margin:16px 0 8px; font-size:14px;">Datos Binance (USDT)</h4>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+              <div class="form-group"><label>Correo Binance</label><input type="text" id="payBinanceEmail" placeholder="Ej: samiibelisario@gmail.com"></div>
+              <div class="form-group"><label>UID Binance</label><input type="text" id="payBinanceUid" placeholder="Ej: 219555454"></div>
+            </div>
+            <button type="submit" class="btn-primary" style="margin-top: 16px;" id="btnSavePayment">Guardar Datos de Pago</button>
           </form>
         </div>
 
@@ -360,10 +382,7 @@
     <form id="productForm" onsubmit="saveProduct(event)">
       <input type="hidden" id="pId">
       <div class="form-group"><label>Nombre *</label><input type="text" id="pName" required></div>
-      <div class="form-group">
-        <label>Categoría *</label>
-        <select id="pCategory" required></select>
-      </div>
+      <div class="form-group"><label>Categoría *</label><select id="pCategory" required></select></div>
       <div class="form-group"><label>Tallas (coma separada) *</label><input type="text" id="pSizes" required placeholder="S, M, L"></div>
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
         <div class="form-group"><label>Precio en $ (USD) *</label><input type="number" step="0.01" id="pPriceUsdt" required></div>
@@ -403,7 +422,6 @@
   </div>
 </div>
 
- <!-- MODAL DE EXPORTACIÓN -->
 <div class="modal-wrap" id="exportModal" onclick="if(event.target.id==='exportModal') this.classList.remove('open')">
   <div class="modal">
     <button class="modal-x" onclick="document.getElementById('exportModal').classList.remove('open')">✕</button>
@@ -433,6 +451,8 @@
   </div>
 </div>
 
+<div id="toast-container"></div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const SUPABASE_URL = "https://zxhufobqfxmbjpneyiam.supabase.co";
@@ -452,11 +472,24 @@ function escapeHTML(str) {
   return String(str).replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag]));
 }
 
+// --- SISTEMA DE NOTIFICACIONES TOAST ---
+function showToast(message, type = 'success') {
+  const container = document.getElementById('toast-container');
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.innerHTML = `<span>${type === 'success' ? '✅' : '❌'}</span> <span>${message}</span>`;
+  container.appendChild(toast);
+  setTimeout(() => {
+    toast.style.animation = 'fadeOut 0.3s forwards';
+    setTimeout(() => toast.remove(), 300);
+  }, 3000);
+}
+
 async function viewReceipt(fileName) {
-  if(!fileName) return alert("No hay comprobante.");
+  if(!fileName) return showToast("No hay comprobante.", 'error');
   if(fileName.startsWith('http')) { window.open(fileName, '_blank'); return; }
   const { data, error } = await supabaseClient.storage.from('receipts').createSignedUrl(fileName, 3600);
-  if(error) return alert("Error al cargar comprobante: " + error.message);
+  if(error) return showToast("Error al cargar comprobante: " + error.message, 'error');
   window.open(data.signedUrl, '_blank');
 }
 
@@ -537,8 +570,8 @@ function calculateKPIs() {
   document.getElementById('kpiLowStockNames').textContent = lowStockNames.length > 0 ? lowStockNames.join(', ') + (lowStockCount > 3 ? '...' : '') : 'Todo en orden';
 }
 
+// --- REPORTE EXCEL ---
 function openExportModal() {
-  // Ponemos la fecha de hoy por defecto en el campo "Fin"
   const today = new Date().toLocaleDateString('en-CA');
   document.getElementById('exportEndDate').value = today;
   document.getElementById('exportStartDate').value = "";
@@ -549,16 +582,13 @@ function generateExcelReport() {
   const type = document.getElementById('exportType').value;
   const start = document.getElementById('exportStartDate').value;
   const end = document.getElementById('exportEndDate').value;
-  
   const btn = document.getElementById('btnExport');
   btn.disabled = true; btn.textContent = "Generando...";
 
-  // Función para verificar si una fecha está en el rango
   const isInDateRange = (dateString) => {
     if (!start && !end) return true;
     const itemDate = new Date(dateString);
-    const itemDateStr = itemDate.toLocaleDateString('en-CA'); // Formato YYYY-MM-DD local
-    
+    const itemDateStr = itemDate.toLocaleDateString('en-CA');
     if (start && itemDateStr < start) return false;
     if (end && itemDateStr > end) return false;
     return true;
@@ -571,16 +601,13 @@ function generateExcelReport() {
   if (type === 'orders') {
     headers = "Pedido;Fecha;Cliente;Telefono;Direccion;Total USD;Total Bs;Estado;Metodo;Cupon\n";
     const filtered = allOrdersData.filter(o => isInDateRange(o.created_at));
-    
     dataToExport = filtered.map(o => {
       return `"${String(o.id).slice(0,8).toUpperCase()}";"${new Date(o.created_at).toLocaleDateString('es-VE')}";"${o.customer_name}";"${o.customer_phone}";"${o.customer_address || ''}";"${o.total_usdt}";"${o.total_bs}";"${o.status}";"${o.payment_method}";"${o.coupon_code || ''}"`;
     });
     fileName = `Reporte_Pedidos_${start || 'Inicio'}_${end || 'Fin'}.csv`;
-
   } else if (type === 'installments') {
     headers = "ID Abono;ID Pedido;Fecha;Monto USD;Monto Bs;Metodo;Referencia;Estado\n";
     const filtered = allInstallments.filter(i => isInDateRange(i.paid_at));
-    
     dataToExport = filtered.map(i => {
       return `"${String(i.id).slice(0,8).toUpperCase()}";"${String(i.order_id).slice(0,8).toUpperCase()}";"${new Date(i.paid_at).toLocaleDateString('es-VE')}";"${i.amount_usdt}";"${i.amount_bs}";"${i.method}";"${i.reference || ''}";"${i.status}"`;
     });
@@ -589,13 +616,10 @@ function generateExcelReport() {
 
   if (dataToExport.length === 0) {
     btn.disabled = false; btn.textContent = "Descargar Excel (.csv)";
-    return alert("No hay datos en el rango de fechas seleccionado.");
+    return showToast("No hay datos en el rango seleccionado.", 'error');
   }
 
-  // Usamos punto y coma (;) para que Excel en español lo lea perfecto
   const csvContent = "\uFEFF" + headers + dataToExport.join("\n");
-  
-  // Crear archivo y descargar (Método Blob, mucho más seguro)
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
@@ -607,6 +631,7 @@ function generateExcelReport() {
   
   document.getElementById('exportModal').classList.remove('open');
   btn.disabled = false; btn.textContent = "Descargar Excel (.csv)";
+  showToast("Reporte descargado con éxito.");
 }
 
 // --- PEDIDOS ---
@@ -623,7 +648,6 @@ async function loadOrders(){
     if(o.installments) o.installments.forEach(i => { if(i.status !== 'pendiente') abonadoBs += Number(i.amount_bs || 0); });
     const saldoBs = Math.max(0, Number(o.total_bs) - abonadoBs);
     const saldoUsd = saldoBs / (Number(o.total_bs)/Number(o.total_usdt));
-    
     const isPaid = saldoBs <= 0.1;
     
     let statusOptions = "";
@@ -671,7 +695,8 @@ async function updateOrderStatus(orderId, newStatus){
 
     calculateKPIs();
     loadOrders(); 
-  } catch(err) { alert("Error al actualizar: " + err.message); loadOrders(); }
+    showToast("Estado del pedido actualizado.");
+  } catch(err) { showToast("Error al actualizar: " + err.message, 'error'); loadOrders(); }
 }
 
 function viewOrderDetails(orderId) {
@@ -755,6 +780,7 @@ async function verifyInstallment(id) {
   if(!confirm("¿Verificar este pago? El monto se restará del saldo del cliente.")) return;
   await supabaseClient.from('installments').update({ status: 'verificado' }).eq('id', id);
   loadInstallments(); loadOrders();
+  showToast("Pago verificado correctamente.");
 }
 
 // --- CUPONES ---
@@ -781,14 +807,15 @@ async function saveCoupon(e) {
     if(error) throw error;
     document.getElementById('couponForm').reset();
     loadCoupons();
-    alert("Cupón creado con éxito.");
-  } catch(err) { alert("Error: " + err.message); }
+    showToast("Cupón creado con éxito.");
+  } catch(err) { showToast("Error: " + err.message, 'error'); }
 }
 
 async function deleteCoupon(id) {
   if(!confirm("¿Eliminar este cupón?")) return;
   await supabaseClient.from('coupons').delete().eq('id', id);
   loadCoupons();
+  showToast("Cupón eliminado.");
 }
 
 // --- RESEÑAS ---
@@ -811,6 +838,7 @@ async function deleteReview(id) {
   if(!confirm("¿Eliminar esta reseña?")) return;
   await supabaseClient.from('reviews').delete().eq('id', id);
   loadReviewsAdmin();
+  showToast("Reseña eliminada.");
 }
 
 // --- SOLICITUDES ---
@@ -842,7 +870,7 @@ async function approveRequest(reqId, userId) {
   await supabaseClient.from('profiles').update({ role: 'vendedor' }).eq('id', userId);
   await supabaseClient.from('upgrade_requests').update({ status: 'aprobado' }).eq('id', reqId);
   loadRequests();
-  alert("Cliente ascendido a Vendedor exitosamente.");
+  showToast("Cliente ascendido a Vendedor exitosamente.");
 }
 
 // --- PRODUCTOS ---
@@ -872,7 +900,8 @@ async function deleteProduct(id) {
     const { error } = await supabaseClient.from('products').delete().eq('id', id);
     if(error) throw error;
     loadProducts();
-  } catch(err) { alert("Error al eliminar: " + err.message); }
+    showToast("Producto eliminado.");
+  } catch(err) { showToast("Error al eliminar: " + err.message, 'error'); }
 }
 
 function openProductForm(){ 
@@ -948,7 +977,8 @@ async function saveProduct(e){
     else await supabaseClient.from('products').insert([productData]);
     
     document.getElementById('productModal').classList.remove('open'); loadProducts();
-  } catch(err) { alert("Error al guardar: " + err.message); } finally { btn.disabled=false; btn.textContent = "Guardar"; }
+    showToast("Producto guardado exitosamente.");
+  } catch(err) { showToast("Error al guardar: " + err.message, 'error'); } finally { btn.disabled=false; btn.textContent = "Guardar"; }
 }
 
 // --- CATEGORÍAS ---
@@ -991,9 +1021,9 @@ async function saveCategory(e) {
     
     document.getElementById('categoryForm').reset();
     loadCategoriesAdmin();
-    alert("Categoría añadida.");
+    showToast("Categoría añadida.");
   } catch(err) {
-    alert("Error al añadir: " + err.message);
+    showToast("Error al añadir: " + err.message, 'error');
   } finally {
     btn.disabled = false; btn.textContent = "Añadir";
   }
@@ -1004,7 +1034,8 @@ async function deleteCategory(id) {
   try {
     await supabaseClient.from('categories').delete().eq('id', id);
     loadCategoriesAdmin();
-  } catch(err) { alert("Error al eliminar: " + err.message); }
+    showToast("Categoría eliminada.");
+  } catch(err) { showToast("Error al eliminar: " + err.message, 'error'); }
 }
 
 // --- USUARIOS ---
@@ -1046,9 +1077,9 @@ async function saveUser(e){
 
     document.getElementById('userModal').classList.remove('open');
     loadUsers();
-    alert("Usuario creado exitosamente.");
+    showToast("Usuario creado exitosamente.");
   } catch(err) {
-    alert(err.message);
+    showToast(err.message, 'error');
   } finally {
     btn.disabled = false; btn.textContent = "Crear";
   }
@@ -1092,6 +1123,36 @@ async function loadSiteConfig() {
   if(data.hero_images && data.hero_images.length > 0) {
     data.hero_images.forEach(url => { if(url) heroPreview.innerHTML += `<img src="${url}">`; });
   }
+
+  // Cargar datos de pago
+  const p = data.payment_details || {};
+  document.getElementById('payBank').value = p.bank || '';
+  document.getElementById('payCedula').value = p.cedula || '';
+  document.getElementById('payPhone').value = p.phone || '';
+  document.getElementById('payTitular').value = p.titular || '';
+  document.getElementById('payBinanceEmail').value = p.binance_email || '';
+  document.getElementById('payBinanceUid').value = p.binance_uid || '';
+}
+
+async function savePaymentConfig(e) {
+  e.preventDefault();
+  const btn = document.getElementById('btnSavePayment');
+  btn.disabled = true; btn.textContent = "Guardando...";
+  const details = {
+    bank: document.getElementById('payBank').value.trim(),
+    cedula: document.getElementById('payCedula').value.trim(),
+    phone: document.getElementById('payPhone').value.trim(),
+    titular: document.getElementById('payTitular').value.trim(),
+    binance_email: document.getElementById('payBinanceEmail').value.trim(),
+    binance_uid: document.getElementById('payBinanceUid').value.trim()
+  };
+  try {
+    const { error } = await supabaseClient.from('site_config').update({ payment_details: details }).eq('id', 1);
+    if(error) throw error;
+    showToast("Datos de pago guardados.");
+    loadSiteConfig();
+  } catch(err) { showToast("Error: " + err.message, 'error'); } 
+  finally { btn.disabled = false; btn.textContent = "Guardar Datos de Pago"; }
 }
 
 async function saveHeroImages(e) {
@@ -1133,10 +1194,10 @@ async function saveHeroImages(e) {
     
     if(error) throw error;
 
-    alert("Carrusel actualizado con éxito.");
+    showToast("Carrusel actualizado con éxito.");
     loadSiteConfig();
   } catch(err) { 
-    alert("Error al guardar: " + err.message); 
+    showToast("Error al guardar: " + err.message, 'error'); 
   } finally { 
     btn.disabled = false; 
     btn.textContent = "Guardar Cambios del Carrusel"; 
@@ -1171,9 +1232,9 @@ async function savePromoConfig(e) {
     }).eq('id', 1);
 
     if(error) throw error;
-    alert("Ventana emergente guardada con éxito.");
+    showToast("Ventana emergente guardada con éxito.");
     loadSiteConfig();
-  } catch(err) { alert("Error al guardar: " + err.message); } finally { btn.disabled = false; btn.textContent = "Guardar Promoción"; }
+  } catch(err) { showToast("Error al guardar: " + err.message, 'error'); } finally { btn.disabled = false; btn.textContent = "Guardar Promoción"; }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
