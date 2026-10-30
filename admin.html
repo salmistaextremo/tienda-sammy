@@ -242,7 +242,7 @@
           <h3 style="margin-bottom: 16px;">Carrusel de Inicio (3 fotos)</h3>
           <p style="font-size: 13px; color: var(--muted); margin-bottom: 16px;">Sube 3 imágenes horizontales (ej. 1200x600px) para el carrusel principal.</p>
           
-          <form id="heroForm" onsubmit="saveHeroImages(event)">
+          <form id="heroForm" onsubmit="(event)">
             <div class="form-group">
               <label>Foto 1 (Oversize)</label>
               <div class="file-upload-box"><input type="file" id="heroImg1" accept="image/*"></div>
@@ -919,8 +919,11 @@ async function saveHeroImages(e) {
   const files = [document.getElementById('heroImg1').files[0], document.getElementById('heroImg2').files[0], document.getElementById('heroImg3').files[0]];
 
   try {
-    let newUrls = [...(currentSiteConfig.hero_images || [])];
+    // 1. Mantenemos las fotos actuales como base, asegurando que siempre sean 3 posiciones
+    let currentHero = currentSiteConfig.hero_images || [];
+    let newUrls = [currentHero[0] || '', currentHero[1] || '', currentHero[2] || ''];
 
+    // 2. Reemplazamos solo las posiciones donde el admin subió una foto nueva
     for(let i = 0; i < files.length; i++) {
       if(files[i]) {
         btn.textContent = `Subiendo foto ${i+1}...`;
@@ -932,13 +935,18 @@ async function saveHeroImages(e) {
       }
     }
 
-    newUrls = newUrls.filter(url => url != null);
+    // 3. Guardamos los 3 espacios exactos (incluso si alguno quedó vacío)
     const { error } = await supabaseClient.from('site_config').update({ hero_images: newUrls }).eq('id', 1);
     if(error) throw error;
 
     alert("Fotos del carrusel actualizadas con éxito.");
     loadSiteConfig();
-  } catch(err) { alert("Error al guardar: " + err.message); } finally { btn.disabled = false; btn.textContent = "Guardar Fotos del Carrusel"; }
+  } catch(err) { 
+    alert("Error al guardar: " + err.message); 
+  } finally { 
+    btn.disabled = false; 
+    btn.textContent = "Guardar Fotos del Carrusel"; 
+  }
 }
 
 async function savePromoConfig(e) {
