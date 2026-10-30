@@ -155,11 +155,14 @@
       <div class="tab" onclick="switchTab('usuarios', event)">👥 Usuarios</div>
       <div class="tab" onclick="switchTab('solicitudes', event)">⭐ Solicitudes</div>
       <div class="tab" onclick="switchTab('cupones', event)">🎟️ Cupones</div>
-      <div class="tab" onclick="switchTab('resenas', event)">⭐ Reseñas</div>
+      <div class="tab" onclick="switchTab('resenas', event)">🌟 Reseñas</div>
       <div class="tab" onclick="switchTab('config', event)">🎨 Diseño Web</div>
     </div>
 
     <div class="panel active" id="panel-pedidos">
+      <div style="display:flex; justify-content:flex-end; margin-bottom: 16px;">
+        <button class="btn-new" onclick="exportToExcel()" style="background:var(--success); color:#fff;">📊 Descargar Reporte Excel</button>
+      </div>
       <div class="data-table-wrap">
         <table class="data-table">
           <thead><tr><th>Pedido</th><th>Cliente</th><th>Total</th><th>Saldo</th><th>Estado</th><th>Acciones</th></tr></thead>
@@ -237,59 +240,89 @@
       </div>
     </div>
 
+    <!-- PANEL CUPONES -->
+    <div class="panel" id="panel-cupones">
+      <div class="panel-header-actions" style="display:flex; justify-content:space-between; margin-bottom:16px;">
+        <h3>Códigos de Descuento</h3>
+      </div>
+      <div class="data-table-wrap" style="margin-bottom: 24px;">
+        <table class="data-table">
+          <thead><tr><th>Código</th><th>Descuento</th><th>Estado</th><th>Acciones</th></tr></thead>
+          <tbody id="couponsTableBody"><tr><td colspan="4" style="text-align:center;">Cargando...</td></tr></tbody>
+        </table>
+      </div>
+      
+      <div style="background: var(--surface); padding: 24px; border-radius: var(--radius-lg); border: 1px solid var(--border);">
+        <h3 style="margin-bottom: 16px;">Crear Nuevo Cupón</h3>
+        <form id="couponForm" onsubmit="saveCoupon(event); return false;" style="display:flex; gap:16px; align-items:flex-end; flex-wrap:wrap;">
+          <div class="form-group" style="flex:1; margin:0; min-width: 200px;">
+            <label>Código (Ej. SAM10)</label>
+            <input type="text" id="couponCode" required placeholder="SAM10" style="text-transform:uppercase;">
+          </div>
+          <div class="form-group" style="flex:1; margin:0; min-width: 150px;">
+            <label>Descuento (%)</label>
+            <input type="number" id="couponDiscount" required min="1" max="100" placeholder="10">
+          </div>
+          <button type="button" onclick="saveCoupon(event)" class="btn-primary" style="width:auto; padding:14px 24px; margin:0;">Crear</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- PANEL RESEÑAS -->
+    <div class="panel" id="panel-resenas">
+      <div class="data-table-wrap">
+        <table class="data-table">
+          <thead><tr><th>Cliente</th><th>Calificación</th><th>Comentario</th><th>Fecha</th><th>Acciones</th></tr></thead>
+          <tbody id="reviewsTableBody"><tr><td colspan="5" style="text-align:center;">Cargando...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- PANEL CONFIGURACIÓN -->
     <div class="panel" id="panel-config">
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+      <div style="display: grid; grid-template-columns: 1fr; gap: 24px;">
         
         <div style="background: var(--surface); padding: 24px; border-radius: var(--radius-lg); border: 1px solid var(--border);">
           <h3 style="margin-bottom: 16px;">Carrusel de Inicio (3 fotos)</h3>
           <p style="font-size: 13px; color: var(--muted); margin-bottom: 16px;">Sube 3 imágenes horizontales (ej. 1200x600px) para el carrusel principal.</p>
           
           <form id="heroForm" onsubmit="saveHeroImages(event); return false;">
-  <div style="background:var(--bg); padding:16px; border-radius:12px; margin-bottom:16px; border:1px solid var(--border);">
-    <h4 style="margin-bottom:12px; font-size:14px;">Slide 1</h4>
-    <div class="form-group">
-      <label>Foto 1</label>
-      <div class="file-upload-box"><input type="file" id="heroImg1" accept="image/*"></div>
-    </div>
-    <div class="form-group"><label>Etiqueta (Badge)</label><input type="text" id="heroBadge1" placeholder="Ej: NUEVA COLECCIÓN 2025"></div>
-    <div class="form-group"><label>Título</label><textarea id="heroTitle1" rows="2" placeholder="Ej: Oversize<br>Sin Límites."></textarea></div>
-    <div class="form-group"><label>Descripción</label><textarea id="heroDesc1" rows="2" placeholder="Ej: Descubre nuestra nueva colección..."></textarea></div>
-    <div class="form-group"><label>Texto del Botón</label><input type="text" id="heroBtnText1" placeholder="Ej: Ver Colección"></div>
-  </div>
+            <div style="background:var(--bg); padding:16px; border-radius:12px; margin-bottom:16px; border:1px solid var(--border);">
+              <h4 style="margin-bottom:12px; font-size:14px;">Slide 1</h4>
+              <div class="form-group"><label>Foto 1</label><div class="file-upload-box"><input type="file" id="heroImg1" accept="image/*"></div></div>
+              <div class="form-group"><label>Etiqueta (Badge)</label><input type="text" id="heroBadge1" placeholder="Ej: NUEVA COLECCIÓN 2025"></div>
+              <div class="form-group"><label>Título</label><textarea id="heroTitle1" rows="2" placeholder="Ej: Oversize<br>Sin Límites."></textarea></div>
+              <div class="form-group"><label>Descripción</label><textarea id="heroDesc1" rows="2" placeholder="Ej: Descubre nuestra nueva colección..."></textarea></div>
+              <div class="form-group"><label>Texto del Botón</label><input type="text" id="heroBtnText1" placeholder="Ej: Ver Colección"></div>
+            </div>
 
-  <div style="background:var(--bg); padding:16px; border-radius:12px; margin-bottom:16px; border:1px solid var(--border);">
-    <h4 style="margin-bottom:12px; font-size:14px;">Slide 2</h4>
-    <div class="form-group">
-      <label>Foto 2</label>
-      <div class="file-upload-box"><input type="file" id="heroImg2" accept="image/*"></div>
-    </div>
-    <div class="form-group"><label>Etiqueta (Badge)</label><input type="text" id="heroBadge2" placeholder="Ej: TENDENCIA URBANA"></div>
-    <div class="form-group"><label>Título</label><textarea id="heroTitle2" rows="2" placeholder="Ej: Camisetas<br>que Destacan."></textarea></div>
-    <div class="form-group"><label>Descripción</label><textarea id="heroDesc2" rows="2" placeholder="Ej: Estampados únicos y cortes perfectos..."></textarea></div>
-    <div class="form-group"><label>Texto del Botón</label><input type="text" id="heroBtnText2" placeholder="Ej: Ver Camisetas"></div>
-  </div>
+            <div style="background:var(--bg); padding:16px; border-radius:12px; margin-bottom:16px; border:1px solid var(--border);">
+              <h4 style="margin-bottom:12px; font-size:14px;">Slide 2</h4>
+              <div class="form-group"><label>Foto 2</label><div class="file-upload-box"><input type="file" id="heroImg2" accept="image/*"></div></div>
+              <div class="form-group"><label>Etiqueta (Badge)</label><input type="text" id="heroBadge2" placeholder="Ej: TENDENCIA URBANA"></div>
+              <div class="form-group"><label>Título</label><textarea id="heroTitle2" rows="2" placeholder="Ej: Camisetas<br>que Destacan."></textarea></div>
+              <div class="form-group"><label>Descripción</label><textarea id="heroDesc2" rows="2" placeholder="Ej: Estampados únicos y cortes perfectos..."></textarea></div>
+              <div class="form-group"><label>Texto del Botón</label><input type="text" id="heroBtnText2" placeholder="Ej: Ver Camisetas"></div>
+            </div>
 
-  <div style="background:var(--bg); padding:16px; border-radius:12px; margin-bottom:16px; border:1px solid var(--border);">
-    <h4 style="margin-bottom:12px; font-size:14px;">Slide 3</h4>
-    <div class="form-group">
-      <label>Foto 3</label>
-      <div class="file-upload-box"><input type="file" id="heroImg3" accept="image/*"></div>
-    </div>
-    <div class="form-group"><label>Etiqueta (Badge)</label><input type="text" id="heroBadge3" placeholder="Ej: COMODIDAD PREMIUM"></div>
-    <div class="form-group"><label>Título</label><textarea id="heroTitle3" rows="2" placeholder="Ej: Pantalones<br>Wide Leg."></textarea></div>
-    <div class="form-group"><label>Descripción</label><textarea id="heroDesc3" rows="2" placeholder="Ej: La comodidad se encuentra con el estilo..."></textarea></div>
-    <div class="form-group"><label>Texto del Botón</label><input type="text" id="heroBtnText3" placeholder="Ej: Ver Pantalones"></div>
-  </div>
-  
-  <button type="button" onclick="saveHeroImages(event)" class="btn-primary" style="margin-top: 16px;" id="btnSaveHero">Guardar Cambios del Carrusel</button>
-</form>
+            <div style="background:var(--bg); padding:16px; border-radius:12px; margin-bottom:16px; border:1px solid var(--border);">
+              <h4 style="margin-bottom:12px; font-size:14px;">Slide 3</h4>
+              <div class="form-group"><label>Foto 3</label><div class="file-upload-box"><input type="file" id="heroImg3" accept="image/*"></div></div>
+              <div class="form-group"><label>Etiqueta (Badge)</label><input type="text" id="heroBadge3" placeholder="Ej: COMODIDAD PREMIUM"></div>
+              <div class="form-group"><label>Título</label><textarea id="heroTitle3" rows="2" placeholder="Ej: Pantalones<br>Wide Leg."></textarea></div>
+              <div class="form-group"><label>Descripción</label><textarea id="heroDesc3" rows="2" placeholder="Ej: La comodidad se encuentra con el estilo..."></textarea></div>
+              <div class="form-group"><label>Texto del Botón</label><input type="text" id="heroBtnText3" placeholder="Ej: Ver Pantalones"></div>
+            </div>
+            
+            <button type="button" onclick="saveHeroImages(event)" class="btn-primary" style="margin-top: 16px;" id="btnSaveHero">Guardar Cambios del Carrusel</button>
+          </form>
         </div>
 
         <div style="background: var(--surface); padding: 24px; border-radius: var(--radius-lg); border: 1px solid var(--border);">
           <h3 style="margin-bottom: 16px;">Ventana Emergente (Promoción)</h3>
           <p style="font-size: 13px; color: var(--muted); margin-bottom: 16px;">Esta ventana aparecerá cuando los clientes entren a la tienda.</p>
           
-         <form id="promoForm" onsubmit="savePromoConfig(event); return false;">
+          <form id="promoForm" onsubmit="savePromoConfig(event); return false;">
             <div class="form-group" style="display:flex; align-items:center; gap:8px;">
               <input type="checkbox" id="promoActive" style="width:auto; accent-color:var(--accent);">
               <label style="margin:0; cursor:pointer;" for="promoActive">Activar ventana emergente</label>
@@ -301,23 +334,12 @@
               <img id="promoPreview" style="display:none; height: 100px; border-radius: 8px; margin-top: 8px; object-fit: cover;">
             </div>
             
-            <div class="form-group">
-              <label>Título de la Promoción</label>
-              <input type="text" id="promoTitle" placeholder="Ej: ¡Nuevo Drop Disponible!">
-            </div>
-            
-            <div class="form-group">
-              <label>Texto o Descripción</label>
-              <textarea id="promoText" rows="2" placeholder="Ej: Descuento del 20% en toda la colección..."></textarea>
-            </div>
-            
-            <div class="form-group">
-              <label>Enlace del Botón (Opcional)</label>
-              <input type="text" id="promoLink" placeholder="Ej: #catalog">
-            </div>
+            <div class="form-group"><label>Título de la Promoción</label><input type="text" id="promoTitle" placeholder="Ej: ¡Nuevo Drop Disponible!"></div>
+            <div class="form-group"><label>Texto o Descripción</label><textarea id="promoText" rows="2" placeholder="Ej: Descuento del 20% en toda la colección..."></textarea></div>
+            <div class="form-group"><label>Enlace del Botón (Opcional)</label><input type="text" id="promoLink" placeholder="Ej: #catalog"></div>
             
             <button type="button" onclick="savePromoConfig(event)" class="btn-primary" style="margin-top: 16px;" id="btnSavePromo">Guardar Promoción</button>
-         </form>
+          </form>
         </div>
 
       </div>
@@ -326,6 +348,7 @@
   </main>
 </div>
 
+<!-- MODALES -->
 <div class="modal-wrap" id="orderDetailModal" onclick="if(event.target.id==='orderDetailModal') this.classList.remove('open')">
   <div class="modal"><button class="modal-x" onclick="document.getElementById('orderDetailModal').classList.remove('open')">✕</button><h3>Detalles del Pedido</h3><div id="orderDetailContent"></div></div>
 </div>
@@ -389,7 +412,7 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 let currentUserId = null, currentUserRole = null;
 let allOrdersData = [], allProducts = [], allUsers = [], allInstallments = [], allCategories = [];
 let currentSiteConfig = {};
-let isRealTimeSubscribed = false; // Para evitar múltiples suscripciones
+let isRealTimeSubscribed = false;
 
 const fmtUSD = n => "$ " + Number(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
 const fmtBs = n => "Bs " + Number(n).toLocaleString('es-VE',{minimumFractionDigits:0,maximumFractionDigits:2});
@@ -411,7 +434,6 @@ async function handleLogin(){
   const email = document.getElementById('loginEmail').value, password = document.getElementById('loginPassword').value;
   const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
   if(error) { document.getElementById('loginError').textContent = error.message; return; }
-  
   await checkAdminSession();
 }
 
@@ -420,35 +442,22 @@ async function handleLogout() {
   location.reload(); 
 }
 
-// NUEVA FUNCIÓN: Verifica si hay sesión activa al cargar la página
 async function checkAdminSession() {
   const { data: { session }, error } = await supabaseClient.auth.getSession();
-  
   if (session) {
     const { data: profile } = await supabaseClient.from('profiles').select('role, is_active').eq('id', session.user.id).single();
-    
-    // Validar que sea admin o vendedor y esté activo
     if(profile && ['super_admin','admin','vendedor'].includes(profile.role) && profile.is_active !== false) {
-      currentUserId = session.user.id; 
-      currentUserRole = profile.role;
-      
+      currentUserId = session.user.id; currentUserRole = profile.role;
       document.getElementById('loginView').style.display = 'none'; 
       document.getElementById('adminPanel').style.display = 'block';
-      
       loadAllData();
-      
-      if (!isRealTimeSubscribed) {
-        suscribirseCambios();
-        isRealTimeSubscribed = true;
-      }
+      if (!isRealTimeSubscribed) { suscribirseCambios(); isRealTimeSubscribed = true; }
     } else {
-      // Si está logueado pero no es admin o está inactivo
       await supabaseClient.auth.signOut();
       document.getElementById('loginView').style.display = 'flex'; 
       document.getElementById('adminPanel').style.display = 'none';
     }
   } else {
-    // No hay sesión
     document.getElementById('loginView').style.display = 'flex'; 
     document.getElementById('adminPanel').style.display = 'none';
   }
@@ -456,6 +465,7 @@ async function checkAdminSession() {
 
 function loadAllData() { 
   loadOrders(); loadInstallments(); loadProducts(); loadCategoriesAdmin(); loadUsers(); loadRequests(); loadSiteConfig();
+  loadCoupons(); loadReviewsAdmin();
 }
 
 function suscribirseCambios() {
@@ -497,6 +507,39 @@ function calculateKPIs() {
   document.getElementById('kpiLowStockNames').textContent = lowStockNames.length > 0 ? lowStockNames.join(', ') + (lowStockCount > 3 ? '...' : '') : 'Todo en orden';
 }
 
+// --- EXPORTAR A EXCEL ---
+function exportToExcel() {
+  if(allOrdersData.length === 0) return alert("No hay pedidos para exportar.");
+  let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; 
+  csvContent += "Pedido,Fecha,Cliente,Telefono,Direccion,Total USD,Total Bs,Estado,Metodo,Cupon\n";
+
+  allOrdersData.forEach(o => {
+    const date = new Date(o.created_at).toLocaleDateString('es-VE');
+    const row = [
+      `#${String(o.id).slice(0,8).toUpperCase()}`,
+      date,
+      `"${o.customer_name}"`,
+      `"${o.customer_phone}"`,
+      `"${o.customer_address || ''}"`,
+      o.total_usdt,
+      o.total_bs,
+      o.status,
+      o.payment_method,
+      `"${o.coupon_code || ''}"`
+    ].join(",");
+    csvContent += row + "\n";
+  });
+
+  const encodedUri = encodeURI(csvContent);
+  const link = document.createElement("a");
+  link.setAttribute("href", encodedUri);
+  link.setAttribute("download", `Reporte_Ventas_${new Date().toLocaleDateString('es-VE').replace(/\//g,'-')}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+// --- PEDIDOS ---
 async function loadOrders(){
   const tbody = document.getElementById('ordersTableBody');
   const { data, error } = await supabaseClient.from('orders').select('*, order_items(*, products(image_url, description)), installments(amount_bs, amount_usdt, status)').order('created_at', { ascending: false });
@@ -511,7 +554,6 @@ async function loadOrders(){
     const saldoBs = Math.max(0, Number(o.total_bs) - abonadoBs);
     const saldoUsd = saldoBs / (Number(o.total_bs)/Number(o.total_usdt));
     
-    // REGLA: Solo muestra "Pagado" si el saldo es menor a 0.1 (cubierto)
     const isPaid = saldoBs <= 0.1;
     
     let statusOptions = "";
@@ -538,50 +580,28 @@ async function loadOrders(){
 
 async function updateOrderStatus(orderId, newStatus){
   try {
-    // 1. Buscamos el pedido en la memoria local para obtener su plan de pago
     const orderIndex = allOrdersData.findIndex(o => o.id === orderId);
     if (orderIndex === -1) return;
 
     const currentOrder = allOrdersData[orderIndex];
     let updatedPlanDetails = currentOrder.payment_plan_details || {};
 
-    // 2. Si es un pedido a crédito, actualizamos los checks de las cuotas
     if (currentOrder.payment_plan === 'credito') {
-      if (newStatus === 'cuota1_confirmada') {
-        updatedPlanDetails.cuota1_pagada = true;
-      } else if (newStatus === 'cuota2_confirmada') {
-        updatedPlanDetails.cuota1_pagada = true;
-        updatedPlanDetails.cuota2_pagada = true;
-      } else if (newStatus === 'cuota3_confirmada') {
-        updatedPlanDetails.cuota1_pagada = true;
-        updatedPlanDetails.cuota2_pagada = true;
-        updatedPlanDetails.cuota3_pagada = true;
-      } else if (newStatus === 'pendiente' || newStatus === 'cancelado') {
-        // Si se revierte a pendiente o se cancela, reiniciamos los checks
-        updatedPlanDetails.cuota1_pagada = false;
-        updatedPlanDetails.cuota2_pagada = false;
-        updatedPlanDetails.cuota3_pagada = false;
-      }
+      if (newStatus === 'cuota1_confirmada') { updatedPlanDetails.cuota1_pagada = true; }
+      else if (newStatus === 'cuota2_confirmada') { updatedPlanDetails.cuota1_pagada = true; updatedPlanDetails.cuota2_pagada = true; }
+      else if (newStatus === 'cuota3_confirmada') { updatedPlanDetails.cuota1_pagada = true; updatedPlanDetails.cuota2_pagada = true; updatedPlanDetails.cuota3_pagada = true; }
+      else if (newStatus === 'pendiente' || newStatus === 'cancelado') { updatedPlanDetails.cuota1_pagada = false; updatedPlanDetails.cuota2_pagada = false; updatedPlanDetails.cuota3_pagada = false; }
     }
 
-    // 3. Actualizamos la base de datos con el nuevo estado Y el nuevo JSON del plan
-    const { error } = await supabaseClient.from('orders').update({ 
-      status: newStatus,
-      payment_plan_details: updatedPlanDetails
-    }).eq('id', orderId);
-    
+    const { error } = await supabaseClient.from('orders').update({ status: newStatus, payment_plan_details: updatedPlanDetails }).eq('id', orderId);
     if(error) throw error;
 
-    // 4. Actualizamos la memoria local y recargamos la tabla
     allOrdersData[orderIndex].status = newStatus;
     allOrdersData[orderIndex].payment_plan_details = updatedPlanDetails;
 
     calculateKPIs();
     loadOrders(); 
-  } catch(err) { 
-    alert("Error al actualizar: " + err.message); 
-    loadOrders(); 
-  }
+  } catch(err) { alert("Error al actualizar: " + err.message); loadOrders(); }
 }
 
 function viewOrderDetails(orderId) {
@@ -592,7 +612,6 @@ function viewOrderDetails(orderId) {
   const saldoBs = Math.max(0, Number(o.total_bs) - abonadoBs);
   const ratio = Number(o.total_bs) / Number(o.total_usdt);
   const saldoUsd = saldoBs / ratio;
-  
   const isPaid = saldoBs <= 0.1;
 
   const itemsHtml = (o.order_items || []).map(item => `
@@ -638,6 +657,7 @@ function viewOrderDetails(orderId) {
   document.getElementById('orderDetailModal').classList.add('open');
 }
 
+// --- ABONOS ---
 async function loadInstallments(){
   const tbody = document.getElementById('installmentsTableBody');
   const { data } = await supabaseClient.from('installments').select('*, orders(customer_name)').order('paid_at', { ascending: false });
@@ -667,6 +687,63 @@ async function verifyInstallment(id) {
   loadInstallments(); loadOrders();
 }
 
+// --- CUPONES ---
+async function loadCoupons() {
+  const tbody = document.getElementById('couponsTableBody');
+  const { data } = await supabaseClient.from('coupons').select('*').order('created_at', { ascending: false });
+  if(!data || data.length === 0) { tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;">No hay cupones.</td></tr>`; return; }
+  tbody.innerHTML = data.map(c => `
+    <tr>
+      <td><strong>${escapeHTML(c.code)}</strong></td>
+      <td>${c.discount_percent}%</td>
+      <td>${c.is_active ? '🟢 Activo' : '🔴 Inactivo'}</td>
+      <td><button class="btn-sm btn-delete" onclick="deleteCoupon('${c.id}')">Eliminar</button></td>
+    </tr>
+  `).join('');
+}
+
+async function saveCoupon(e) {
+  e.preventDefault();
+  const code = document.getElementById('couponCode').value.trim().toUpperCase();
+  const discount_percent = parseInt(document.getElementById('couponDiscount').value);
+  try {
+    const { error } = await supabaseClient.from('coupons').insert([{ code, discount_percent }]);
+    if(error) throw error;
+    document.getElementById('couponForm').reset();
+    loadCoupons();
+    alert("Cupón creado con éxito.");
+  } catch(err) { alert("Error: " + err.message); }
+}
+
+async function deleteCoupon(id) {
+  if(!confirm("¿Eliminar este cupón?")) return;
+  await supabaseClient.from('coupons').delete().eq('id', id);
+  loadCoupons();
+}
+
+// --- RESEÑAS ---
+async function loadReviewsAdmin() {
+  const tbody = document.getElementById('reviewsTableBody');
+  const { data } = await supabaseClient.from('reviews').select('*').order('created_at', { ascending: false });
+  if(!data || data.length === 0) { tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;">No hay reseñas.</td></tr>`; return; }
+  tbody.innerHTML = data.map(r => `
+    <tr>
+      <td>${escapeHTML(r.customer_name)}</td>
+      <td>${'⭐'.repeat(r.rating)}</td>
+      <td><span style="font-size:13px; color:var(--muted);">${escapeHTML(r.comment || '-')}</span></td>
+      <td>${new Date(r.created_at).toLocaleDateString()}</td>
+      <td><button class="btn-sm btn-delete" onclick="deleteReview('${r.id}')">Eliminar</button></td>
+    </tr>
+  `).join('');
+}
+
+async function deleteReview(id) {
+  if(!confirm("¿Eliminar esta reseña?")) return;
+  await supabaseClient.from('reviews').delete().eq('id', id);
+  loadReviewsAdmin();
+}
+
+// --- SOLICITUDES ---
 async function loadRequests() {
   const tbody = document.getElementById('requestsTableBody');
   const { data: requests, error } = await supabaseClient.from('upgrade_requests').select('*').eq('status', 'pendiente');
@@ -698,6 +775,7 @@ async function approveRequest(reqId, userId) {
   alert("Cliente ascendido a Vendedor exitosamente.");
 }
 
+// --- PRODUCTOS ---
 async function loadProducts(){
   const tbody = document.getElementById('productsTableBody');
   const { data } = await supabaseClient.from('products').select('*').order('created_at', { ascending: false });
@@ -803,6 +881,7 @@ async function saveProduct(e){
   } catch(err) { alert("Error al guardar: " + err.message); } finally { btn.disabled=false; btn.textContent = "Guardar"; }
 }
 
+// --- CATEGORÍAS ---
 async function loadCategoriesAdmin() {
   const { data, error } = await supabaseClient.from('categories').select('*').order('name');
   const tbody = document.getElementById('categoriesTableBody');
@@ -858,6 +937,7 @@ async function deleteCategory(id) {
   } catch(err) { alert("Error al eliminar: " + err.message); }
 }
 
+// --- USUARIOS ---
 async function loadUsers(){
   const tbody = document.getElementById('usersTableBody');
   const { data } = await supabaseClient.from('profiles').select('*').order('created_at', { ascending: false });
@@ -911,23 +991,23 @@ function switchTab(name, event){
   document.getElementById('panel-'+name).classList.add('active'); 
 }
 
+// --- SITE CONFIG ---
 async function loadSiteConfig() {
   const { data, error } = await supabaseClient.from('site_config').select('*').eq('id', 1).single();
   if(error) return;
   currentSiteConfig = data;
 
-  // Cargar datos de Promoción
   document.getElementById('promoActive').checked = data.promo_active || false;
   document.getElementById('promoTitle').value = data.promo_title || '';
   document.getElementById('promoText').value = data.promo_text || '';
   document.getElementById('promoLink').value = data.promo_link || '';
+
   if(data.promo_image) {
     const img = document.getElementById('promoPreview');
     img.src = data.promo_image;
     img.style.display = 'block';
   }
 
-  // Cargar textos del Hero
   const details = data.hero_details || [];
   for(let i=0; i<3; i++) {
     const d = details[i] || {};
@@ -937,13 +1017,13 @@ async function loadSiteConfig() {
     document.getElementById(`heroBtnText${i+1}`).value = d.btn_text || '';
   }
 
-  // Cargar fotos del Hero
   const heroPreview = document.getElementById('heroPreviewBox');
   heroPreview.innerHTML = '';
   if(data.hero_images && data.hero_images.length > 0) {
     data.hero_images.forEach(url => { if(url) heroPreview.innerHTML += `<img src="${url}">`; });
   }
 }
+
 async function saveHeroImages(e) {
   e.preventDefault();
   const btn = document.getElementById('btnSaveHero');
@@ -951,7 +1031,6 @@ async function saveHeroImages(e) {
 
   const files = [document.getElementById('heroImg1').files[0], document.getElementById('heroImg2').files[0], document.getElementById('heroImg3').files[0]];
   
-  // Recolectar los textos
   const newDetails = [];
   for(let i=1; i<=3; i++) {
     newDetails.push({
@@ -1027,7 +1106,6 @@ async function savePromoConfig(e) {
   } catch(err) { alert("Error al guardar: " + err.message); } finally { btn.disabled = false; btn.textContent = "Guardar Promoción"; }
 }
 
-// INICIALIZACIÓN: Ejecuta la validación de sesión ni bien carga la página
 document.addEventListener('DOMContentLoaded', () => {
   checkAdminSession();
 });
