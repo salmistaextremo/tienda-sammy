@@ -161,9 +161,9 @@
 
     <div class="panel active" id="panel-pedidos">
       <div style="display:flex; justify-content:flex-end; margin-bottom: 16px;">
-        <button class="btn-new" onclick="exportToExcel()" style="background:var(--success); color:#fff;">📊 Descargar Reporte Excel</button>
-      </div>
-      <div class="data-table-wrap">
+        <button class="btn-new" onclick="openExportModal()" style="background:var(--success); color:#fff;">📊 Descargar Reporte</button>
+</div>    
+     <div class="data-table-wrap">
         <table class="data-table">
           <thead><tr><th>Pedido</th><th>Cliente</th><th>Total</th><th>Saldo</th><th>Estado</th><th>Acciones</th></tr></thead>
           <tbody id="ordersTableBody"><tr><td colspan="6" style="text-align:center;">Cargando...</td></tr></tbody>
@@ -403,6 +403,36 @@
   </div>
 </div>
 
+ <!-- MODAL DE EXPORTACIÓN -->
+<div class="modal-wrap" id="exportModal" onclick="if(event.target.id==='exportModal') this.classList.remove('open')">
+  <div class="modal">
+    <button class="modal-x" onclick="document.getElementById('exportModal').classList.remove('open')">✕</button>
+    <h3>Descargar Reporte Excel</h3>
+    <p style="font-size:14px; color:var(--muted); margin-bottom:24px;">Selecciona el tipo de datos y el rango de fechas que deseas exportar.</p>
+    
+    <div class="form-group">
+      <label>Tipo de Reporte</label>
+      <select id="exportType">
+        <option value="orders">📦 Pedidos (Ventas)</option>
+        <option value="installments">💳 Abonos / Pagos</option>
+      </select>
+    </div>
+    
+    <div style="display:flex; gap:16px;">
+      <div class="form-group" style="flex:1;">
+        <label>Fecha Inicio (Opcional)</label>
+        <input type="date" id="exportStartDate">
+      </div>
+      <div class="form-group" style="flex:1;">
+        <label>Fecha Fin (Opcional)</label>
+        <input type="date" id="exportEndDate">
+      </div>
+    </div>
+    
+    <button class="btn-primary" onclick="generateExcelReport()" id="btnExport">Descargar Excel (.csv)</button>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const SUPABASE_URL = "https://zxhufobqfxmbjpneyiam.supabase.co";
@@ -507,36 +537,76 @@ function calculateKPIs() {
   document.getElementById('kpiLowStockNames').textContent = lowStockNames.length > 0 ? lowStockNames.join(', ') + (lowStockCount > 3 ? '...' : '') : 'Todo en orden';
 }
 
-// --- EXPORTAR A EXCEL ---
-function exportToExcel() {
-  if(allOrdersData.length === 0) return alert("No hay pedidos para exportar.");
-  let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; 
-  csvContent += "Pedido,Fecha,Cliente,Telefono,Direccion,Total USD,Total Bs,Estado,Metodo,Cupon\n";
+function openExportModal() {
+  // Ponemos la fecha de hoy por defecto en el campo "Fin"
+  const today = new Date().toLocaleDateString('en-CA');
+  document.getElementById('exportEndDate').value = today;
+  document.getElementById('exportStartDate').value = "";
+  document.getElementById('exportModal').classList.add('open');
+}
 
-  allOrdersData.forEach(o => {
-    const date = new Date(o.created_at).toLocaleDateString('es-VE');
-    const row = [
-      `#${String(o.id).slice(0,8).toUpperCase()}`,
-      date,
-      `"${o.customer_name}"`,
-      `"${o.customer_phone}"`,
-      `"${o.customer_address || ''}"`,
-      o.total_usdt,
-      o.total_bs,
-      o.status,
-      o.payment_method,
-      `"${o.coupon_code || ''}"`
-    ].join(",");
-    csvContent += row + "\n";
-  });
+function generateExcelReport() {
+  const type = document.getElementById('exportType').value;
+  const start = document.getElementById('exportStartDate').value;
+  const end = document.getElementById('exportEndDate').value;
+  
+  const btn = document.getElementById('btnExport');
+  btn.disabled = true; btn.textContent = "Generando...";
 
-  const encodedUri = encodeURI(csvContent);
+  // Función para verificar si una fecha está en el rango
+  const isInDateRange = (dateString) => {
+    if (!start && !end) return true;
+    const itemDate = new Date(dateString);
+    const itemDateStr = itemDate.toLocaleDateString('en-CA'); // Formato YYYY-MM-DD local
+    
+    if (start && itemDateStr < start) return false;
+    if (end && itemDateStr > end) return false;
+    return true;
+  };
+
+  let dataToExport = [];
+  let headers = "";
+  let fileName = "";
+
+  if (type === 'orders') {
+    headers = "Pedido;Fecha;Cliente;Telefono;Direccion;Total USD;Total Bs;Estado;Metodo;Cupon\n";
+    const filtered = allOrdersData.filter(o => isInDateRange(o.created_at));
+    
+    dataToExport = filtered.map(o => {
+      return `"${String(o.id).slice(0,8).toUpperCase()}";"${new Date(o.created_at).toLocaleDateString('es-VE')}";"${o.customer_name}";"${o.customer_phone}";"${o.customer_address || ''}";"${o.total_usdt}";"${o.total_bs}";"${o.status}";"${o.payment_method}";"${o.coupon_code || ''}"`;
+    });
+    fileName = `Reporte_Pedidos_${start || 'Inicio'}_${end || 'Fin'}.csv`;
+
+  } else if (type === 'installments') {
+    headers = "ID Abono;ID Pedido;Fecha;Monto USD;Monto Bs;Metodo;Referencia;Estado\n";
+    const filtered = allInstallments.filter(i => isInDateRange(i.paid_at));
+    
+    dataToExport = filtered.map(i => {
+      return `"${String(i.id).slice(0,8).toUpperCase()}";"${String(i.order_id).slice(0,8).toUpperCase()}";"${new Date(i.paid_at).toLocaleDateString('es-VE')}";"${i.amount_usdt}";"${i.amount_bs}";"${i.method}";"${i.reference || ''}";"${i.status}"`;
+    });
+    fileName = `Reporte_Abonos_${start || 'Inicio'}_${end || 'Fin'}.csv`;
+  }
+
+  if (dataToExport.length === 0) {
+    btn.disabled = false; btn.textContent = "Descargar Excel (.csv)";
+    return alert("No hay datos en el rango de fechas seleccionado.");
+  }
+
+  // Usamos punto y coma (;) para que Excel en español lo lea perfecto
+  const csvContent = "\uFEFF" + headers + dataToExport.join("\n");
+  
+  // Crear archivo y descargar (Método Blob, mucho más seguro)
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
-  link.setAttribute("href", encodedUri);
-  link.setAttribute("download", `Reporte_Ventas_${new Date().toLocaleDateString('es-VE').replace(/\//g,'-')}.csv`);
+  link.setAttribute("href", url);
+  link.setAttribute("download", fileName);
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
+  
+  document.getElementById('exportModal').classList.remove('open');
+  btn.disabled = false; btn.textContent = "Descargar Excel (.csv)";
 }
 
 // --- PEDIDOS ---
