@@ -242,7 +242,7 @@
           <h3 style="margin-bottom: 16px;">Carrusel de Inicio (3 fotos)</h3>
           <p style="font-size: 13px; color: var(--muted); margin-bottom: 16px;">Sube 3 imágenes horizontales (ej. 1200x600px) para el carrusel principal.</p>
           
-          <form id="heroForm" onsubmit="(event)">
+          <form id="heroForm" onsubmit="saveHeroImages(event); return false;">
             <div class="form-group">
               <label>Foto 1 (Oversize)</label>
               <div class="file-upload-box"><input type="file" id="heroImg1" accept="image/*"></div>
@@ -258,15 +258,15 @@
             
             <div id="heroPreviewBox" class="hero-preview"></div>
             
-            <button type="submit" class="btn-primary" style="margin-top: 16px;" id="btnSaveHero">Guardar Fotos del Carrusel</button>
-          </form>
+            <button type="button" onclick="saveHeroImages(event)" class="btn-primary" style="margin-top: 16px;" id="btnSaveHero">Guardar Fotos del Carrusel</button>
+        </form>
         </div>
 
         <div style="background: var(--surface); padding: 24px; border-radius: var(--radius-lg); border: 1px solid var(--border);">
           <h3 style="margin-bottom: 16px;">Ventana Emergente (Promoción)</h3>
           <p style="font-size: 13px; color: var(--muted); margin-bottom: 16px;">Esta ventana aparecerá cuando los clientes entren a la tienda.</p>
           
-          <form id="promoForm" onsubmit="savePromoConfig(event)">
+         <form id="promoForm" onsubmit="savePromoConfig(event); return false;">
             <div class="form-group" style="display:flex; align-items:center; gap:8px;">
               <input type="checkbox" id="promoActive" style="width:auto; accent-color:var(--accent);">
               <label style="margin:0; cursor:pointer;" for="promoActive">Activar ventana emergente</label>
@@ -293,8 +293,8 @@
               <input type="text" id="promoLink" placeholder="Ej: #catalog">
             </div>
             
-            <button type="submit" class="btn-primary" style="margin-top: 16px;" id="btnSavePromo">Guardar Promoción</button>
-          </form>
+            <button type="button" onclick="savePromoConfig(event)" class="btn-primary" style="margin-top: 16px;" id="btnSavePromo">Guardar Promoción</button>
+         </form>
         </div>
 
       </div>
