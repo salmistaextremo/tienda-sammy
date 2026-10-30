@@ -117,8 +117,8 @@
   .checkout{ max-width:600px; padding:40px; } .plans{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:24px; }
   .plan{ padding:16px; border-radius:var(--radius-md); border:1px solid var(--border); text-align:center; cursor:pointer; transition: all 0.2s;} .plan.selected{ border-color:var(--text); background:var(--bg); }
   .methods{ display:flex; flex-direction:column; gap:8px; margin-bottom:24px; } .method{ padding:16px; border-radius:var(--radius-md); border:1px solid var(--border); cursor:pointer; transition: all 0.2s;} .method.selected{ border-color:var(--text); background:var(--bg); }
-  .field{ margin-bottom:12px; } .field input{ width:100%; padding:16px; border-radius:var(--radius-md); background:var(--bg); border:1px solid transparent; font-family: inherit; outline: none; transition: border 0.2s;}
-  .field input:focus { border-color: var(--border); }
+  .field{ margin-bottom:12px; } .field input, .field textarea { width:100%; padding:16px; border-radius:var(--radius-md); background:var(--bg); border:1px solid transparent; font-family: inherit; outline: none; transition: border 0.2s;}
+  .field input:focus, .field textarea:focus { border-color: var(--border); }
   .summary{ background:var(--bg); border-radius:var(--radius-md); padding:20px; margin:24px 0; } .summary .row.total{ font-size:18px; font-weight:700; margin-top:12px; border-top:1px solid var(--border); padding-top:12px; }
   .err{ color:#ef4444; font-size:13px; text-align:center; } .msg{ text-align:center; padding:48px 24px; }
   .file-upload-wrapper { border: 1px dashed var(--border); padding: 16px; border-radius: var(--radius-md); text-align: center; cursor: pointer; background: var(--bg); margin-bottom: 24px; display: block; transition: border 0.2s;}
@@ -186,9 +186,7 @@
     <a href="/" class="logo">
       <img src="https://zxhufobqfxmbjpneyiam.supabase.co/storage/v1/object/public/brand-assets/logo.png" alt="Tiendas Sam's">
     </a>
-    <nav class="nav" id="dynamicNav">
-      <!-- Se llena con JS -->
-    </nav>
+    <nav class="nav" id="dynamicNav"></nav>
     <div class="header-actions">
       <a href="/portal.html" id="btnAccount" class="btn-account">Mi Cuenta</a>
       <button class="cart-btn" onclick="openCart()">
@@ -202,7 +200,6 @@
   <div class="container">
     <div class="hero-carousel">
       <div class="hero-track" id="heroTrack">
-        
         <div class="hero-slide">
           <img class="hero-bg" id="heroImg1" src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1500&auto=format&fit=crop" alt="Oversize">
           <div class="hero-gradient"></div>
@@ -213,7 +210,6 @@
             <button class="btn-primary" onclick="setFilter('oversize')">Ver Colección</button>
           </div>
         </div>
-
         <div class="hero-slide">
           <img class="hero-bg" id="heroImg2" src="https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?q=80&w=1500&auto=format&fit=crop" alt="Camisetas">
           <div class="hero-gradient"></div>
@@ -224,7 +220,6 @@
             <button class="btn-primary" onclick="setFilter('camisetas')">Ver Camisetas</button>
           </div>
         </div>
-
         <div class="hero-slide">
           <img class="hero-bg" id="heroImg3" src="https://images.unsplash.com/photo-1517423568366-8b83523034fd?q=80&w=1500&auto=format&fit=crop" alt="Pantalones">
           <div class="hero-gradient"></div>
@@ -235,7 +230,6 @@
             <button class="btn-primary" onclick="setFilter('pantalones')">Ver Pantalones</button>
           </div>
         </div>
-
       </div>
     </div>
     <div class="hero-dots" id="heroDots">
@@ -257,9 +251,7 @@
   <div class="container">
     <div class="fgrid">
       <div>
-        <a href="/" class="footer-logo">
-          <img src="https://zxhufobqfxmbjpneyiam.supabase.co/storage/v1/object/public/brand-assets/logo.png" alt="Tiendas Sam's">
-        </a>
+        <a href="/" class="footer-logo"><img src="https://zxhufobqfxmbjpneyiam.supabase.co/storage/v1/object/public/brand-assets/logo.png" alt="Tiendas Sam's"></a>
         <p>Ropa oversize y otros productos de calidad. Pago en bolívares y USDT.</p>
       </div>
       <div>
@@ -288,7 +280,6 @@
         <a href="/info.html">Preguntas Frecuentes</a>
       </div>
     </div>
-    
     <div class="fbot">
       <div>© 2025 Tiendas Sam's. Todos los derechos reservados.</div>
       <div>Hecho con ♥ en Venezuela.</div>
@@ -313,22 +304,18 @@
     <p id="authSub" style="text-align:center; color:var(--muted); margin-bottom:32px;">Debes ingresar para completar tu compra.</p>
     <form id="authFormStore" onsubmit="handleStoreAuth(event)">
       <div class="field" id="nameField" style="display:none;"><label style="font-size:13px;font-weight:600;margin-bottom:8px;display:block;">Nombre Completo</label><input type="text" id="authName" style="border:1px solid var(--border);"></div>
+      <div class="field" id="phoneField" style="display:none;"><label style="font-size:13px;font-weight:600;margin-bottom:8px;display:block;">Teléfono</label><input type="tel" id="authPhone" style="border:1px solid var(--border);"></div>
+      <div class="field" id="addressField" style="display:none;"><label style="font-size:13px;font-weight:600;margin-bottom:8px;display:block;">Dirección de Envío</label><input type="text" id="authAddress" style="border:1px solid var(--border);"></div>
+      
       <div class="field"><label style="font-size:13px;font-weight:600;margin-bottom:8px;display:block;">Correo Electrónico</label><input type="email" id="authEmail" required style="border:1px solid var(--border);"></div>
       
-      <!-- CAMPO CON OJO -->
       <div class="field">
         <label style="font-size:13px;font-weight:600;margin-bottom:8px;display:block;">Contraseña</label>
         <div class="password-container">
           <input type="password" id="authPassword" required style="border:1px solid var(--border);">
           <button type="button" class="toggle-password" onclick="togglePassword('authPassword', this)">
-            <svg class="eye-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-              <circle cx="12" cy="12" r="3"></circle>
-            </svg>
-            <svg class="eye-off-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" style="display:none;">
-              <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
-              <line x1="1" y1="1" x2="23" y2="23"></line>
-            </svg>
+            <svg class="eye-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+            <svg class="eye-off-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" style="display:none;"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
           </button>
         </div>
       </div>
@@ -354,9 +341,7 @@
   </div>
 </div>
 
-<button id="installAppBtn" style="display: none; position: fixed; bottom: 24px; left: 24px; z-index: 1000; background: var(--accent); color: #111; padding: 12px 20px; border-radius: 100px; font-weight: 700; border: none; box-shadow: 0 4px 15px rgba(0,0,0,0.2); cursor: pointer;">
-  📲 Instalar App
-</button>
+<button id="installAppBtn" style="display: none; position: fixed; bottom: 24px; left: 24px; z-index: 1000; background: var(--accent); color: #111; padding: 12px 20px; border-radius: 100px; font-weight: 700; border: none; box-shadow: 0 4px 15px rgba(0,0,0,0.2); cursor: pointer;">📲 Instalar App</button>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -368,29 +353,17 @@ let PRODUCTS = [], cart = [], currentFilter = "todo", selectedSize = null, curre
 let isLoginMode = true;
 let DYNAMIC_CATEGORIES = [];
 
-// FUNCIÓN DE SEGURIDAD XSS
 function escapeHTML(str) {
   if (!str) return '';
-  return String(str).replace(/[&<>'"]/g, 
-    tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag])
-  );
+  return String(str).replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag]));
 }
 
-// FUNCIÓN PARA MOSTRAR/OCULTAR CONTRASEÑA
 function togglePassword(inputId, btn) {
   const input = document.getElementById(inputId);
   const eyeIcon = btn.querySelector('.eye-icon');
   const eyeOffIcon = btn.querySelector('.eye-off-icon');
-
-  if (input.type === 'password') {
-    input.type = 'text';
-    eyeIcon.style.display = 'none';
-    eyeOffIcon.style.display = 'block';
-  } else {
-    input.type = 'password';
-    eyeIcon.style.display = 'block';
-    eyeOffIcon.style.display = 'none';
-  }
+  if (input.type === 'password') { input.type = 'text'; eyeIcon.style.display = 'none'; eyeOffIcon.style.display = 'block'; } 
+  else { input.type = 'password'; eyeIcon.style.display = 'block'; eyeOffIcon.style.display = 'none'; }
 }
 
 const fmtUSD = n => "$ " + Number(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -399,134 +372,74 @@ const fmtBs = n => "Bs " + Number(n).toLocaleString('es-VE',{minimumFractionDigi
 let currentHeroSlide = 0;
 const totalHeroSlides = 3;
 let heroInterval;
-
 const getProduct = id => PRODUCTS.find(p => p.id === id);
 
 function goToSlide(index) {
   currentHeroSlide = index;
-  const track = document.getElementById('heroTrack');
-  track.style.transform = `translateX(-${index * 100}%)`;
-  
-  const dots = document.querySelectorAll('.hero-dot');
-  dots.forEach((dot, i) => {
-    if(i === index) dot.classList.add('active');
-    else dot.classList.remove('active');
-  });
-
-  clearInterval(heroInterval);
-  startHeroAutoplay();
+  document.getElementById('heroTrack').style.transform = `translateX(-${index * 100}%)`;
+  document.querySelectorAll('.hero-dot').forEach((dot, i) => dot.classList.toggle('active', i === index));
+  clearInterval(heroInterval); startHeroAutoplay();
 }
-
-function startHeroAutoplay() {
-  heroInterval = setInterval(() => {
-    let nextSlide = (currentHeroSlide + 1) % totalHeroSlides;
-    goToSlide(nextSlide);
-  }, 5000);
-}
+function startHeroAutoplay() { heroInterval = setInterval(() => { goToSlide((currentHeroSlide + 1) % totalHeroSlides); }, 5000); }
 
 let deferredPrompt;
 const installBtn = document.getElementById('installAppBtn');
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-  installBtn.style.display = 'block';
-});
+window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredPrompt = e; installBtn.style.display = 'block'; });
 installBtn.addEventListener('click', async () => {
-  if (deferredPrompt) {
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    deferredPrompt = null;
-    installBtn.style.display = 'none';
-  }
+  if (deferredPrompt) { deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt = null; installBtn.style.display = 'none'; }
 });
 window.addEventListener('appinstalled', () => { installBtn.style.display = 'none'; });
+if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW error:', err)); }); }
 
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW error:', err));
-  });
-}
-
-supabaseClient.auth.onAuthStateChange((event, session) => {
-  document.getElementById('btnAccount').style.display = session ? 'inline-block' : 'none';
-});
+supabaseClient.auth.onAuthStateChange((event, session) => { document.getElementById('btnAccount').style.display = session ? 'inline-block' : 'none'; });
 
 async function loadCategories() {
   const { data, error } = await supabaseClient.from('categories').select('*').order('name');
   if(!error && data) {
     DYNAMIC_CATEGORIES = [{ slug: 'todo', name: 'Todo' }, ...data];
-    renderFilters();
-    renderNav();
+    renderFilters(); renderNav();
   }
 }
-
 function renderNav() {
-  document.getElementById('dynamicNav').innerHTML = DYNAMIC_CATEGORIES.slice(1, 5).map(c => 
-    `<button onclick="setFilter('${c.slug}')">${escapeHTML(c.name)}</button>`
-  ).join('');
+  document.getElementById('dynamicNav').innerHTML = DYNAMIC_CATEGORIES.slice(1, 5).map(c => `<button onclick="setFilter('${c.slug}')">${escapeHTML(c.name)}</button>`).join('');
 }
 
 async function loadSiteConfig() {
   const { data, error } = await supabaseClient.from('site_config').select('*').eq('id', 1).single();
   if(error) return;
-
   if(data.hero_images && data.hero_images.length >= 3) {
     document.getElementById('heroImg1').src = data.hero_images[0] || '';
     document.getElementById('heroImg2').src = data.hero_images[1] || '';
     document.getElementById('heroImg3').src = data.hero_images[2] || '';
   }
-
   if (data.promo_active && data.promo_image) {
     if (!sessionStorage.getItem('promoShown')) {
       setTimeout(() => {
         document.getElementById('promoModalImg').src = data.promo_image;
         document.getElementById('promoModalTitle').textContent = data.promo_title || '¡Oferta Especial!';
         document.getElementById('promoModalText').textContent = data.promo_text || '';
-        
         const btn = document.getElementById('promoModalBtn');
-        if(data.promo_link) {
-          btn.style.display = 'inline-flex';
-          btn.setAttribute('onclick', `window.location.href='${escapeHTML(data.promo_link)}'`);
-        } else {
-          btn.style.display = 'none';
-        }
-
+        if(data.promo_link) { btn.style.display = 'inline-flex'; btn.setAttribute('onclick', `window.location.href='${escapeHTML(data.promo_link)}'`); } 
+        else { btn.style.display = 'none'; }
         document.getElementById('promoModal').classList.add('open');
         sessionStorage.setItem('promoShown', 'true');
       }, 1500);
     }
   }
 }
-
-function closePromoModal() {
-  document.getElementById('promoModal').classList.remove('open');
-}
+function closePromoModal() { document.getElementById('promoModal').classList.remove('open'); }
 
 async function loadProducts(){
   const { data, error } = await supabaseClient.from('products').select('*').eq('is_active', true).order('created_at', { ascending: true });
   if(!error) { PRODUCTS = data || []; renderProducts(); }
 }
-
 function suscribirseProductos() {
-  supabaseClient
-    .channel('cambios-tienda')
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, payload => { loadProducts(); })
-    .subscribe();
+  supabaseClient.channel('cambios-tienda').on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, payload => { loadProducts(); }).subscribe();
 }
-
 function renderFilters(){
-  document.getElementById('filters').innerHTML = DYNAMIC_CATEGORIES.map(c => 
-    `<button class="filter ${c.slug===currentFilter?'active':''}" onclick="setFilter('${c.slug}')">${escapeHTML(c.name)}</button>`
-  ).join('');
+  document.getElementById('filters').innerHTML = DYNAMIC_CATEGORIES.map(c => `<button class="filter ${c.slug===currentFilter?'active':''}" onclick="setFilter('${c.slug}')">${escapeHTML(c.name)}</button>`).join('');
 }
-
-function setFilter(key){ 
-  currentFilter = key; 
-  renderFilters(); 
-  renderProducts();
-  document.getElementById('catalog').scrollIntoView({behavior:'smooth'});
-}
-
+function setFilter(key){ currentFilter = key; renderFilters(); renderProducts(); document.getElementById('catalog').scrollIntoView({behavior:'smooth'}); }
 function renderProducts(){
   const list = currentFilter === 'todo' ? PRODUCTS : PRODUCTS.filter(p => p.category === currentFilter);
   document.getElementById('productGrid').innerHTML = list.map(p => {
@@ -551,18 +464,13 @@ function renderProducts(){
   `}).join('');
 }
 
-let productGalleryImages = [];
-let currentProductImageIndex = 0;
-
+let productGalleryImages = [], currentProductImageIndex = 0;
 function openProduct(id){
   const p = getProduct(id); if(!p) return;
   currentProduct = p; selectedSize = (p.sizes && p.sizes[0]) || "Única"; currentQty = 1;
-  
   const isOutOfStock = p.stock <= 0;
-
   productGalleryImages = [p.image_url, ...(p.gallery || [])].filter(Boolean);
   currentProductImageIndex = 0;
-
   let carouselHtml = "";
   if (productGalleryImages.length > 1) {
     carouselHtml = `
@@ -573,15 +481,12 @@ function openProduct(id){
       </div>
     `;
   }
-
   document.getElementById('productModalInner').innerHTML = `
     <button class="modal-x" onclick="closeProduct()">✕</button>
     <div class="detail">
       <div class="detail-img-wrap">
         <div class="product-carousel">
-          <div class="carousel-track" id="productCarouselTrack">
-            ${productGalleryImages.map(img => `<img src="${img}" class="carousel-img">`).join('')}
-          </div>
+          <div class="carousel-track" id="productCarouselTrack">${productGalleryImages.map(img => `<img src="${img}" class="carousel-img">`).join('')}</div>
           ${carouselHtml}
         </div>
       </div>
@@ -590,76 +495,45 @@ function openProduct(id){
         <h3>${escapeHTML(p.name)}</h3>
         <div class="dprice">${fmtUSD(p.price_usdt)}</div>
         <div class="dusdt">≈ ${fmtBs(p.price_bs)}</div>
-
         <div class="dlabel">Selecciona Talla</div>
-        <div class="sizes" id="sizesBox">
-          ${(p.sizes||[]).map(s=>`<button class="s-opt ${s===selectedSize?'selected':''}" onclick="pickSize('${s}')">${s}</button>`).join('')}
-        </div>
-
+        <div class="sizes" id="sizesBox">${(p.sizes||[]).map(s=>`<button class="s-opt ${s===selectedSize?'selected':''}" onclick="pickSize('${s}')">${s}</button>`).join('')}</div>
         <div class="dlabel">Cantidad</div>
-        <div class="qty" style="display:inline-flex;margin-bottom:24px; padding:6px 12px;">
-          <button onclick="changeModalQty(-1)">−</button><span id="modalQty">1</span><button onclick="changeModalQty(1)">+</button>
-        </div>
-
+        <div class="qty" style="display:inline-flex;margin-bottom:24px; padding:6px 12px;"><button onclick="changeModalQty(-1)">−</button><span id="modalQty">1</span><button onclick="changeModalQty(1)">+</button></div>
         <div class="dlabel">Instrucciones Especiales (Opcional)</div>
         <textarea id="modalNote" class="notes-input" placeholder="Ej: Color negro, estampado personalizado, etc..." ${isOutOfStock ? 'disabled' : ''}></textarea>
-
-        <button class="btn-primary" onclick="addFromModal()" ${isOutOfStock ? 'disabled style="background:#ccc; cursor:not-allowed; width:100%;"' : 'style="width:100%;"'}>
-          ${isOutOfStock ? 'Producto Agotado' : 'Añadir al Carrito'}
-        </button>
+        <button class="btn-primary" onclick="addFromModal()" ${isOutOfStock ? 'disabled style="background:#ccc; cursor:not-allowed; width:100%;"' : 'style="width:100%;"'}>${isOutOfStock ? 'Producto Agotado' : 'Añadir al Carrito'}</button>
       </div>
     </div>
   `;
   document.getElementById('productModal').classList.add('open');
 }
-
-function moveProductCarousel(direction) {
+function moveProductCarousel(d) {
   if(productGalleryImages.length <= 1) return;
-  currentProductImageIndex += direction;
+  currentProductImageIndex += d;
   if (currentProductImageIndex >= productGalleryImages.length) currentProductImageIndex = 0;
   if (currentProductImageIndex < 0) currentProductImageIndex = productGalleryImages.length - 1;
   updateCarouselPosition();
 }
-
-function goToProductImage(index) {
-  currentProductImageIndex = index;
-  updateCarouselPosition();
-}
-
+function goToProductImage(i) { currentProductImageIndex = i; updateCarouselPosition(); }
 function updateCarouselPosition() {
-  const track = document.getElementById('productCarouselTrack');
-  if(track) track.style.transform = `translateX(-${currentProductImageIndex * 100}%)`;
-  const dots = document.querySelectorAll('#carouselDots .carousel-dot');
-  dots.forEach((dot, i) => {
-    if(i === currentProductImageIndex) dot.classList.add('active');
-    else dot.classList.remove('active');
-  });
+  const track = document.getElementById('productCarouselTrack'); if(track) track.style.transform = `translateX(-${currentProductImageIndex * 100}%)`;
+  document.querySelectorAll('#carouselDots .carousel-dot').forEach((dot, i) => dot.classList.toggle('active', i === currentProductImageIndex));
 }
-
 function pickSize(s){ selectedSize = s; document.querySelectorAll('#sizesBox .s-opt').forEach(el=>el.classList.toggle('selected', el.textContent === s)); }
 function changeModalQty(d){ currentQty = Math.max(1, currentQty + d); document.getElementById('modalQty').textContent = currentQty; }
-function addFromModal(){
-  if(!currentProduct || currentProduct.stock <= 0) return;
-  const note = document.getElementById('modalNote').value.trim();
-  addToCart(currentProduct, selectedSize, currentQty, note);
-  closeProduct(); openCart();
-}
+function addFromModal(){ if(!currentProduct || currentProduct.stock <= 0) return; addToCart(currentProduct, selectedSize, currentQty, document.getElementById('modalNote').value.trim()); closeProduct(); openCart(); }
 function closeProduct(e){ if(e && e.target.id !== 'productModal') return; document.getElementById('productModal').classList.remove('open'); }
 
 function addToCart(product, size, qty, note = ""){
   const existing = cart.find(i => i.productId === product.id && i.size === size && i.note === note);
-  if(existing){ existing.qty += qty; }
-  else {
-    cart.push({ productId: product.id, name: product.name, size, qty, note, price_bs: Number(product.price_bs), price_usdt: Number(product.price_usdt), image_url: product.image_url, maxStock: product.stock });
-  }
+  if(existing){ existing.qty += qty; } 
+  else { cart.push({ productId: product.id, name: product.name, size, qty, note, price_bs: Number(product.price_bs), price_usdt: Number(product.price_usdt), image_url: product.image_url, maxStock: product.stock }); }
   renderCart();
 }
-
 function renderCart(){
   document.getElementById('cartCount').textContent = cart.reduce((s,i)=>s+i.qty,0);
   const body = document.getElementById('cartBody'), foot = document.getElementById('cartFoot');
   if(cart.length === 0){ body.innerHTML = `<div style="text-align:center; padding:40px;">Tu carrito está vacío.</div>`; foot.innerHTML = ''; return; }
-
   body.innerHTML = cart.map((it,idx)=>`
     <div class="cart-item">
       <img src="${it.image_url || ''}">
@@ -675,17 +549,11 @@ function renderCart(){
       </div>
     </div>
   `).join('');
-
   const totalUsd = cart.reduce((s,i)=>s + i.price_usdt*i.qty, 0);
-  foot.innerHTML = `
-    <div class="tot-row"><span>Subtotal</span><span>${fmtUSD(totalUsd)}</span></div>
-    <div class="tot-row total"><span>Total</span><span>${fmtUSD(totalUsd)}</span></div>
-    <button class="btn-primary" style="width:100%;" onclick="openCheckout()">Finalizar Compra</button>
-  `;
+  foot.innerHTML = `<div class="tot-row"><span>Subtotal</span><span>${fmtUSD(totalUsd)}</span></div><div class="tot-row total"><span>Total</span><span>${fmtUSD(totalUsd)}</span></div><button class="btn-primary" style="width:100%;" onclick="openCheckout()">Finalizar Compra</button>`;
 }
 function changeQty(idx,d){ cart[idx].qty += d; if(cart[idx].qty < 1) cart.splice(idx,1); renderCart(); }
 function removeItem(idx){ cart.splice(idx,1); renderCart(); }
-
 function openCart(){ document.getElementById('drawer').classList.add('open'); document.getElementById('overlay').classList.add('open'); }
 function closeCart(){ document.getElementById('drawer').classList.remove('open'); document.getElementById('overlay').classList.remove('open'); }
 
@@ -695,6 +563,8 @@ function toggleStoreAuthMode() {
   document.getElementById('authSub').textContent = isLoginMode ? "Debes ingresar para completar tu compra." : "Regístrate para continuar con tu pedido.";
   document.getElementById('btnAuthSubmit').textContent = isLoginMode ? "Entrar y Continuar" : "Registrarse y Continuar";
   document.getElementById('nameField').style.display = isLoginMode ? 'none' : 'block';
+  document.getElementById('phoneField').style.display = isLoginMode ? 'none' : 'block';
+  document.getElementById('addressField').style.display = isLoginMode ? 'none' : 'block';
   document.getElementById('switchText').textContent = isLoginMode ? "¿No tienes cuenta?" : "¿Ya tienes cuenta?";
   document.getElementById('switchBtn').textContent = isLoginMode ? "Regístrate aquí" : "Inicia sesión";
   document.getElementById('authError').textContent = "";
@@ -704,68 +574,58 @@ function closeAuthModal() { document.getElementById('authModal').classList.remov
 
 async function handleStoreAuth(e) {
   e.preventDefault();
-  const email = document.getElementById('authEmail').value.trim(), password = document.getElementById('authPassword').value, name = document.getElementById('authName').value.trim();
+  const email = document.getElementById('authEmail').value.trim(), password = document.getElementById('authPassword').value;
+  const name = document.getElementById('authName').value.trim(), phone = document.getElementById('authPhone').value.trim(), address = document.getElementById('authAddress').value.trim();
   const errBox = document.getElementById('authError'), btn = document.getElementById('btnAuthSubmit');
   errBox.textContent = ""; btn.disabled = true; btn.textContent = "Procesando...";
 
   try {
     if (isLoginMode) {
-      const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+      const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
       if (error) throw error;
       closeAuthModal(); openCheckout();
     } else {
-      if (!name) throw new Error("Por favor ingresa tu nombre.");
-      const { data, error } = await supabaseClient.auth.signUp({ email, password, options: { data: { full_name: name } } });
+      if (!name || !phone || !address) throw new Error("Por favor completa todos los campos.");
+      const { data, error } = await supabaseClient.auth.signUp({ email, password, options: { data: { full_name: name, phone: phone, address: address } } });
       if (error) throw error;
       if (data.session) { closeAuthModal(); openCheckout(); } 
       else { alert("Cuenta creada. Por favor, inicia sesión."); toggleStoreAuthMode(); }
     }
-  } catch (err) {
-    errBox.textContent = err.message === "Invalid login credentials" ? "Correo o contraseña incorrectos." : err.message;
-  } finally {
-    btn.disabled = false; btn.textContent = isLoginMode ? "Entrar y Continuar" : "Registrarse y Continuar";
-  }
+  } catch (err) { errBox.textContent = err.message === "Invalid login credentials" ? "Correo o contraseña incorrectos." : err.message; } 
+  finally { btn.disabled = false; btn.textContent = isLoginMode ? "Entrar y Continuar" : "Registrarse y Continuar"; }
 }
 
 async function openCheckout(){
   if(cart.length === 0) return;
   const { data: { session } } = await supabaseClient.auth.getSession();
   if (!session) { closeCart(); openAuthModal(); return; }
-
-  closeCart(); 
-  paymentPlan = "contado"; 
-  paymentMethod = "bs_transfer";
+  closeCart(); paymentPlan = "contado"; paymentMethod = "bs_transfer";
   
-  let prefName = "";
-  const { data: profile } = await supabaseClient.from('profiles').select('full_name').eq('id', session.user.id).single();
-  prefName = profile?.full_name || "";
-
-  renderCheckout(prefName);
+  // Leer datos del perfil
+  const { data: profile } = await supabaseClient.from('profiles').select('full_name, phone, address').eq('id', session.user.id).single();
+  renderCheckout(profile || {});
   document.getElementById('checkoutModal').classList.add('open');
 }
 function closeCheckout(e){ if(e && e.target.id !== 'checkoutModal') return; document.getElementById('checkoutModal').classList.remove('open'); }
 
 function getMethodFieldsHtml(method) {
-  if (method === 'bs_pago_movil') {
-    return `<div style="background:var(--bg); padding:16px; border-radius:12px; margin-bottom:24px; border:1px solid var(--border);"><p style="font-size:13px; color:var(--text); margin-bottom:12px; font-weight:600;">Transfiere a estos datos y sube tu captura:</p><div style="font-size:15px; line-height:2; color:var(--text); background:var(--surface); padding:12px; border-radius:8px;"><strong>Banco:</strong> 0134 Banesco<br><strong>Teléfono:</strong> 04243351245<br><strong>Cédula:</strong> 26464322</div></div>`;
-  } else if (method === 'bs_transfer') {
-    return `<div style="background:var(--bg); padding:16px; border-radius:12px; margin-bottom:24px; border:1px solid var(--border);"><p style="font-size:13px; color:var(--text); margin-bottom:12px; font-weight:600;">Transfiere a estos datos y sube tu captura:</p><div style="font-size:15px; line-height:2; color:var(--text); background:var(--surface); padding:12px; border-radius:8px;"><strong>Banco:</strong> Banesco (0134)<br><strong>Cédula:</strong> 26464322<br><strong>Titular:</strong> Tiendas Sam's</div></div>`;
-  } else if (method === 'usdt_binance') {
-    return `<div style="background:var(--bg); padding:16px; border-radius:12px; margin-bottom:24px; border:1px solid var(--border);"><p style="font-size:13px; color:var(--text); margin-bottom:12px; font-weight:600;">Transfiere a estos datos y sube tu captura:</p><div style="font-size:15px; line-height:2; color:var(--text); background:var(--surface); padding:12px; border-radius:8px;"><strong>Correo:</strong> samiibelisario@gmail.com<br><strong>UID:</strong> 219555454</div></div>`;
-  }
+  if (method === 'bs_pago_movil') return `<div style="background:var(--bg); padding:16px; border-radius:12px; margin-bottom:24px; border:1px solid var(--border);"><p style="font-size:13px; color:var(--text); margin-bottom:12px; font-weight:600;">Transfiere a estos datos y sube tu captura:</p><div style="font-size:15px; line-height:2; color:var(--text); background:var(--surface); padding:12px; border-radius:8px;"><strong>Banco:</strong> 0134 Banesco<br><strong>Teléfono:</strong> 04243351245<br><strong>Cédula:</strong> 26464322</div></div>`;
+  if (method === 'bs_transfer') return `<div style="background:var(--bg); padding:16px; border-radius:12px; margin-bottom:24px; border:1px solid var(--border);"><p style="font-size:13px; color:var(--text); margin-bottom:12px; font-weight:600;">Transfiere a estos datos y sube tu captura:</p><div style="font-size:15px; line-height:2; color:var(--text); background:var(--surface); padding:12px; border-radius:8px;"><strong>Banco:</strong> Banesco (0134)<br><strong>Cédula:</strong> 26464322<br><strong>Titular:</strong> Tiendas Sam's</div></div>`;
+  if (method === 'usdt_binance') return `<div style="background:var(--bg); padding:16px; border-radius:12px; margin-bottom:24px; border:1px solid var(--border);"><p style="font-size:13px; color:var(--text); margin-bottom:12px; font-weight:600;">Transfiere a estos datos y sube tu captura:</p><div style="font-size:15px; line-height:2; color:var(--text); background:var(--surface); padding:12px; border-radius:8px;"><strong>Correo:</strong> samiibelisario@gmail.com<br><strong>UID:</strong> 219555454</div></div>`;
   return "";
 }
 
-function renderCheckout(prefName){
+function renderCheckout(profile){
   const totalBs = cart.reduce((s,i)=>s + i.price_bs*i.qty, 0), totalUsdt = cart.reduce((s,i)=>s + i.price_usdt*i.qty, 0);
   
   document.getElementById('checkoutModalInner').innerHTML = `
     <button class="modal-x" onclick="closeCheckout()">✕</button>
     <h3>Finalizar Pedido</h3><p class="sub">Confirma tus datos y elige cómo pagar.</p>
 
-    <div class="dlabel">Datos de contacto</div>
-    <div class="field"><input id="fName" type="text" placeholder="Nombre completo" value="${escapeHTML(prefName)}" ${prefName ? 'readonly style="background:#f0f0f0;"' : 'style="border:1px solid var(--border);"'}></div>
-    <div class="field"><input id="fPhone" type="text" placeholder="Teléfono / WhatsApp (para la entrega)" style="border:1px solid var(--border);"></div>
+    <div class="dlabel">Datos de Envío</div>
+    <div class="field"><input id="fName" type="text" placeholder="Nombre completo" value="${escapeHTML(profile.full_name || '')}" ${profile.full_name ? 'readonly style="background:#f0f0f0;"' : 'style="border:1px solid var(--border);"'}></div>
+    <div class="field"><input id="fPhone" type="text" placeholder="Teléfono / WhatsApp" value="${escapeHTML(profile.phone || '')}" ${profile.phone ? 'readonly style="background:#f0f0f0;"' : 'style="border:1px solid var(--border);"'}></div>
+    <div class="field"><textarea id="fAddress" rows="2" placeholder="Dirección exacta de envío" ${profile.address ? 'readonly style="background:#f0f0f0;"' : 'style="border:1px solid var(--border);"'}>${escapeHTML(profile.address || '')}</textarea></div>
 
     <div class="dlabel" style="margin-top:24px;">Modalidad de pago</div>
     <div class="plans">
@@ -794,9 +654,7 @@ function renderCheckout(prefName){
       <div class="method ${paymentMethod==='usdt_binance'?'selected':''}" onclick="selMethod('usdt_binance', this)"><span class="dot"></span><span class="mn">USDT (Binance)</span></div>
     </div>
 
-    <div id="methodFieldsContainer">
-      ${getMethodFieldsHtml(paymentMethod)}
-    </div>
+    <div id="methodFieldsContainer">${getMethodFieldsHtml(paymentMethod)}</div>
 
     <div class="dlabel">Comprobante de Pago</div>
     <label class="file-upload-wrapper">
@@ -812,35 +670,20 @@ function renderCheckout(prefName){
     <button class="btn-primary" style="width:100%;" onclick="submitOrder()">Confirmar Pedido</button>
     <div id="checkoutError" class="err"></div>
   `;
-  
   setTimeout(updateCheckoutTotal, 50);
 }
 
 function selPlan(p, el){ 
   paymentPlan = p; 
-  document.querySelectorAll('.plan').forEach(e => e.classList.remove('selected'));
-  el.classList.add('selected');
-  if(p === 'credito') {
-    document.getElementById('creditFields').style.display = 'block';
-    document.getElementById('layawayFields').style.display = 'none';
-  } else if(p === 'apartado') {
-    document.getElementById('creditFields').style.display = 'none';
-    document.getElementById('layawayFields').style.display = 'block';
-  } else {
-    document.getElementById('creditFields').style.display = 'none';
-    document.getElementById('layawayFields').style.display = 'none';
-  }
+  document.querySelectorAll('.plan').forEach(e => e.classList.remove('selected')); el.classList.add('selected');
+  document.getElementById('creditFields').style.display = p === 'credito' ? 'block' : 'none';
+  document.getElementById('layawayFields').style.display = p === 'apartado' ? 'block' : 'none';
   updateCheckoutTotal();
 }
-
 function selMethod(m, el){ 
   paymentMethod = m; 
-  document.querySelectorAll('.method').forEach(e => e.classList.remove('selected'));
-  el.classList.add('selected');
-  const container = document.getElementById('methodFieldsContainer');
-  if (container) {
-    container.innerHTML = getMethodFieldsHtml(m);
-  }
+  document.querySelectorAll('.method').forEach(e => e.classList.remove('selected')); el.classList.add('selected');
+  document.getElementById('methodFieldsContainer').innerHTML = getMethodFieldsHtml(m);
 }
 
 function updateCheckoutTotal() {
@@ -857,21 +700,21 @@ function updateCheckoutTotal() {
     const abonoInputBs = parseFloat(document.getElementById('abonoAmount')?.value || 0);
     const ratio = totalBs / totalUsdt;
     amountToPay = isNaN(abonoInputBs) ? 0 : (abonoInputBs / ratio);
-    
     const remaining = Math.max(0, totalBs - abonoInputBs);
     if(document.getElementById('remainingBalance')) document.getElementById('remainingBalance').textContent = fmtBs(remaining);
   }
-
   if(document.getElementById('amountToPay')) document.getElementById('amountToPay').textContent = fmtUSD(amountToPay);
 }
 
 async function submitOrder(){
   const errBox = document.getElementById('checkoutError'); errBox.textContent = "";
-  const name  = document.getElementById('fName').value.trim();
+  const name = document.getElementById('fName').value.trim();
   const phone = document.getElementById('fPhone').value.trim();
+  const address = document.getElementById('fAddress').value.trim();
   
   if(!name)  { errBox.textContent = "El nombre es obligatorio."; return; }
   if(!phone) { errBox.textContent = "El teléfono es obligatorio."; return; }
+  if(!address){ errBox.textContent = "La dirección es obligatoria."; return; }
 
   const btn = document.querySelector('#checkoutModalInner .btn-primary');
   btn.disabled = true; btn.textContent = "Procesando...";
@@ -880,21 +723,14 @@ async function submitOrder(){
   const totalUsdt = cart.reduce((s,i)=> s + i.price_usdt * i.qty, 0);
   const ratio     = totalBs / totalUsdt;
 
-  // Construir plan
-  let planDetails = {};
-  let installmentsRecords = [];
+  let planDetails = {}; let installmentsRecords = [];
   if (paymentPlan === 'contado') {
     planDetails = { tipo: 'contado' };
     installmentsRecords.push({ amount_bs: totalBs, reference: "Pago de contado" });
   } else if (paymentPlan === 'credito') {
-    const c1 = document.getElementById('cuota1').checked;
-    const c2 = document.getElementById('cuota2').checked;
-    const c3 = document.getElementById('cuota3').checked;
+    const c1 = document.getElementById('cuota1').checked, c2 = document.getElementById('cuota2').checked, c3 = document.getElementById('cuota3').checked;
     const cuotaBs = totalBs / 3;
-    planDetails = {
-      cuota_monto: cuotaBs,
-      cuota1_pagada: c1, cuota2_pagada: c2, cuota3_pagada: c3
-    };
+    planDetails = { cuota_monto: cuotaBs, cuota1_pagada: c1, cuota2_pagada: c2, cuota3_pagada: c3 };
     if (c1) installmentsRecords.push({ amount_bs: cuotaBs, reference: "Cuota 01" });
     if (c2) installmentsRecords.push({ amount_bs: cuotaBs, reference: "Cuota 02" });
     if (c3) installmentsRecords.push({ amount_bs: totalBs - cuotaBs*2, reference: "Cuota 03" });
@@ -910,7 +746,6 @@ async function submitOrder(){
     const { data: { session } } = await supabaseClient.auth.getSession();
     if (!session) throw new Error("Tu sesión expiró.");
 
-    // Subir comprobante (path = userId/archivo por políticas de storage)
     let receipt_fileName = null;
     const fileInput = document.getElementById('fReceipt');
     if (fileInput && fileInput.files.length > 0) {
@@ -919,37 +754,27 @@ async function submitOrder(){
       const compressed = await imageCompression(file, { maxSizeMB: 0.5, maxWidthOrHeight: 1000, useWebWorker: true });
       const ext = compressed.name.split('.').pop();
       const fileName = `${session.user.id}/receipt_${Date.now()}.${ext}`;
-      const { error: uploadError } = await supabaseClient.storage
-        .from('receipts').upload(fileName, compressed);
+      const { error: uploadError } = await supabaseClient.storage.from('receipts').upload(fileName, compressed);
       if (uploadError) throw new Error("Error al subir comprobante: " + uploadError.message);
       receipt_fileName = fileName;
     }
 
     btn.textContent = "Registrando pedido...";
-
-    const itemsPayload = cart.map(i => ({
-      product_id: i.productId,
-      size: i.size,
-      quantity: i.qty,
-      custom_note: i.note || null
-    }));
+    const itemsPayload = cart.map(i => ({ product_id: i.productId, size: i.size, quantity: i.qty, custom_note: i.note || null }));
 
     const { data, error } = await supabaseClient.rpc('create_order', {
       p_customer_name: name,
       p_customer_phone: phone,
+      p_customer_address: address,
       p_payment_plan: paymentPlan,
       p_payment_method: paymentMethod,
       p_receipt_url: receipt_fileName,
       p_items: itemsPayload,
       p_payment_plan_details: planDetails,
-      p_installments: installmentsRecords.map(r => ({
-        amount_bs: r.amount_bs,
-        reference: r.reference
-      }))
+      p_installments: installmentsRecords.map(r => ({ amount_bs: r.amount_bs, reference: r.reference }))
     });
 
     if (error) throw error;
-
     const shortId = String(data.order_id).slice(0,8).toUpperCase();
     document.getElementById('checkoutModalInner').innerHTML = `
       <button class="modal-x" onclick="closeCheckout()">✕</button>
@@ -961,22 +786,14 @@ async function submitOrder(){
         <button class="btn-primary" onclick="closeCheckout()" style="background:#e5e7eb; color:#111; width:100%; margin-top:10px;">Seguir Comprando</button>
       </div>
     `;
-    cart = [];
-    renderCart();
+    cart = []; renderCart();
   } catch (err) {
-    errBox.textContent = "Error: " + err.message;
-    btn.disabled = false;
-    btn.textContent = "Confirmar Pedido";
+    errBox.textContent = "Error: " + err.message; btn.disabled = false; btn.textContent = "Confirmar Pedido";
   }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  loadCategories();
-  loadProducts(); 
-  renderCart();
-  suscribirseProductos();
-  startHeroAutoplay(); 
-  loadSiteConfig();
+  loadCategories(); loadProducts(); renderCart(); suscribirseProductos(); startHeroAutoplay(); loadSiteConfig();
   supabaseClient.auth.getSession().then(({data: {session}}) => { if(session) document.getElementById('btnAccount').style.display = 'inline-block'; });
 });
 </script>
