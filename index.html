@@ -125,42 +125,12 @@
   .file-upload-wrapper:hover { border-color: var(--text); }
   
   /* AUTH MODAL CON FONDO Y OJO */
-  .auth-modal { 
-    max-width: 420px; 
-    padding: 40px; 
-    position: relative; 
-    overflow: hidden; 
-    border: 1px solid var(--border);
-  }
-  .auth-modal::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background-image: url('https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=1000&auto=format&fit=crop');
-    background-size: cover;
-    background-position: center;
-    opacity: 0.1; /* Imagen fundida */
-    z-index: 0;
-  }
-  .auth-modal > * {
-    position: relative;
-    z-index: 1;
-  }
-  
+  .auth-modal { max-width: 420px; padding: 40px; position: relative; overflow: hidden; border: 1px solid var(--border); }
+  .auth-modal::before { content: ''; position: absolute; inset: 0; background-image: url('https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=1000&auto=format&fit=crop'); background-size: cover; background-position: center; opacity: 0.1; z-index: 0; }
+  .auth-modal > * { position: relative; z-index: 1; }
   .password-container { position: relative; display: flex; align-items: center; }
   .password-container input { padding-right: 48px; }
-  .toggle-password {
-    position: absolute;
-    right: 12px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: var(--muted);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 5px;
-  }
+  .toggle-password { position: absolute; right: 12px; background: none; border: none; cursor: pointer; color: var(--muted); display: flex; align-items: center; justify-content: center; padding: 5px; }
   .toggle-password:hover { color: var(--text); }
 
   .promo-modal { max-width: 450px; padding: 0; overflow: hidden; text-align: center; border-radius: var(--radius-lg); }
@@ -559,7 +529,10 @@ function setFilter(key){
 
 function renderProducts(){
   const list = currentFilter === 'todo' ? PRODUCTS : PRODUCTS.filter(p => p.category === currentFilter);
-  document.getElementById('productGrid').innerHTML = list.map(p => `
+  document.getElementById('productGrid').innerHTML = list.map(p => {
+    const catObj = DYNAMIC_CATEGORIES.find(c => c.slug === p.category);
+    const catName = catObj ? catObj.name : p.category;
+    return `
     <div class="product-card" onclick="openProduct('${p.id}')">
       <div class="product-image">
         <img src="${p.image_url || ''}" alt="${escapeHTML(p.name)}" loading="lazy">
@@ -567,7 +540,7 @@ function renderProducts(){
         ${p.stock <= 0 ? `<div class="out-of-stock-badge">AGOTADO</div>` : ''}
       </div>
       <div class="product-info">
-        <div class="product-cat">${escapeHTML(p.category)}</div>
+        <div class="product-cat">${escapeHTML(catName)}</div>
         <div class="product-name">${escapeHTML(p.name)}</div>
         <div class="product-prices">
           <div class="price-usd">${fmtUSD(p.price_usdt)}</div>
@@ -575,7 +548,7 @@ function renderProducts(){
         </div>
       </div>
     </div>
-  `).join('');
+  `}).join('');
 }
 
 let productGalleryImages = [];
@@ -772,26 +745,27 @@ async function openCheckout(){
 }
 function closeCheckout(e){ if(e && e.target.id !== 'checkoutModal') return; document.getElementById('checkoutModal').classList.remove('open'); }
 
+function getMethodFieldsHtml(method) {
+  if (method === 'bs_pago_movil') {
+    return `<div style="background:var(--bg); padding:16px; border-radius:12px; margin-bottom:24px; border:1px solid var(--border);"><p style="font-size:13px; color:var(--text); margin-bottom:12px; font-weight:600;">Transfiere a estos datos y sube tu captura:</p><div style="font-size:15px; line-height:2; color:var(--text); background:var(--surface); padding:12px; border-radius:8px;"><strong>Banco:</strong> 0134 Banesco<br><strong>Teléfono:</strong> 04243351245<br><strong>Cédula:</strong> 26464322</div></div>`;
+  } else if (method === 'bs_transfer') {
+    return `<div style="background:var(--bg); padding:16px; border-radius:12px; margin-bottom:24px; border:1px solid var(--border);"><p style="font-size:13px; color:var(--text); margin-bottom:12px; font-weight:600;">Transfiere a estos datos y sube tu captura:</p><div style="font-size:15px; line-height:2; color:var(--text); background:var(--surface); padding:12px; border-radius:8px;"><strong>Banco:</strong> Banesco (0134)<br><strong>Cédula:</strong> 26464322<br><strong>Titular:</strong> Tiendas Sam's</div></div>`;
+  } else if (method === 'usdt_binance') {
+    return `<div style="background:var(--bg); padding:16px; border-radius:12px; margin-bottom:24px; border:1px solid var(--border);"><p style="font-size:13px; color:var(--text); margin-bottom:12px; font-weight:600;">Transfiere a estos datos y sube tu captura:</p><div style="font-size:15px; line-height:2; color:var(--text); background:var(--surface); padding:12px; border-radius:8px;"><strong>Correo:</strong> samiibelisario@gmail.com<br><strong>UID:</strong> 219555454</div></div>`;
+  }
+  return "";
+}
+
 function renderCheckout(prefName){
   const totalBs = cart.reduce((s,i)=>s + i.price_bs*i.qty, 0), totalUsdt = cart.reduce((s,i)=>s + i.price_usdt*i.qty, 0);
-  const cuotaBs = totalBs / 3;
   
-  let methodFields = "";
-  if (paymentMethod === 'bs_pago_movil') {
-    methodFields = `<div style="background:var(--bg); padding:16px; border-radius:12px; margin-bottom:24px; border:1px solid var(--border);"><p style="font-size:13px; color:var(--text); margin-bottom:12px; font-weight:600;">Transfiere a estos datos y sube tu captura:</p><div style="font-size:15px; line-height:2; color:var(--text); background:var(--surface); padding:12px; border-radius:8px;"><strong>Banco:</strong> 0134 Banesco<br><strong>Teléfono:</strong> 04243351245<br><strong>Cédula:</strong> 26464322</div></div>`;
-  } else if (paymentMethod === 'bs_transfer') {
-    methodFields = `<div style="background:var(--bg); padding:16px; border-radius:12px; margin-bottom:24px; border:1px solid var(--border);"><p style="font-size:13px; color:var(--text); margin-bottom:12px; font-weight:600;">Transfiere a estos datos y sube tu captura:</p><div style="font-size:15px; line-height:2; color:var(--text); background:var(--surface); padding:12px; border-radius:8px;"><strong>Banco:</strong> Banesco (0134)<br><strong>Cédula:</strong> 26464322<br><strong>Titular:</strong> Tiendas Sam's</div></div>`;
-  } else if (paymentMethod === 'usdt_binance') {
-    methodFields = `<div style="background:var(--bg); padding:16px; border-radius:12px; margin-bottom:24px; border:1px solid var(--border);"><p style="font-size:13px; color:var(--text); margin-bottom:12px; font-weight:600;">Transfiere a estos datos y sube tu captura:</p><div style="font-size:15px; line-height:2; color:var(--text); background:var(--surface); padding:12px; border-radius:8px;"><strong>Correo:</strong> samiibelisario@gmail.com<br><strong>UID:</strong> 219555454</div></div>`;
-  }
-
   document.getElementById('checkoutModalInner').innerHTML = `
     <button class="modal-x" onclick="closeCheckout()">✕</button>
     <h3>Finalizar Pedido</h3><p class="sub">Confirma tus datos y elige cómo pagar.</p>
 
     <div class="dlabel">Datos de contacto</div>
-    <div class="field"><input id="fName" type="text" placeholder="Nombre completo" value="${escapeHTML(prefName)}" readonly style="background:#f0f0f0;"></div>
-    <div class="field"><input id="fPhone" type="text" placeholder="Teléfono / WhatsApp (para la entrega)"></div>
+    <div class="field"><input id="fName" type="text" placeholder="Nombre completo" value="${escapeHTML(prefName)}" ${prefName ? 'readonly style="background:#f0f0f0;"' : 'style="border:1px solid var(--border);"'}></div>
+    <div class="field"><input id="fPhone" type="text" placeholder="Teléfono / WhatsApp (para la entrega)" style="border:1px solid var(--border);"></div>
 
     <div class="dlabel" style="margin-top:24px;">Modalidad de pago</div>
     <div class="plans">
@@ -820,12 +794,14 @@ function renderCheckout(prefName){
       <div class="method ${paymentMethod==='usdt_binance'?'selected':''}" onclick="selMethod('usdt_binance', this)"><span class="dot"></span><span class="mn">USDT (Binance)</span></div>
     </div>
 
-    ${methodFields}
+    <div id="methodFieldsContainer">
+      ${getMethodFieldsHtml(paymentMethod)}
+    </div>
 
     <div class="dlabel">Comprobante de Pago</div>
     <label class="file-upload-wrapper">
       <span id="fileNameDisplay">📸 Sube una captura del pago</span>
-      <input type="file" id="fReceipt" accept="image/*" onchange="document.getElementById('fileNameDisplay').textContent = this.files[0].name">
+      <input type="file" id="fReceipt" accept="image/*" onchange="document.getElementById('fileNameDisplay').textContent = this.files[0].name" style="display:none;">
     </label>
 
     <div class="summary">
@@ -856,14 +832,15 @@ function selPlan(p, el){
   }
   updateCheckoutTotal();
 }
+
 function selMethod(m, el){ 
   paymentMethod = m; 
   document.querySelectorAll('.method').forEach(e => e.classList.remove('selected'));
   el.classList.add('selected');
-  const prefName = document.getElementById('fName').value;
-  const prefPhone = document.getElementById('fPhone').value;
-  renderCheckout(prefName);
-  document.getElementById('fPhone').value = prefPhone;
+  const container = document.getElementById('methodFieldsContainer');
+  if (container) {
+    container.innerHTML = getMethodFieldsHtml(m);
+  }
 }
 
 function updateCheckoutTotal() {
@@ -890,108 +867,90 @@ function updateCheckoutTotal() {
 
 async function submitOrder(){
   const errBox = document.getElementById('checkoutError'); errBox.textContent = "";
-  const name = document.getElementById('fName').value.trim();
+  const name  = document.getElementById('fName').value.trim();
   const phone = document.getElementById('fPhone').value.trim();
-  if(!phone) { errBox.textContent = "El teléfono es obligatorio para la entrega."; return; }
-
-  const btn = document.querySelector('#checkoutModalInner .btn-primary'); btn.disabled = true; btn.textContent = "Verificando stock...";
   
-  try {
-    for (let item of cart) {
-      const { data: prod, error } = await supabaseClient.from('products').select('stock, name').eq('id', item.productId).single();
-      if (error) throw error;
-      if (prod.stock < item.qty) {
-        throw new Error(`Lo sentimos, el producto "${prod.name}" ya no tiene suficiente stock. Quedan ${prod.stock} unidades.`);
-      }
-    }
-  } catch (err) {
-    errBox.textContent = err.message; btn.disabled = false; btn.textContent = "Confirmar Pedido"; return;
-  }
+  if(!name)  { errBox.textContent = "El nombre es obligatorio."; return; }
+  if(!phone) { errBox.textContent = "El teléfono es obligatorio."; return; }
 
-  const totalBs = cart.reduce((s,i)=>s + i.price_bs*i.qty, 0), totalUsdt = cart.reduce((s,i)=>s + i.price_usdt*i.qty, 0);
-  const cuotaBs = totalBs / 3;
-  
-  let amountToPayBs = totalBs;
+  const btn = document.querySelector('#checkoutModalInner .btn-primary');
+  btn.disabled = true; btn.textContent = "Procesando...";
+
+  const totalBs   = cart.reduce((s,i)=> s + i.price_bs   * i.qty, 0);
+  const totalUsdt = cart.reduce((s,i)=> s + i.price_usdt * i.qty, 0);
+  const ratio     = totalBs / totalUsdt;
+
+  // Construir plan
   let planDetails = {};
   let installmentsRecords = [];
-
   if (paymentPlan === 'contado') {
     planDetails = { tipo: 'contado' };
     installmentsRecords.push({ amount_bs: totalBs, reference: "Pago de contado" });
   } else if (paymentPlan === 'credito') {
-    planDetails.cuota_monto = cuotaBs;
-    planDetails.cuota1_pagada = document.getElementById('cuota1').checked;
-    planDetails.cuota2_pagada = document.getElementById('cuota2').checked;
-    planDetails.cuota3_pagada = document.getElementById('cuota3').checked;
-    
-    if (planDetails.cuota1_pagada) installmentsRecords.push({ amount_bs: cuotaBs, reference: "Cuota 01" });
-    if (planDetails.cuota2_pagada) installmentsRecords.push({ amount_bs: cuotaBs, reference: "Cuota 02" });
-    if (planDetails.cuota3_pagada) installmentsRecords.push({ amount_bs: totalBs - (cuotaBs*2), reference: "Cuota 03" });
-    
-    amountToPayBs = installmentsRecords.reduce((s,r) => s + r.amount_bs, 0);
+    const c1 = document.getElementById('cuota1').checked;
+    const c2 = document.getElementById('cuota2').checked;
+    const c3 = document.getElementById('cuota3').checked;
+    const cuotaBs = totalBs / 3;
+    planDetails = {
+      cuota_monto: cuotaBs,
+      cuota1_pagada: c1, cuota2_pagada: c2, cuota3_pagada: c3
+    };
+    if (c1) installmentsRecords.push({ amount_bs: cuotaBs, reference: "Cuota 01" });
+    if (c2) installmentsRecords.push({ amount_bs: cuotaBs, reference: "Cuota 02" });
+    if (c3) installmentsRecords.push({ amount_bs: totalBs - cuotaBs*2, reference: "Cuota 03" });
   } else if (paymentPlan === 'apartado') {
-    const abonoInput = parseFloat(document.getElementById('abonoAmount').value);
-    if (isNaN(abonoInput) || abonoInput <= 0) { errBox.textContent = "Debes ingresar un monto válido."; btn.disabled = false; btn.textContent = "Confirmar Pedido"; return; }
-    if (abonoInput > totalBs) { errBox.textContent = "El abono no puede ser mayor al total."; btn.disabled = false; btn.textContent = "Confirmar Pedido"; return; }
-    
-    planDetails.abono_inicial = abonoInput;
-    planDetails.saldo_pendiente = totalBs - abonoInput;
-    installmentsRecords.push({ amount_bs: abonoInput, reference: "Abono inicial" });
-    
-    amountToPayBs = abonoInput;
+    const abono = parseFloat(document.getElementById('abonoAmount').value);
+    if (isNaN(abono) || abono <= 0)   { errBox.textContent = "Ingresa un abono válido."; btn.disabled=false; btn.textContent="Confirmar Pedido"; return; }
+    if (abono > totalBs)              { errBox.textContent = "El abono no puede superar el total."; btn.disabled=false; btn.textContent="Confirmar Pedido"; return; }
+    planDetails = { abono_inicial: abono, saldo_pendiente: totalBs - abono };
+    installmentsRecords.push({ amount_bs: abono, reference: "Abono inicial" });
   }
 
-  btn.textContent = "Registrando...";
-
-  try{
+  try {
     const { data: { session } } = await supabaseClient.auth.getSession();
-    if (!session) throw new Error("Tu sesión ha expirado.");
-    
+    if (!session) throw new Error("Tu sesión expiró.");
+
+    // Subir comprobante (path = userId/archivo por políticas de storage)
     let receipt_fileName = null;
     const fileInput = document.getElementById('fReceipt');
     if (fileInput && fileInput.files.length > 0) {
       btn.textContent = "Subiendo comprobante...";
       const file = fileInput.files[0];
-      const options = { maxSizeMB: 0.5, maxWidthOrHeight: 1000, useWebWorker: true };
-      const compressedFile = await imageCompression(file, options);
-      const ext = compressedFile.name.split('.').pop();
-      const fileName = `receipt_${session.user.id}_${Date.now()}.${ext}`;
-      
-      const { error: uploadError } = await supabaseClient.storage.from('receipts').upload(fileName, compressedFile);
+      const compressed = await imageCompression(file, { maxSizeMB: 0.5, maxWidthOrHeight: 1000, useWebWorker: true });
+      const ext = compressed.name.split('.').pop();
+      const fileName = `${session.user.id}/receipt_${Date.now()}.${ext}`;
+      const { error: uploadError } = await supabaseClient.storage
+        .from('receipts').upload(fileName, compressed);
       if (uploadError) throw new Error("Error al subir comprobante: " + uploadError.message);
-      
-      receipt_fileName = fileName; 
+      receipt_fileName = fileName;
     }
 
-    btn.textContent = "Guardando pedido...";
+    btn.textContent = "Registrando pedido...";
 
-    const { data: orderData, error: orderErr } = await supabaseClient.from('orders').insert({
-      customer_name: name, customer_phone: phone, customer_email: session.user.email, user_id: session.user.id,
-      payment_plan: paymentPlan, payment_method: paymentMethod, total_bs: totalBs, total_usdt: totalUsdt, 
-      status: 'pendiente', receipt_url: receipt_fileName,
-      payment_plan_details: planDetails
-    }).select().single();
-    
-    if(orderErr) throw orderErr;
-
-    const items = cart.map(i => ({
-      order_id: orderData.id, product_id: i.productId, product_name: i.name, size: i.size, quantity: i.qty,
-      custom_note: i.note || null, unit_price_bs: i.price_bs, unit_price_usdt: i.price_usdt, subtotal_bs: i.price_bs * i.qty, subtotal_usdt: i.price_usdt * i.qty
+    const itemsPayload = cart.map(i => ({
+      product_id: i.productId,
+      size: i.size,
+      quantity: i.qty,
+      custom_note: i.note || null
     }));
-    
-    const { error: itemsErr } = await supabaseClient.from('order_items').insert(items);
-    if(itemsErr) throw itemsErr;
 
-    const installmentsToInsert = installmentsRecords.map(rec => ({
-       order_id: orderData.id, amount_bs: rec.amount_bs, amount_usdt: rec.amount_bs / (totalBs / totalUsdt),
-       method: paymentMethod, reference: rec.reference, notes: "Checkout", status: "verificado"
-    }));
-    if(installmentsToInsert.length > 0) {
-      const { error: instErr } = await supabaseClient.from('installments').insert(installmentsToInsert);
-      if(instErr) throw instErr;
-    }
+    const { data, error } = await supabaseClient.rpc('create_order', {
+      p_customer_name: name,
+      p_customer_phone: phone,
+      p_payment_plan: paymentPlan,
+      p_payment_method: paymentMethod,
+      p_receipt_url: receipt_fileName,
+      p_items: itemsPayload,
+      p_payment_plan_details: planDetails,
+      p_installments: installmentsRecords.map(r => ({
+        amount_bs: r.amount_bs,
+        reference: r.reference
+      }))
+    });
 
-    const shortId = String(orderData.id).slice(0,8).toUpperCase();
+    if (error) throw error;
+
+    const shortId = String(data.order_id).slice(0,8).toUpperCase();
     document.getElementById('checkoutModalInner').innerHTML = `
       <button class="modal-x" onclick="closeCheckout()">✕</button>
       <div class="msg">
@@ -1002,9 +961,12 @@ async function submitOrder(){
         <button class="btn-primary" onclick="closeCheckout()" style="background:#e5e7eb; color:#111; width:100%; margin-top:10px;">Seguir Comprando</button>
       </div>
     `;
-    cart = []; renderCart();
-  }catch(err){
-    errBox.textContent = "Error: " + err.message; btn.disabled = false; btn.textContent = "Confirmar Pedido";
+    cart = [];
+    renderCart();
+  } catch (err) {
+    errBox.textContent = "Error: " + err.message;
+    btn.disabled = false;
+    btn.textContent = "Confirmar Pedido";
   }
 }
 
