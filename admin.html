@@ -891,23 +891,35 @@ function switchTab(name, event){
 async function loadSiteConfig() {
   const { data, error } = await supabaseClient.from('site_config').select('*').eq('id', 1).single();
   if(error) return;
-  currentSiteConfig = data;
 
-  document.getElementById('promoActive').checked = data.promo_active || false;
-  document.getElementById('promoTitle').value = data.promo_title || '';
-  document.getElementById('promoText').value = data.promo_text || '';
-  document.getElementById('promoLink').value = data.promo_link || '';
+  // Imágenes por defecto por si el admin deja un espacio vacío
+  const defaultHero1 = "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1500&auto=format&fit=crop";
+  const defaultHero2 = "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?q=80&w=1500&auto=format&fit=crop";
+  const defaultHero3 = "https://images.unsplash.com/photo-1517423568366-8b83523034fd?q=80&w=1500&auto=format&fit=crop";
 
-  if(data.promo_image) {
-    const img = document.getElementById('promoPreview');
-    img.src = data.promo_image;
-    img.style.display = 'block';
+  if(data.hero_images && data.hero_images.length >= 3) {
+    document.getElementById('heroImg1').src = data.hero_images[0] || defaultHero1;
+    document.getElementById('heroImg2').src = data.hero_images[1] || defaultHero2;
+    document.getElementById('heroImg3').src = data.hero_images[2] || defaultHero3;
   }
 
-  const heroPreview = document.getElementById('heroPreviewBox');
-  heroPreview.innerHTML = '';
-  if(data.hero_images && data.hero_images.length > 0) {
-    data.hero_images.forEach(url => { heroPreview.innerHTML += `<img src="${url}">`; });
+  if (data.promo_active && data.promo_image) {
+    if (!sessionStorage.getItem('promoShown')) {
+      setTimeout(() => {
+        document.getElementById('promoModalImg').src = data.promo_image;
+        document.getElementById('promoModalTitle').textContent = data.promo_title || '¡Oferta Especial!';
+        document.getElementById('promoModalText').textContent = data.promo_text || '';
+        const btn = document.getElementById('promoModalBtn');
+        if(data.promo_link) { 
+          btn.style.display = 'inline-flex'; 
+          btn.setAttribute('onclick', `window.location.href='${escapeHTML(data.promo_link)}'`); 
+        } else { 
+          btn.style.display = 'none'; 
+        }
+        document.getElementById('promoModal').classList.add('open');
+        sessionStorage.setItem('promoShown', 'true');
+      }, 1500);
+    }
   }
 }
 
