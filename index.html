@@ -298,16 +298,31 @@
 </section>
 
 <!-- SECCIÓN DE RESEÑAS -->
+<!-- SECCIÓN DE RESEÑAS (CARRUSEL) -->
 <section class="reviews-section">
   <div class="container">
     <div style="text-align:center; margin-bottom:40px;">
       <h2 class="display" style="font-size:36px;">Lo que dicen de nosotros</h2>
       <p style="color:var(--muted); margin-top:8px;">Opiniones reales de nuestros clientes.</p>
     </div>
-    <div id="reviewsContainer" class="reviews-grid"></div>
+    
+    <div class="reviews-carousel-wrap" id="reviewsWrap" style="display:none;">
+      <button class="review-arrow left" onclick="moveReview(-1)">❮</button>
+      
+      <div class="reviews-carousel">
+        <div class="reviews-track" id="reviewsContainer"></div>
+      </div>
+      
+      <button class="review-arrow right" onclick="moveReview(1)">❯</button>
+    </div>
+    
+    <!-- Puntos de navegación -->
+    <div class="reviews-dots" id="reviewsDots"></div>
+    
+    <!-- Mensaje si no hay reseñas -->
+    <p id="noReviewsMsg" style="text-align:center; color:var(--muted); display:none;">Aún no hay reseñas. ¡Sé el primero en dejar una!</p>
   </div>
 </section>
-
 <footer class="footer">
   <div class="container">
     <div class="fgrid">
