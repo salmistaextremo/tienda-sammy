@@ -830,11 +830,20 @@ async function submitOrder(){
   const btn = document.querySelector('#checkoutModalInner .btn-primary');
   btn.disabled = true; btn.textContent = "Procesando...";
 
-  const totalBs   = cart.reduce((s,i)=> s + i.price_bs   * i.qty, 0);
-  const totalUsdt = cart.reduce((s,i)=> s + i.price_usdt * i.qty, 0);
-  const ratio     = totalBs / totalUsdt;
+  // 1. Calculamos los totales originales
+  let totalBs   = cart.reduce((s,i)=> s + i.price_bs   * i.qty, 0);
+  let totalUsdt = cart.reduce((s,i)=> s + i.price_usdt * i.qty, 0);
+  
+  // 2. Aplicamos el descuento AQUÍ para que los abonos se calculen sobre el monto real a pagar
+  if (currentDiscount > 0) {
+    totalBs = totalBs - (totalBs * (currentDiscount / 100));
+    totalUsdt = totalUsdt - (totalUsdt * (currentDiscount / 100));
+  }
+
+  const ratio = totalBs / totalUsdt; // La tasa de cambio se mantiene igual
 
   let planDetails = {}; let installmentsRecords = [];
+  
   if (paymentPlan === 'contado') {
     planDetails = { tipo: 'contado' };
     installmentsRecords.push({ amount_bs: totalBs, reference: "Pago de contado" });
@@ -873,7 +882,7 @@ async function submitOrder(){
     btn.textContent = "Registrando pedido...";
     const itemsPayload = cart.map(i => ({ product_id: i.productId, size: i.size, quantity: i.qty, custom_note: i.note || null }));
 
-    // Enviamos al RPC con los datos del cupón
+    // 3. Enviamos el pedido con el descuento y los abonos calculados correctamente
     const { data, error } = await supabaseClient.rpc('create_order', {
       p_customer_name: name,
       p_customer_phone: phone,
