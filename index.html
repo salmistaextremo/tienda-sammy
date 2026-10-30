@@ -901,22 +901,25 @@ async function submitOrder(){
     
     const shortId = String(data.order_id).slice(0,8).toUpperCase();
     
-    const telefonoAdmin = "584243351245"; 
+        const telefonoAdmin = "584243351245"; 
     let planText = paymentPlan.toUpperCase();
     if (paymentPlan === 'credito') planText = 'CRÉDITO (3 Cuotas)';
     if (paymentPlan === 'apartado') planText = 'APARTADO';
 
-    let msj = `¡Hola! Acabo de registrar un pedido en Tiendas Sam's.%0A%0A`;
-    msj += `*Pedido Nro:* #${shortId}%0A`;
-    msj += `*Cliente:* ${name}%0A`;
-    msj += `*Cédula/Teléfono:* ${phone}%0A`;
-    msj += `*Dirección:* ${address}%0A`;
-    msj += `*Modalidad:* ${planText}%0A`;
-    msj += `*Total:* ${fmtUSD(data.total_usdt)} (${fmtBs(data.total_bs)})%0A`;
-    if (currentDiscount > 0) msj += `*Cupón Aplicado:* ${appliedCouponCode} (-${currentDiscount}%)%0A`;
-    msj += `%0AAcabo de subir mi comprobante de pago a la plataforma. Por favor, verifíquenlo para procesar mi envío. ¡Gracias!`;
+    // 1. Construimos el mensaje con saltos de línea normales (\n)
+    let msjText = `¡Hola! Acabo de registrar un pedido en Tiendas Sam's.\n\n`;
+    msjText += `*Pedido Nro:* ${shortId}\n`; 
+    msjText += `*Cliente:* ${name}\n`;
+    msjText += `*Cédula/Teléfono:* ${phone}\n`;
+    msjText += `*Dirección:* ${address}\n`;
+    msjText += `*Modalidad:* ${planText}\n`;
+    msjText += `*Total:* ${fmtUSD(data.total_usdt)} (${fmtBs(data.total_bs)})\n`;
+    if (currentDiscount > 0) msjText += `*Cupón:* ${appliedCouponCode} (-${currentDiscount}%)\n`;
+    msjText += `\nAcabo de subir mi comprobante de pago a la plataforma. Por favor, verifíquenlo para procesar mi envío. ¡Gracias!`;
 
-    const whatsappLink = `https://wa.me/${telefonoAdmin}?text=${msj}`;
+    // 2. Codificamos el mensaje para que los enlaces no se rompan con el # o el &
+    const whatsappLink = `https://wa.me/${telefonoAdmin}?text=${encodeURIComponent(msjText)}`;
+    // ----------------------------------------
 
     document.getElementById('checkoutModalInner').innerHTML = `
       <button class="modal-x" onclick="closeCheckout()">✕</button>
