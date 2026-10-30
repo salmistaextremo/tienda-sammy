@@ -202,27 +202,40 @@
       <div class="hero-track" id="heroTrack">
         
         <!-- SLIDE 1 -->
-        <div class="hero-content">
-  <span class="hero-badge" id="heroBadge1">NUEVA COLECCIÓN 2025</span>
-  <h1 class="display" id="heroTitle1">Oversize<br>Sin Límites.</h1>
-  <p id="heroDesc1">Descubre nuestra nueva colección...</p>
-  <button class="btn-primary" id="heroBtn1" onclick="setFilter('todo')">Ver Colección</button>
-</div>
+        <div class="hero-slide">
+          <img class="hero-bg" id="heroImg1" src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1500&auto=format&fit=crop" alt="Oversize">
+          <div class="hero-gradient"></div>
+          <div class="hero-content">
+            <span class="hero-badge" id="heroBadge1">NUEVA COLECCIÓN 2025</span>
+            <h1 class="display" id="heroTitle1">Oversize<br>Sin Límites.</h1>
+            <p id="heroDesc1">Descubre nuestra nueva colección con envío a todo el país. Paga en Bs o USDT, de contado, a crédito o apartado.</p>
+            <button class="btn-primary" id="heroBtn1" onclick="setFilter('todo')">Ver Colección</button>
+          </div>
+        </div>
 
         <!-- SLIDE 2 -->
-        <div class="hero-content">
-  <span class="hero-badge" id="heroBadge2" style="background:#ff5b1f; color:#fff;">TENDENCIA URBANA</span>
-  <h1 class="display" id="heroTitle2">Camisetas<br>que Destacan.</h1>
-  <p id="heroDesc2">Estampados únicos y cortes perfectos...</p>
-  <button class="btn-primary" id="heroBtn2" onclick="setFilter('todo')">Ver Camisetas</button>
-</div>
+        <div class="hero-slide">
+          <img class="hero-bg" id="heroImg2" src="https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?q=80&w=1500&auto=format&fit=crop" alt="Camisetas">
+          <div class="hero-gradient"></div>
+          <div class="hero-content">
+            <span class="hero-badge" id="heroBadge2" style="background:#ff5b1f; color:#fff;">TENDENCIA URBANA</span>
+            <h1 class="display" id="heroTitle2">Camisetas<br>que Destacan.</h1>
+            <p id="heroDesc2">Estampados únicos y cortes perfectos para tu día a día. Diseños exclusivos que no encontrarás en otro lugar.</p>
+            <button class="btn-primary" id="heroBtn2" onclick="setFilter('todo')">Ver Camisetas</button>
+          </div>
+        </div>
+
         <!-- SLIDE 3 -->
-        <div class="hero-content">
-  <span class="hero-badge" id="heroBadge3" style="background:#3b82f6; color:#fff;">COMODIDAD PREMIUM</span>
-  <h1 class="display" id="heroTitle3">Pantalones<br>Wide Leg.</h1>
-  <p id="heroDesc3">La comodidad se encuentra con el estilo...</p>
-  <button class="btn-primary" id="heroBtn3" onclick="setFilter('todo')">Ver Pantalones</button>
-</div>
+        <div class="hero-slide">
+          <img class="hero-bg" id="heroImg3" src="https://images.unsplash.com/photo-1517423568366-8b83523034fd?q=80&w=1500&auto=format&fit=crop" alt="Pantalones">
+          <div class="hero-gradient"></div>
+          <div class="hero-content">
+            <span class="hero-badge" id="heroBadge3" style="background:#3b82f6; color:#fff;">COMODIDAD PREMIUM</span>
+            <h1 class="display" id="heroTitle3">Pantalones<br>Wide Leg.</h1>
+            <p id="heroDesc3">La comodidad se encuentra con el estilo. Nuestros pantalones cargo y wide leg son la pieza clave de tu outfit.</p>
+            <button class="btn-primary" id="heroBtn3" onclick="setFilter('todo')">Ver Pantalones</button>
+          </div>
+        </div>
 
       </div>
     </div>
@@ -344,6 +357,7 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 let PRODUCTS = [], cart = [], currentFilter = "todo", selectedSize = null, currentProduct = null, currentQty = 1, paymentPlan = "contado", paymentMethod = "bs_transfer";
 let isLoginMode = true;
 let DYNAMIC_CATEGORIES = [];
+let currentSiteConfig = {};
 
 function escapeHTML(str) {
   if (!str) return '';
@@ -391,20 +405,18 @@ async function loadCategories() {
     DYNAMIC_CATEGORIES = [{ slug: 'todo', name: 'Todo' }, ...data];
     renderFilters(); 
     renderNav();
-    updateHeroButtons(); // NUEVA LLAMADA
+    updateHeroButtons();
   }
 }
 
 function renderNav() {
   document.getElementById('dynamicNav').innerHTML = DYNAMIC_CATEGORIES.slice(1, 5).map(c => `<button onclick="setFilter('${c.slug}')">${escapeHTML(c.name)}</button>`).join('');
   
-  // Llenar también el footer dinámicamente
   document.getElementById('footerNavLinks').innerHTML = DYNAMIC_CATEGORIES.slice(1, 4).map(c => 
     `<a href="#catalog" onclick="setFilter('${c.slug}')">${escapeHTML(c.name)}</a>`
   ).join('');
 }
 
-// NUEVA FUNCIÓN: Asigna las categorías reales a los botones del Hero
 function updateHeroButtons() {
   const availableCats = DYNAMIC_CATEGORIES.filter(c => c.slug !== 'todo');
   const customDetails = currentSiteConfig.hero_details || [];
@@ -412,7 +424,6 @@ function updateHeroButtons() {
   for (let i = 0; i < 3; i++) {
     const btn = document.getElementById(`heroBtn${i+1}`);
     if (btn) {
-      // 1. Si el admin escribió un texto personalizado, lo respetamos y solo le cambiamos la acción
       const customBtnText = customDetails[i] ? customDetails[i].btn_text : null;
       
       if (availableCats[i]) {
@@ -427,10 +438,10 @@ function updateHeroButtons() {
   }
 }
 
-
 async function loadSiteConfig() {
   const { data, error } = await supabaseClient.from('site_config').select('*').eq('id', 1).single();
   if(error) return;
+  currentSiteConfig = data;
 
   const defaultHero1 = "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1500&auto=format&fit=crop";
   const defaultHero2 = "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?q=80&w=1500&auto=format&fit=crop";
@@ -442,20 +453,18 @@ async function loadSiteConfig() {
     document.getElementById('heroImg3').src = data.hero_images[2] || defaultHero3;
   }
 
-  // NUEVO: Cargar los textos dinámicos si existen
   if (data.hero_details && data.hero_details.length > 0) {
     for(let i=0; i<3; i++) {
       const d = data.hero_details[i];
       if(d) {
         if(d.badge) document.getElementById(`heroBadge${i+1}`).innerHTML = escapeHTML(d.badge);
-        if(d.title) document.getElementById(`heroTitle${i+1}`).innerHTML = escapeHTML(d.title).replace(/\n/g, '<br>'); // Permite saltos de línea
+        if(d.title) document.getElementById(`heroTitle${i+1}`).innerHTML = escapeHTML(d.title).replace(/\n/g, '<br>');
         if(d.desc) document.getElementById(`heroDesc${i+1}`).innerHTML = escapeHTML(d.desc);
-        if(d.btn_text) document.getElementById(`heroBtnText${i+1}`) ? null : document.getElementById(`heroBtn${i+1}`).innerHTML = escapeHTML(d.btn_text); // Se asigna directo al botón
+        if(d.btn_text) document.getElementById(`heroBtn${i+1}`).innerHTML = escapeHTML(d.btn_text);
       }
     }
   }
 
-  // Promo (lo que ya tenías)
   if (data.promo_active && data.promo_image) {
     if (!sessionStorage.getItem('promoShown')) {
       setTimeout(() => {
@@ -475,6 +484,7 @@ async function loadSiteConfig() {
     }
   }
 }
+
 function closePromoModal() { document.getElementById('promoModal').classList.remove('open'); }
 
 async function loadProducts(){
@@ -861,7 +871,6 @@ async function submitOrder(){
 
         <a href="/portal.html" class="btn-primary" style="background:#e5e7eb; color:#111; width:100%; margin-top:10px; text-decoration:none;">Ir a Mis Pedidos</a>
         
-        <!-- BOTÓN SEGUIR COMPRANDO -->
         <button class="btn-primary" onclick="closeCheckout()" style="background:transparent; color:var(--text); border:1px solid var(--border); width:100%; margin-top:12px;">Seguir Comprando</button>
       </div>
     `;
