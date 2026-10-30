@@ -187,7 +187,7 @@
       </div>
     </div>
 
-    <!-- NUEVO PANEL CATEGORÍAS -->
+    <!-- PANEL CATEGORÍAS -->
     <div class="panel" id="panel-categorias">
       <div class="panel-header-actions" style="display:flex; justify-content:space-between; margin-bottom:16px;">
         <h3>Categorías de Productos</h3>
@@ -365,7 +365,6 @@
 const SUPABASE_URL = "https://zxhufobqfxmbjpneyiam.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4aHVmb2JxZnhtYmpwbmV5aWFtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMxNjk2OTEsImV4cCI6MjEwODc0NTY5MX0.EUS-QUdhuhtSk9rgLB11wz-GYF9m01JqhXfT6yT9_Vs";
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-const tempSupabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 let currentUserId = null, currentUserRole = null;
 let allOrdersData = [], allProducts = [], allUsers = [], allInstallments = [], allCategories = [];
@@ -560,8 +559,8 @@ async function loadInstallments(){
   tbody.innerHTML = allInstallments.map(i => `
     <tr>
       <td data-label="Pedido">#${String(i.order_id).slice(0,8)}</td>
-      <td data-label="Monto Bs">${fmtUSD(i.amount_usdt)}</td>
-      <td data-label="Monto USDT" style="font-size: 11px; color: var(--muted);">${fmtBs(i.amount_bs)}</td>
+      <td data-label="Monto Bs">${fmtBs(i.amount_bs)}</td>
+      <td data-label="Monto USDT">${fmtUSD(i.amount_usdt)}</td>
       <td data-label="Método">${i.method}</td>
       <td data-label="Referencia">${i.reference || '-'}</td>
       <td data-label="Fecha">${new Date(i.paid_at).toLocaleDateString()}</td>
@@ -730,7 +729,6 @@ async function loadCategoriesAdmin() {
 
   allCategories = data;
   
-  // Llenar la tabla
   tbody.innerHTML = data.map(c => `
     <tr>
       <td data-label="Nombre"><strong>${escapeHTML(c.name)}</strong></td>
@@ -741,7 +739,6 @@ async function loadCategoriesAdmin() {
     </tr>
   `).join('');
 
-  // Llenar el Select del Formulario de Productos
   const select = document.getElementById('pCategory');
   select.innerHTML = data.map(c => `<option value="${c.slug}">${escapeHTML(c.name)}</option>`).join('');
 }
@@ -782,15 +779,45 @@ async function loadUsers(){
   allUsers = data || [];
   tbody.innerHTML = allUsers.map(u => `<tr><td data-label="Nombre">${escapeHTML(u.full_name)||'-'}</td><td data-label="Email">${escapeHTML(u.email)||'-'}</td><td data-label="Rol">${u.role}</td><td data-label="Estado">${u.is_active ? 'Activo' : 'Inactivo'}</td><td data-label="Acciones">-</td></tr>`).join('');
 }
+
 function openUserForm(){ document.getElementById('userForm').reset(); document.getElementById('userModal').classList.add('open'); }
+
 async function saveUser(e){
-  e.preventDefault(); const btn = document.getElementById('btnSaveUser'); btn.disabled=true;
+  e.preventDefault();
+  const btn = document.getElementById('btnSaveUser');
+  btn.disabled = true; btn.textContent = "Creando...";
+  
   try {
-    const { data, error } = await tempSupabase.auth.signUp({ email: document.getElementById('uEmail').value, password: document.getElementById('uPassword').value, options: { data: { full_name: document.getElementById('uName').value } } });
-    if(error) throw error;
-    await supabaseClient.from('profiles').update({ role: document.getElementById('uRole').value }).eq('id', data.user.id);
-    document.getElementById('userModal').classList.remove('open'); loadUsers(); alert("Usuario creado.");
-  } catch(err) { alert(err.message); } finally { btn.disabled=false; }
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (!session) throw new Error("Sesión expirada");
+
+    // LLAMADA A LA NUEVA EDGE FUNCTION SEGURA
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/admin-create-user`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session.access_token}`,
+        'apikey': SUPABASE_ANON_KEY
+      },
+      body: JSON.stringify({
+        email:    document.getElementById('uEmail').value,
+        password: document.getElementById('uPassword').value,
+        full_name: document.getElementById('uName').value,
+        role:     document.getElementById('uRole').value
+      })
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Error al crear usuario');
+
+    document.getElementById('userModal').classList.remove('open');
+    loadUsers();
+    alert("Usuario creado exitosamente.");
+  } catch(err) {
+    alert(err.message);
+  } finally {
+    btn.disabled = false; btn.textContent = "Crear";
+  }
 }
 
 function switchTab(name, event){ 
