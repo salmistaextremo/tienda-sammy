@@ -151,7 +151,7 @@
       <button class="btn-logout" onclick="handleLogout()">Cerrar Sesión</button>
     </div>
     
-    <!-- NUEVA SECCIÓN: INVITACIÓN A DEJAR RESEÑA -->
+    <!-- INVITACIÓN A DEJAR RESEÑA -->
     <div style="background:#fffbeb; border:1px solid #fcd34d; padding:16px; border-radius:16px; margin-bottom:24px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
       <p style="color:#b45309; font-weight:500; font-size:14px; margin:0;">¿Te gustó tu compra? ¡Déjanos una reseña!</p>
       <button onclick="openReviewModal()" style="background:#f59e0b; color:#fff; padding:8px 16px; border-radius:100px; font-weight:600; font-size:13px; cursor:pointer;">Escribir Reseña</button>
@@ -626,6 +626,7 @@ function openReviewModal() {
   document.getElementById('reviewModal').classList.add('open');
   document.getElementById('reviewError').textContent = "";
 }
+
 function closeReviewModal() {
   document.getElementById('reviewModal').classList.remove('open');
 }
@@ -651,4 +652,15 @@ async function submitReview() {
     
     if(error) throw error;
     alert("¡Gracias por tu reseña!");
-    closeReviewModal
+    closeReviewModal();
+  } catch(err) {
+    errBox.textContent = err.message;
+  } finally {
+    btn.disabled = false; btn.textContent = "Enviar Reseña";
+  }
+}
+
+checkSession();
+</script>
+</body>
+</html>
