@@ -14,18 +14,9 @@
 <link rel="icon" type="image/png" href="https://zxhufobqfxmbjpneyiam.supabase.co/storage/v1/object/public/brand-assets/icon-192.png">
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
-  :root{ 
-    --bg:#fcfbf8; --surface:#ffffff; --text:#111111; --muted:#767676; --border:#e8e5df; 
-    --accent:#ffea61; --danger:#ef4444; --success:#22c55e; --warning:#d97706; 
-    --radius-lg:24px; --radius-md:16px; --radius-sm:100px; 
-  }
-  html,body{ 
-    background:var(--bg); color:var(--text); font-family:'Outfit',sans-serif; 
-    min-height: 100vh; display: flex; flex-direction: column; 
-    padding-bottom: 80px;
-  }
-  button{ font-family:inherit; cursor:pointer; border:none; background:none; color:inherit; } 
-  a{ color:inherit; text-decoration:none; }
+  :root{ --bg:#fcfbf8; --surface:#ffffff; --text:#111111; --muted:#767676; --border:#e8e5df; --accent:#ffea61; --danger:#ef4444; --success:#22c55e; --warning:#d97706; --radius-lg:24px; --radius-md:16px; --radius-sm:100px; }
+  html,body{ background:var(--bg); color:var(--text); font-family:'Outfit',sans-serif; min-height: 100vh; display: flex; flex-direction: column; padding-bottom: 80px; }
+  button{ font-family:inherit; cursor:pointer; border:none; background:none; color:inherit; } a{ color:inherit; text-decoration:none; }
   .container{ max-width:900px; margin:0 auto; padding:0 24px; width: 100%; }
   
   .header{ border-bottom:1px solid var(--border); padding: 20px 0; background: var(--surface); } 
@@ -34,44 +25,21 @@
   .btn-back { font-size: 14px; font-weight: 600; color: var(--muted); } .btn-back:hover { color: var(--text); }
   
   /* PANTALLA DE AUTH CON FONDO */
-  .auth-screen { 
-    flex: 1; display: flex; align-items: center; justify-content: center; 
-    padding: 40px 20px; 
-    background-image: url('https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=1500&auto=format&fit=crop');
-    background-size: cover;
-    background-position: center;
-    position: relative;
-  }
-  .auth-screen::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: var(--bg);
-    opacity: 0.85; /* Filtro fundido sobre la imagen de fondo */
-    z-index: 1;
-  }
-  .auth-card { 
-    position: relative; z-index: 2;
-    background: var(--surface); padding: 48px; border-radius: var(--radius-lg); 
-    width: 100%; max-width: 420px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); 
-    border: 1px solid var(--border); 
-  }
+  .auth-screen { flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px 20px; background-image: url('https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=1500&auto=format&fit=crop'); background-size: cover; background-position: center; position: relative; }
+  .auth-screen::before { content: ''; position: absolute; inset: 0; background: var(--bg); opacity: 0.85; z-index: 1; }
+  .auth-card { position: relative; z-index: 2; background: var(--surface); padding: 48px; border-radius: var(--radius-lg); width: 100%; max-width: 420px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); border: 1px solid var(--border); }
   .auth-card h2 { font-size: 24px; font-weight: 700; margin-bottom: 8px; text-align: center; } 
   .auth-card p { font-size: 14px; color: var(--muted); text-align: center; margin-bottom: 32px; }
   .field { margin-bottom: 16px; } .field label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 8px; }
-  .field input { width: 100%; padding: 16px; border-radius: var(--radius-md); background: var(--bg); border: 1px solid var(--border); font-family: inherit; font-size: 15px; }
-  .field input:focus { outline: none; border-color: var(--text); background: #fff; }
+  .field input, .field textarea { width: 100%; padding: 16px; border-radius: var(--radius-md); background: var(--bg); border: 1px solid var(--border); font-family: inherit; font-size: 15px; }
+  .field input:focus, .field textarea:focus { outline: none; border-color: var(--text); background: #fff; }
   .btn-primary { width: 100%; padding: 16px; border-radius: var(--radius-md); background: var(--text); color: #fff; font-weight: 600; display: flex; justify-content: center; margin-top: 8px; }
   .auth-switch { text-align: center; margin-top: 24px; font-size: 14px; color: var(--muted); } .auth-switch button { color: var(--text); font-weight: 600; text-decoration: underline; }
   .err { color: var(--danger); font-size: 13px; margin-top: 12px; text-align: center; }
 
-  /* PASSWORD OJO */
   .password-container { position: relative; display: flex; align-items: center; }
   .password-container input { padding-right: 48px; }
-  .toggle-password {
-    position: absolute; right: 12px; background: none; border: none;
-    cursor: pointer; color: var(--muted); display: flex; align-items: center; justify-content: center; padding: 5px;
-  }
+  .toggle-password { position: absolute; right: 12px; background: none; border: none; cursor: pointer; color: var(--muted); display: flex; align-items: center; justify-content: center; padding: 5px; }
   .toggle-password:hover { color: var(--text); }
 
   .dashboard { flex: 1; padding: 32px 0 40px; display: none; }
@@ -106,8 +74,7 @@
   .detail-item { display: flex; flex-direction: column; gap: 2px; }
   .detail-label { font-size: 11px; color: var(--muted); text-transform: uppercase; font-weight: 600; }
   .detail-value { font-size: 16px; font-weight: 600; } .detail-sub { font-size: 12px; color: var(--muted); }
-  .text-danger { color: var(--danger); } .text-success { color: var(--success); }
-  .text-warning { color: var(--warning); }
+  .text-danger { color: var(--danger); } .text-success { color: var(--success); } .text-warning { color: var(--warning); }
   
   .upload-receipt-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: var(--text); color: #fff; padding: 12px 20px; border-radius: var(--radius-sm); font-size: 14px; font-weight: 600; cursor: pointer; margin-top: 10px; width: 100%; border: none; }
   .upload-receipt-btn:hover { background: #333; }
@@ -121,10 +88,7 @@
   .btn-loyalty:disabled { background: #d1fae5; color: #065f46; cursor: not-allowed; }
 
   /* NAVEGACIÓN INFERIOR */
-  .bottom-nav {
-    position: fixed; bottom: 0; left: 0; right: 0; background: var(--surface); border-top: 1px solid var(--border);
-    display: flex; justify-content: space-around; align-items: center; height: 72px; z-index: 1000; padding-bottom: env(safe-area-inset-bottom);
-  }
+  .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--surface); border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: center; height: 72px; z-index: 1000; padding-bottom: env(safe-area-inset-bottom); }
   .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; color: var(--muted); font-size: 11px; font-weight: 500; transition: all 0.2s; flex: 1; height: 100%; }
   .nav-item svg { width: 22px; height: 22px; stroke-width: 1.5; transition: all 0.2s; }
   .nav-item.active { color: var(--text); font-weight: 700; }
@@ -149,9 +113,7 @@
 
 <header class="header">
   <div class="container header-inner">
-    <a href="/" class="logo">
-      <img src="https://zxhufobqfxmbjpneyiam.supabase.co/storage/v1/object/public/brand-assets/logo.png" alt="Tiendas Sam's">
-    </a>
+    <a href="/" class="logo"><img src="https://zxhufobqfxmbjpneyiam.supabase.co/storage/v1/object/public/brand-assets/logo.png" alt="Tiendas Sam's"></a>
     <a href="/" class="btn-back">← Volver a la tienda</a>
   </div>
 </header>
@@ -161,22 +123,17 @@
     <h2 id="authTitle">Iniciar Sesión</h2><p id="authSub">Accede para ver tus pedidos.</p>
     <form id="authForm" onsubmit="handleAuth(event)">
       <div class="field" id="nameField" style="display:none;"><label>Nombre Completo</label><input type="text" id="authName"></div>
-      <div class="field"><label>Correo Electrónico</label><input type="email" id="authEmail" required></div>
+      <div class="field" id="phoneField" style="display:none;"><label>Teléfono</label><input type="tel" id="authPhone"></div>
+      <div class="field" id="addressField" style="display:none;"><label>Dirección de Envío</label><input type="text" id="authAddress"></div>
       
-      <!-- CAMPO CON OJO -->
+      <div class="field"><label>Correo Electrónico</label><input type="email" id="authEmail" required></div>
       <div class="field">
         <label>Contraseña</label>
         <div class="password-container">
           <input type="password" id="authPassword" required>
           <button type="button" class="toggle-password" onclick="togglePassword('authPassword', this)">
-            <svg class="eye-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-              <circle cx="12" cy="12" r="3"></circle>
-            </svg>
-            <svg class="eye-off-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" style="display:none;">
-              <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
-              <line x1="1" y1="1" x2="23" y2="23"></line>
-            </svg>
+            <svg class="eye-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+            <svg class="eye-off-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" style="display:none;"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
           </button>
         </div>
       </div>
@@ -205,28 +162,20 @@
 
 <div class="bottom-nav" id="bottomNav" style="display: none;">
   <button class="nav-item" onclick="switchPortalTab('pendientes', this)">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-      <circle cx="12" cy="12" r="10"></circle>
-      <polyline points="12 6 12 12 16 14"></polyline>
-    </svg>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
     Pendientes
   </button>
-  
   <button class="nav-item active" onclick="switchPortalTab('todos', this)">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
-      <line x1="3" y1="6" x2="21" y2="6"></line>
-      <path d="M16 10a4 4 0 0 1-8 0"></path>
-    </svg>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
     Mis Pedidos
   </button>
-  
   <button class="nav-item" onclick="switchPortalTab('finalizados', this)">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-      <polyline points="22 4 12 14.01 9 11.01"></polyline>
-    </svg>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
     Finalizados
+  </button>
+  <button class="nav-item" onclick="switchPortalTab('perfil', this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+    Perfil
   </button>
 </div>
 
@@ -276,47 +225,22 @@ let currentUserEmail = null;
 let myOrdersData = []; 
 let currentTab = 'todos'; 
 
-// FUNCIÓN DE SEGURIDAD XSS
 function escapeHTML(str) {
   if (!str) return '';
-  return String(str).replace(/[&<>'"]/g, 
-    tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag])
-  );
+  return String(str).replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag]));
 }
 
-// FUNCIÓN PARA MOSTRAR/OCULTAR CONTRASEÑA
 function togglePassword(inputId, btn) {
   const input = document.getElementById(inputId);
   const eyeIcon = btn.querySelector('.eye-icon');
   const eyeOffIcon = btn.querySelector('.eye-off-icon');
-
-  if (input.type === 'password') {
-    input.type = 'text';
-    eyeIcon.style.display = 'none';
-    eyeOffIcon.style.display = 'block';
-  } else {
-    input.type = 'password';
-    eyeIcon.style.display = 'block';
-    eyeOffIcon.style.display = 'none';
-  }
+  if (input.type === 'password') { input.type = 'text'; eyeIcon.style.display = 'none'; eyeOffIcon.style.display = 'block'; } 
+  else { input.type = 'password'; eyeIcon.style.display = 'block'; eyeOffIcon.style.display = 'none'; }
 }
 
-const statusLabels = {
-  'pendiente': 'Pendiente',
-  'verificado': 'Verificado',
-  'enviado': 'Enviado',
-  'cuota1_confirmada': 'Cuota 1 Confirmada',
-  'cuota2_confirmada': 'Cuota 2 Confirmada',
-  'cuota3_confirmada': 'Cuota 3 Confirmada',
-  'registro_pago': 'Registro de Pago',
-  'cancelado': 'Cancelado'
-};
+const statusLabels = { 'pendiente': 'Pendiente', 'verificado': 'Verificado', 'enviado': 'Enviado', 'cuota1_confirmada': 'Cuota 1 Confirmada', 'cuota2_confirmada': 'Cuota 2 Confirmada', 'cuota3_confirmada': 'Cuota 3 Confirmada', 'registro_pago': 'Registro de Pago', 'cancelado': 'Cancelado' };
 
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW error:', err));
-  });
-}
+if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW error:', err)); }); }
 
 function toggleAuthMode() {
   isLoginMode = !isLoginMode;
@@ -324,6 +248,8 @@ function toggleAuthMode() {
   document.getElementById('authSub').textContent = isLoginMode ? "Accede para ver tus pedidos." : "Regístrate para gestionar tus compras.";
   document.getElementById('btnAuthSubmit').textContent = isLoginMode ? "Entrar" : "Registrarse";
   document.getElementById('nameField').style.display = isLoginMode ? 'none' : 'block';
+  document.getElementById('phoneField').style.display = isLoginMode ? 'none' : 'block';
+  document.getElementById('addressField').style.display = isLoginMode ? 'none' : 'block';
   document.getElementById('switchText').textContent = isLoginMode ? "¿No tienes cuenta?" : "¿Ya tienes cuenta?";
   document.getElementById('switchBtn').textContent = isLoginMode ? "Regístrate aquí" : "Inicia sesión";
   document.getElementById('authError').textContent = "";
@@ -331,7 +257,8 @@ function toggleAuthMode() {
 
 async function handleAuth(e) {
   e.preventDefault();
-  const email = document.getElementById('authEmail').value.trim(), password = document.getElementById('authPassword').value, name = document.getElementById('authName').value.trim();
+  const email = document.getElementById('authEmail').value.trim(), password = document.getElementById('authPassword').value;
+  const name = document.getElementById('authName').value.trim(), phone = document.getElementById('authPhone').value.trim(), address = document.getElementById('authAddress').value.trim();
   const errBox = document.getElementById('authError'), btn = document.getElementById('btnAuthSubmit');
   errBox.textContent = ""; btn.disabled = true; btn.textContent = "Procesando...";
 
@@ -340,8 +267,8 @@ async function handleAuth(e) {
       const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
       if (error) throw error; checkSession();
     } else {
-      if (!name) throw new Error("Ingresa tu nombre.");
-      const { data, error } = await supabaseClient.auth.signUp({ email, password, options: { data: { full_name: name } } });
+      if (!name || !phone || !address) throw new Error("Por favor completa todos los campos.");
+      const { data, error } = await supabaseClient.auth.signUp({ email, password, options: { data: { full_name: name, phone: phone, address: address } } });
       if (error) throw error;
       if (data.session) checkSession(); else { alert("Cuenta creada. Revisa tu correo."); toggleAuthMode(); }
     }
@@ -352,10 +279,8 @@ async function handleLogout() { await supabaseClient.auth.signOut(); location.re
 
 async function checkSession() {
   const { data: { user }, error } = await supabaseClient.auth.getUser();
-  
   if (user && !error) {
-    currentUserId = user.id;
-    currentUserEmail = user.email;
+    currentUserId = user.id; currentUserEmail = user.email;
     document.getElementById('authScreen').style.display = 'none'; 
     document.getElementById('dashboardScreen').style.display = 'block';
     document.getElementById('bottomNav').style.display = 'flex'; 
@@ -363,7 +288,7 @@ async function checkSession() {
     const { data: profile } = await supabaseClient.from('profiles').select('full_name').eq('id', user.id).single();
     document.getElementById('userNameDisplay').textContent = profile?.full_name || user.user_metadata?.full_name || user.email;
     
-    loadMyOrders(currentUserId, currentUserEmail);
+    if(currentTab === 'perfil') { renderProfile(); } else { loadMyOrders(currentUserId, currentUserEmail); }
     suscribirseCambiosCliente();
   } else { 
     document.getElementById('authScreen').style.display = 'flex'; 
@@ -373,35 +298,20 @@ async function checkSession() {
 }
 
 function suscribirseCambiosCliente() {
-  supabaseClient
-    .channel('cambios-cliente')
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, payload => {
-      if (payload.new.user_id === currentUserId || payload.new.customer_email === currentUserEmail) {
-        loadMyOrders(currentUserId, currentUserEmail);
-      }
-    })
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'installments' }, payload => {
-       loadMyOrders(currentUserId, currentUserEmail);
-    })
+  supabaseClient.channel('cambios-cliente')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, payload => { if (payload.new.user_id === currentUserId || payload.new.customer_email === currentUserEmail) loadMyOrders(currentUserId, currentUserEmail); })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'installments' }, payload => { loadMyOrders(currentUserId, currentUserEmail); })
     .subscribe();
 }
 
 async function loadMyOrders(userId, userEmail) {
   const list = document.getElementById('ordersList');
   try {
-    const { data: orders, error } = await supabaseClient
-      .from('orders')
-      .select('*, order_items(*, products(image_url, description)), installments(*)')
-      .or(`user_id.eq.${userId},customer_email.eq.${userEmail}`)
-      .order('created_at', { ascending: false });
-      
+    const { data: orders, error } = await supabaseClient.from('orders').select('*, order_items(*, products(image_url, description)), installments(*)').or(`user_id.eq.${userId},customer_email.eq.${userEmail}`).order('created_at', { ascending: false });
     if (error) throw error;
-
     checkLoyaltyStatus(orders, userId);
     myOrdersData = orders || [];
-    
     renderFilteredOrders(); 
-
   } catch (err) { list.innerHTML = `<div class="empty-state"><p style="color:var(--danger)">Error: ${err.message}</p></div>`; }
 }
 
@@ -409,15 +319,17 @@ function switchPortalTab(tabName, btnElement) {
   currentTab = tabName;
   document.querySelectorAll('.bottom-nav .nav-item').forEach(btn => btn.classList.remove('active'));
   if(btnElement) btnElement.classList.add('active');
-  renderFilteredOrders();
+  
+  if (tabName === 'perfil') {
+    renderProfile();
+  } else {
+    renderFilteredOrders();
+  }
 }
 
 async function viewReceipt(fileName) {
   if(!fileName) return alert("No hay comprobante.");
-  if(fileName.startsWith('http')) {
-    window.open(fileName, '_blank');
-    return;
-  }
+  if(fileName.startsWith('http')) { window.open(fileName, '_blank'); return; }
   const { data, error } = await supabaseClient.storage.from('receipts').createSignedUrl(fileName, 3600);
   if(error) return alert("Error al cargar comprobante: " + error.message);
   window.open(data.signedUrl, '_blank');
@@ -434,41 +346,21 @@ function renderFilteredOrders() {
   }
 
   if (filtered.length === 0) {
-    list.innerHTML = `<div class="empty-state" style="text-align:center; padding:40px; color:var(--muted);">
-      <h3 style="margin-bottom:8px;">No hay pedidos aquí</h3>
-      <p>Cuando tengas pedidos en esta categoría, aparecerán aquí.</p>
-    </div>`;
+    list.innerHTML = `<div class="empty-state" style="text-align:center; padding:40px; color:var(--muted);"><h3 style="margin-bottom:8px;">No hay pedidos aquí</h3><p>Cuando tengas pedidos en esta categoría, aparecerán aquí.</p></div>`;
     return;
   }
 
   list.innerHTML = filtered.map(o => {
     const shortId = String(o.id).slice(0,8).toUpperCase();
     const date = new Date(o.created_at).toLocaleDateString('es-VE', { day: '2-digit', month: 'long', year: 'numeric' });
+    let abonadoBs = 0, pendienteBs = 0;
     
-    let abonadoBs = 0;
-    let pendienteBs = 0;
+    if (o.installments) { o.installments.forEach(i => { if (i.status === 'pendiente') { pendienteBs += Number(i.amount_bs || 0); } else { abonadoBs += Number(i.amount_bs || 0); } }); }
     
-    if (o.installments) {
-      o.installments.forEach(i => {
-        if (i.status === 'pendiente') {
-          pendienteBs += Number(i.amount_bs || 0);
-        } else {
-          abonadoBs += Number(i.amount_bs || 0);
-        }
-      });
-    }
-    
-    const totalBs = Number(o.total_bs);
-    const totalUsdt = Number(o.total_usdt);
-    const ratio = totalBs / totalUsdt;
-    
-    // El saldo real es el total menos lo ya verificado Y lo que está pendiente por verificar
-    const saldoBs = Math.max(0, totalBs - abonadoBs - pendienteBs);
-    const saldoUsdt = saldoBs / ratio;
-    
+    const totalBs = Number(o.total_bs), totalUsdt = Number(o.total_usdt), ratio = totalBs / totalUsdt;
+    const saldoBs = Math.max(0, totalBs - abonadoBs - pendienteBs), saldoUsdt = saldoBs / ratio;
     const isPaid = (totalBs - abonadoBs - pendienteBs) <= 0.1;
-    const statusClass = `status-${o.status}`;
-    const statusText = statusLabels[o.status] || o.status;
+    const statusClass = `status-${o.status}`, statusText = statusLabels[o.status] || o.status;
 
     const itemsHtml = (o.order_items || []).map(item => `
       <div class="item-row">
@@ -487,36 +379,15 @@ function renderFilteredOrders() {
     if(o.payment_plan_details) {
       const d = o.payment_plan_details;
       if(o.payment_plan === 'credito') {
-        planDetailsHtml = `
-          <div class="plan-details-box">
-            <strong>Plan de Crédito (3 cuotas de ${fmtUSD(d.cuota_monto / ratio)}):</strong><br>
-            Cuota 1: ${d.cuota1_pagada ? '✅ Pagada' : '⏳ Pendiente'}<br>
-            Cuota 2: ${d.cuota2_pagada ? '✅ Pagada' : '⏳ Pendiente'}<br>
-            Cuota 3: ${d.cuota3_pagada ? '✅ Pagada' : '⏳ Pendiente'}
-          </div>
-        `;
+        planDetailsHtml = `<div class="plan-details-box"><strong>Plan de Crédito (3 cuotas de ${fmtUSD(d.cuota_monto / ratio)}):</strong><br>Cuota 1: ${d.cuota1_pagada ? '✅ Pagada' : '⏳ Pendiente'}<br>Cuota 2: ${d.cuota2_pagada ? '✅ Pagada' : '⏳ Pendiente'}<br>Cuota 3: ${d.cuota3_pagada ? '✅ Pagada' : '⏳ Pendiente'}</div>`;
       } else if (o.payment_plan === 'apartado') {
-        planDetailsHtml = `
-          <div class="plan-details-box">
-            <strong>Plan de Apartado:</strong><br>
-            Abono Inicial: ${fmtUSD(d.abono_inicial / ratio)}<br>
-            Saldo Pendiente inicial: <strong style="color:var(--danger);">${fmtUSD(d.saldo_pendiente / ratio)}</strong>
-          </div>
-        `;
+        planDetailsHtml = `<div class="plan-details-box"><strong>Plan de Apartado:</strong><br>Abono Inicial: ${fmtUSD(d.abono_inicial / ratio)}<br>Saldo Pendiente inicial: <strong style="color:var(--danger);">${fmtUSD(d.saldo_pendiente / ratio)}</strong></div>`;
       }
     }
 
     const canPay = saldoBs > 0.1 && (o.payment_plan === 'credito' || o.payment_plan === 'apartado');
-    const payButtonHtml = canPay ? `
-      <div style="margin-top:16px;">
-        <button class="btn-primary" style="background:var(--text); color:#fff; width:100%;" onclick="openPaymentModal('${o.id}', ${saldoBs})">💸 Realizar Pago / Abono</button>
-        ${pendienteBs > 0 ? `<p style="color:var(--warning); font-size:13px; margin-top:8px; text-align:center;">⏳ Tienes un pago de ${fmtUSD(pendienteBs/ratio)} pendiente por verificar.</p>` : ''}
-      </div>
-    ` : '';
-
-    const mainReceiptHtml = o.receipt_url 
-      ? `<button onclick="viewReceipt('${o.receipt_url}')" class="upload-receipt-btn view-receipt-btn">👁️ Ver Comprobante Inicial</button>`
-      : '';
+    const payButtonHtml = canPay ? `<div style="margin-top:16px;"><button class="btn-primary" style="background:var(--text); color:#fff; width:100%;" onclick="openPaymentModal('${o.id}', ${saldoBs})">💸 Realizar Pago / Abono</button>${pendienteBs > 0 ? `<p style="color:var(--warning); font-size:13px; margin-top:8px; text-align:center;">⏳ Tienes un pago de ${fmtUSD(pendienteBs/ratio)} pendiente por verificar.</p>` : ''}</div>` : '';
+    const mainReceiptHtml = o.receipt_url ? `<button onclick="viewReceipt('${o.receipt_url}')" class="upload-receipt-btn view-receipt-btn">👁️ Ver Comprobante Inicial</button>` : '';
 
     return `
       <div class="order-card">
@@ -524,23 +395,100 @@ function renderFilteredOrders() {
           <div><div class="order-id">Pedido #${shortId}</div><div class="order-date">${date}</div></div>
           <div class="order-status ${statusClass}">${statusText}</div>
         </div>
-        
         <div class="order-items">${itemsHtml}</div>
-
         ${planDetailsHtml}
-
         <div class="order-details">
           <div class="detail-item"><span class="detail-label">Total</span><span class="detail-value">${fmtUSD(totalUsdt)}</span><span class="detail-sub">≈ ${fmtBs(totalBs)}</span></div>
-          <div class="detail-item"><span class="detail-label">Saldo Restante (Real)</span>${isPaid ? `<span class="detail-value text-success">Pagado</span>` : `<span class="detail-value text-danger">${fmtUSD(saldoUsdt)}</span><span class="detail-sub text-danger">≈ ${fmtBs(saldoBs)}</span>`}</div>
+          <div class="detail-item"><span class="detail-label">Saldo Restante</span>${isPaid ? `<span class="detail-value text-success">Pagado</span>` : `<span class="detail-value text-danger">${fmtUSD(saldoUsdt)}</span><span class="detail-sub text-danger">≈ ${fmtBs(saldoBs)}</span>`}</div>
         </div>
-        
-        <div style="margin-top:16px; padding-top:16px; border-top:1px dashed var(--border);">
-          ${payButtonHtml}
-          ${mainReceiptHtml}
-        </div>
+        <div style="margin-top:16px; padding-top:16px; border-top:1px dashed var(--border);">${payButtonHtml}${mainReceiptHtml}</div>
       </div>
     `;
   }).join('');
+}
+
+async function renderProfile() {
+  const list = document.getElementById('ordersList');
+  list.innerHTML = `<p style="text-align:center; padding:40px;">Cargando perfil...</p>`;
+  
+  const { data: profile, error } = await supabaseClient.from('profiles').select('*').eq('id', currentUserId).single();
+  if (error) { list.innerHTML = `<p style="color:red; text-align:center;">Error al cargar perfil.</p>`; return; }
+
+  list.innerHTML = `
+    <div class="order-card" style="max-width: 500px; margin: 0 auto;">
+      <h2 style="font-size: 20px; margin-bottom: 24px;">Mis Datos Personales</h2>
+      <div class="field">
+        <label>Nombre Completo</label>
+        <input type="text" id="profName" value="${escapeHTML(profile.full_name || '')}">
+      </div>
+      <div class="field">
+        <label>Correo (No editable)</label>
+        <input type="email" value="${escapeHTML(profile.email || '')}" disabled style="background:#f0f0f0;">
+      </div>
+      <div class="field">
+        <label>Teléfono</label>
+        <input type="tel" id="profPhone" value="${escapeHTML(profile.phone || '')}">
+      </div>
+      <div class="field">
+        <label>Dirección de Envío</label>
+        <textarea id="profAddress" rows="3">${escapeHTML(profile.address || '')}</textarea>
+      </div>
+      
+      <hr style="border:none; border-top: 1px solid var(--border); margin: 24px 0;">
+      
+      <h2 style="font-size: 20px; margin-bottom: 16px;">Cambiar Contraseña</h2>
+      <p style="font-size: 13px; color: var(--muted); margin-bottom: 16px;">Déjalo en blanco si no deseas cambiarla.</p>
+      <div class="field">
+        <label>Nueva Contraseña</label>
+        <div class="password-container">
+          <input type="password" id="profPassword" placeholder="Mínimo 6 caracteres">
+          <button type="button" class="toggle-password" onclick="togglePassword('profPassword', this)">
+            <svg class="eye-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+          </button>
+        </div>
+      </div>
+
+      <button class="btn-primary" style="margin-top: 16px;" onclick="updateProfile()" id="btnSaveProfile">Guardar Cambios</button>
+      <div id="profError" class="err"></div>
+    </div>
+  `;
+}
+
+async function updateProfile() {
+  const btn = document.getElementById('btnSaveProfile');
+  const errBox = document.getElementById('profError');
+  btn.disabled = true; btn.textContent = "Guardando..."; errBox.textContent = "";
+
+  const name = document.getElementById('profName').value.trim();
+  const phone = document.getElementById('profPhone').value.trim();
+  const address = document.getElementById('profAddress').value.trim();
+  const newPassword = document.getElementById('profPassword').value;
+
+  try {
+    if (!name || !phone || !address) throw new Error("Nombre, teléfono y dirección son obligatorios.");
+    
+    // 1. Actualizar perfil en la tabla
+    const { error: profileError } = await supabaseClient.from('profiles').update({
+      full_name: name,
+      phone: phone,
+      address: address
+    }).eq('id', currentUserId);
+    if (profileError) throw profileError;
+
+    // 2. Actualizar contraseña si se proporcionó una nueva
+    if (newPassword) {
+      if (newPassword.length < 6) throw new Error("La contraseña debe tener al menos 6 caracteres.");
+      const { error: authError } = await supabaseClient.auth.updateUser({ password: newPassword });
+      if (authError) throw authError;
+    }
+
+    alert("Perfil actualizado correctamente.");
+    document.getElementById('userNameDisplay').textContent = name;
+  } catch (error) {
+    errBox.textContent = error.message;
+  } finally {
+    btn.disabled = false; btn.textContent = "Guardar Cambios";
+  }
 }
 
 async function checkLoyaltyStatus(orders, userId) {
@@ -561,18 +509,12 @@ async function checkLoyaltyStatus(orders, userId) {
     (o.order_items || []).forEach(item => {
       if(!productStats[item.product_id]) productStats[item.product_id] = { totalQty: 0, ordersCount: 0 };
       productStats[item.product_id].totalQty += item.quantity;
-      if(!seenInOrder.has(item.product_id)) {
-        productStats[item.product_id].ordersCount += 1;
-        seenInOrder.add(item.product_id);
-      }
+      if(!seenInOrder.has(item.product_id)) { productStats[item.product_id].ordersCount += 1; seenInOrder.add(item.product_id); }
     });
   });
 
   let qualifies = false;
-  for (const pid in productStats) {
-    if (productStats[pid].totalQty >= 12 && productStats[pid].ordersCount >= 5) qualifies = true;
-  }
-
+  for (const pid in productStats) { if (productStats[pid].totalQty >= 12 && productStats[pid].ordersCount >= 5) qualifies = true; }
   if (qualifies) document.getElementById('loyaltyBanner').style.display = 'flex';
 }
 
@@ -585,12 +527,10 @@ async function requestUpgrade() {
   if (!error) btn.textContent = 'Solicitud enviada con éxito'; else { alert("Error: " + error.message); btn.disabled = false; btn.textContent = 'Solicitar Ascenso'; }
 }
 
-let currentPayOrderId = null;
-let currentPaySaldoBs = 0;
+let currentPayOrderId = null, currentPaySaldoBs = 0;
 
 function openPaymentModal(orderId, saldoBs) {
-  currentPayOrderId = orderId;
-  currentPaySaldoBs = saldoBs;
+  currentPayOrderId = orderId; currentPaySaldoBs = saldoBs;
   document.getElementById('payAmount').value = saldoBs.toFixed(2);
   document.getElementById('payMethod').value = 'bs_pago_movil';
   updatePayDetails();
@@ -631,13 +571,9 @@ async function submitPayment() {
     const compressedFile = await imageCompression(file, options);
     const ext = compressedFile.name.split('.').pop();
     
-    // RUTA SEGURA: userId/nombre_archivo
     const fileName = `${user.id}/receipt_${currentPayOrderId}_${Date.now()}.${ext}`;
-    
     const { error: uploadError } = await supabaseClient.storage.from('receipts').upload(fileName, compressedFile);
     if (uploadError) throw new Error("Error al subir comprobante: " + uploadError.message);
-    
-    const receipt_fileName = fileName;
     
     const { data: order } = await supabaseClient.from('orders').select('total_bs, total_usdt').eq('id', currentPayOrderId).single();
     const ratio = Number(order.total_bs) / Number(order.total_usdt);
@@ -645,23 +581,14 @@ async function submitPayment() {
     
     const { error: instError } = await supabaseClient.from('installments').insert({
       order_id: currentPayOrderId,
-      amount_bs: amount,
-      amount_usdt: amountUsdt,
-      method: method,
-      reference: "Pago desde Portal",
-      receipt_url: receipt_fileName,
-      notes: "Pendiente de verificación",
-      status: "pendiente"
+      amount_bs: amount, amount_usdt: amountUsdt, method: method,
+      reference: "Pago desde Portal", receipt_url: fileName,
+      notes: "Pendiente de verificación", status: "pendiente"
     });
     
     if (instError) throw instError;
-    closePaymentModal();
-    checkSession();
-  } catch(err) {
-    errBox.textContent = err.message;
-  } finally {
-    btn.disabled = false; btn.textContent = "Enviar Pago";
-  }
+    closePaymentModal(); checkSession();
+  } catch(err) { errBox.textContent = err.message; } finally { btn.disabled = false; btn.textContent = "Enviar Pago"; }
 }
 
 checkSession();
